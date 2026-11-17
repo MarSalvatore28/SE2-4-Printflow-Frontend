@@ -23,9 +23,10 @@ Proyecto de la materia **Ingeniería de Software II** (ESPOL, sección 4).
 6. [Variables de entorno](#variables-de-entorno)
 7. [Scripts](#scripts)
 8. [Estructura del proyecto](#estructura-del-proyecto)
-9. [Imagen de producción](#imagen-de-producción)
-10. [Flujo de trabajo](#flujo-de-trabajo)
-11. [Equipo](#equipo)
+9. [Cómo agregar un módulo](#como-agregar-un-modulo)
+10. [Imagen de producción](#imagen-de-producción)
+11. [Flujo de trabajo](#flujo-de-trabajo)
+12. [Equipo](#equipo)
 
 ---
 
@@ -125,6 +126,30 @@ Las variables `VITE_*` se incluyen en el código compilado: **nunca** deben cont
 ```
 
 Las carpetas de `src/` se completan a medida que cada equipo integra su módulo.
+
+## Cómo agregar un módulo
+
+En 4 archivos ya están escritas, **comentadas**, las líneas de todos los equipos:
+
+| Repo | Archivo |
+|---|---|
+| backend | `src/app.js` |
+| frontend | `src/App.tsx` |
+| frontend | `src/data/modulos.data.ts` |
+| frontend | `src/components/layout/Sidebar.tsx` |
+
+Cada línea termina con una etiqueta: `// [B-F1]` = Equipo B, Fase 1.
+
+**Tu único trabajo en esos archivos:** buscar tu etiqueta con `Ctrl+F` y quitar el `// ` del **inicio** de esas líneas. La etiqueta del final se queda. No escribas líneas nuevas ni toques las de otro equipo.
+
+Ejemplo, Equipo B en la Fase 1:
+
+```js
+// const clienteRoutes = require('@routes/cliente/cliente.routes'); // [B-F1]     ← antes
+const clienteRoutes = require('@routes/cliente/cliente.routes'); // [B-F1]        ← después
+```
+
+Si tu tarea dice `[BORRAR en X-FN]`, esa línea se **borra completa**.
 
 ## Imagen de producción
 

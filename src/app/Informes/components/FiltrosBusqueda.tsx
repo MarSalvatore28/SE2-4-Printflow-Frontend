@@ -222,8 +222,9 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
                 <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700">Área</label>
+                    <label htmlFor="informe-area" className="block text-sm font-semibold text-gray-700">Área <span className="font-normal text-gray-500">(opcional)</span></label>
                     <select
+                        id="informe-area"
                         value={selectedArea || ''}
                         onChange={(e) => onAreaChange?.(e.target.value === '' ? null : Number(e.target.value))}
                         disabled={!selectedCliente || loadingAreas}
@@ -237,10 +238,10 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700">Máquina</label>
+                    <label className="block text-sm font-semibold text-gray-700">Máquina <span className="font-normal text-gray-500">(opcional)</span></label>
                     <BuscadorInteligente<Maquina>
                         disabled={!selectedCliente}
-                        placeholder={selectedCliente ? "Buscar máquina..." : "Seleccione primero un cliente"}
+                        placeholder={selectedCliente ? "Todas las máquinas (buscar por serie, modelo o IP)" : "Seleccione primero un cliente"}
                         buscarFn={async (term) => {
                             if (!selectedCliente) return [];
                             const maquinasCliente = maquinasUnicas.filter(m =>

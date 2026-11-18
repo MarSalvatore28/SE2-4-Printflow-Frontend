@@ -41,6 +41,8 @@ export const InstalacionesList: React.FC<InstalacionesListProps> = ({
     const [expandedAreas, setExpandedAreas] = useState<Set<string>>(new Set());
     const [paginaActual, setPaginaActual] = useState(1);
     const itemsPorPagina = 10;
+    // Sin acciones (rol de solo consulta) no se muestra la columna
+    const conAcciones = Boolean(onEdit || onRetirar);
 
     const instalacionesPorCliente = instalaciones.reduce((acc, instalacion) => {
         const clienteId = instalacion.id_cliente;
@@ -301,9 +303,11 @@ export const InstalacionesList: React.FC<InstalacionesListProps> = ({
                                                                     <th className="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
                                                                         Contador
                                                                     </th>
+                                                                    {conAcciones && (
                                                                     <th className="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
                                                                         Acciones
                                                                     </th>
+                                                                    )}
                                                                 </tr>
                                                             </thead>
                                                             <tbody className="divide-y divide-gray-200 bg-white">
@@ -415,6 +419,7 @@ export const InstalacionesList: React.FC<InstalacionesListProps> = ({
                                                                         </td>
 
                                                                         {/* Acciones */}
+                                                                        {conAcciones && (
                                                                         <td className="px-6 py-4">
                                                                             <div className="flex items-center justify-center gap-2">
                                                                                 {onEdit && (
@@ -444,6 +449,7 @@ export const InstalacionesList: React.FC<InstalacionesListProps> = ({
                                                                                 )}
                                                                             </div>
                                                                         </td>
+                                                                        )}
                                                                     </tr>
                                                                 ))}
                                                             </tbody>

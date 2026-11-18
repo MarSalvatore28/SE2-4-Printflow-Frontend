@@ -14,8 +14,8 @@ import type {
     ApiResponse
 } from '@models/Instalacion/Instalacion.types';
 import { getToken } from '@services/Auth/auth.service';
+import { apiFetch } from '@services/api';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 const getAuthHeaders = () => {
     const token = getToken();
@@ -29,7 +29,7 @@ const getAuthHeaders = () => {
  * Obtiene información completa de una máquina por su ID
  */
 export async function getInstalacionByMaquina(maquinaId: number): Promise<InstalacionCompleta | null> {
-    const res = await fetch(`${API_BASE}/api/instalacion/maquina/${maquinaId}`, {
+    const res = await apiFetch(`/api/instalacion/maquina/${maquinaId}`, {
         headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error(`Error fetching instalacion by maquina: ${res.status}`);
@@ -41,7 +41,7 @@ export async function getInstalacionByMaquina(maquinaId: number): Promise<Instal
  * Busca una instalación activa por dirección IP
  */
 export async function getInstalacionByIP(ip: string): Promise<InstalacionCompleta | null> {
-    const res = await fetch(`${API_BASE}/api/instalacion/ip/${ip}`, {
+    const res = await apiFetch(`/api/instalacion/ip/${ip}`, {
         headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error(`Error fetching instalacion by IP: ${res.status}`);
@@ -53,7 +53,7 @@ export async function getInstalacionByIP(ip: string): Promise<InstalacionComplet
  * Obtiene información completa de una máquina por su número de serie
  */
 export async function getInstalacionBySerie(serie: string): Promise<InstalacionCompleta | null> {
-    const res = await fetch(`${API_BASE}/api/instalacion/serie/${serie}`, {
+    const res = await apiFetch(`/api/instalacion/serie/${serie}`, {
         headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error(`Error fetching instalacion by serie: ${res.status}`);
@@ -65,7 +65,7 @@ export async function getInstalacionBySerie(serie: string): Promise<InstalacionC
  * Obtiene todas las instalaciones activas de un cliente específico
  */
 export async function getInstalacionesActivasByCliente(clienteId: number): Promise<InstalacionActivaCliente[]> {
-    const res = await fetch(`${API_BASE}/api/instalacion/cliente/${clienteId}`, {
+    const res = await apiFetch(`/api/instalacion/cliente/${clienteId}`, {
         headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error(`Error fetching instalaciones by cliente: ${res.status}`);
@@ -77,7 +77,7 @@ export async function getInstalacionesActivasByCliente(clienteId: number): Promi
  * Obtiene TODAS las instalaciones activas de TODOS los clientes
  */
 export async function getTodasInstalacionesActivas(): Promise<InstalacionActivaCliente[]> {
-    const res = await fetch(`${API_BASE}/api/instalaciones/activas`, {
+    const res = await apiFetch(`/api/instalacion/instalaciones/activas`, {
         headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error(`Error fetching todas las instalaciones activas: ${res.status}`);
@@ -89,7 +89,7 @@ export async function getTodasInstalacionesActivas(): Promise<InstalacionActivaC
  * Obtiene máquinas disponibles (sin instalación activa)
  */
 export async function getMaquinasDisponibles(): Promise<MaquinaSinInstalacion[]> {
-    const res = await fetch(`${API_BASE}/api/instalacion/disponibles`, {
+    const res = await apiFetch(`/api/instalacion/disponibles`, {
         headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error(`Error fetching maquinas disponibles: ${res.status}`);
@@ -101,7 +101,7 @@ export async function getMaquinasDisponibles(): Promise<MaquinaSinInstalacion[]>
  * Obtiene el historial completo de instalaciones de una máquina
  */
 export async function getHistorialInstalacionesByMaquina(maquinaId: number): Promise<HistorialInstalacion[]> {
-    const res = await fetch(`${API_BASE}/api/instalacion/historial/maquina/${maquinaId}`, {
+    const res = await apiFetch(`/api/instalacion/historial/maquina/${maquinaId}`, {
         headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error(`Error fetching historial instalaciones: ${res.status}`);
@@ -113,7 +113,7 @@ export async function getHistorialInstalacionesByMaquina(maquinaId: number): Pro
  * Obtiene resumen de instalaciones agrupadas por área de un cliente
  */
 export async function getResumenInstalacionesByCliente(clienteId: number): Promise<ResumenInstalacionesCliente[]> {
-    const res = await fetch(`${API_BASE}/api/instalacion/resumen/cliente/${clienteId}`, {
+    const res = await apiFetch(`/api/instalacion/resumen/cliente/${clienteId}`, {
         headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error(`Error fetching resumen instalaciones: ${res.status}`);
@@ -125,7 +125,7 @@ export async function getResumenInstalacionesByCliente(clienteId: number): Promi
  * Obtiene una instalación específica por ID
  */
 export async function getInstalacionById(idInstalacion: number): Promise<InstalacionDetallada | null> {
-    const res = await fetch(`${API_BASE}/api/instalacion/${idInstalacion}`, {
+    const res = await apiFetch(`/api/instalacion/${idInstalacion}`, {
         headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error(`Error fetching instalacion by ID: ${res.status}`);
@@ -138,7 +138,7 @@ export async function getInstalacionById(idInstalacion: number): Promise<Instala
  * Crea una nueva instalación
  */
 export async function createInstalacion(instalacion: InstalacionFormData): Promise<CrearInstalacionResponse> {
-    const res = await fetch(`${API_BASE}/api/instalacion`, {
+    const res = await apiFetch(`/api/instalacion`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(instalacion),
@@ -161,7 +161,7 @@ export async function retirarInstalacion(
     idInstalacion: number,
     formData: RetirarInstalacionFormData
 ): Promise<RetirarInstalacionResponse> {
-    const res = await fetch(`${API_BASE}/api/instalacion/${idInstalacion}/retirar`, {
+    const res = await apiFetch(`/api/instalacion/${idInstalacion}/retirar`, {
         method: 'PATCH',
         headers: getAuthHeaders(),
         body: JSON.stringify(formData),
@@ -191,7 +191,7 @@ export async function updateInstalacion(
         fecha_instalacion?: string;
     }
 ): Promise<any> {
-    const res = await fetch(`${API_BASE}/api/instalacion/${idInstalacion}`, {
+    const res = await apiFetch(`/api/instalacion/${idInstalacion}`, {
         method: 'PATCH',
         headers: getAuthHeaders(),
         body: JSON.stringify(formData),
@@ -210,7 +210,7 @@ export async function updateInstalacion(
  * Obtiene todas las áreas activas (para select general)
  */
 export async function getAllAreas(): Promise<Area[]> {
-    const res = await fetch(`${API_BASE}/api/instalacion/areas`, {
+    const res = await apiFetch(`/api/instalacion/areas`, {
         headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error(`Error fetching areas: ${res.status}`);
@@ -222,7 +222,7 @@ export async function getAllAreas(): Promise<Area[]> {
  * Obtiene áreas de un cliente específico (para select filtrado)
  */
 export async function getAreasByCliente(clienteId: number): Promise<Area[]> {
-    const res = await fetch(`${API_BASE}/api/instalacion/areas/cliente/${clienteId}`, {
+    const res = await apiFetch(`/api/instalacion/areas/cliente/${clienteId}`, {
         headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error(`Error fetching areas by cliente: ${res.status}`);
@@ -234,7 +234,7 @@ export async function getAreasByCliente(clienteId: number): Promise<Area[]> {
  * Obtiene contratos activos de un cliente (para select)
  */
 export async function getContratosByCliente(clienteId: number): Promise<Contrato[]> {
-    const res = await fetch(`${API_BASE}/api/instalacion/contratos/cliente/${clienteId}`, {
+    const res = await apiFetch(`/api/instalacion/contratos/cliente/${clienteId}`, {
         headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error(`Error fetching contratos by cliente: ${res.status}`);

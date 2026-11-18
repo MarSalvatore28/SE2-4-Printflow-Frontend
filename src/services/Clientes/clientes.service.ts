@@ -5,9 +5,9 @@ import type {
   InstalacionActiva
 } from '@models/Cliente/cliente.types';
 import { getToken } from '@services/Auth/auth.service';
+import { apiFetch } from '@services/api';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
-const RESOURCE_URL = `${API_BASE}/api/clientes`;
+const RESOURCE_URL = '/api/clientes'; // apiFetch agrega la URL base
 
 const getAuthHeaders = (isPost = false) => {
   const token = getToken();
@@ -19,7 +19,7 @@ const getAuthHeaders = (isPost = false) => {
 
 export async function fetchAllClientes(): Promise<ClienteParaTabla[]> {
   try {
-    const res = await fetch(`${RESOURCE_URL}`, { headers: getAuthHeaders() });
+    const res = await apiFetch(`${RESOURCE_URL}`, { headers: getAuthHeaders() });
     if (!res.ok) throw new Error(`Error: ${res.status}`);
     const data = await res.json();
     return data.success ? data.data : [];
@@ -31,7 +31,7 @@ export async function fetchAllClientes(): Promise<ClienteParaTabla[]> {
 
 export async function fetchClientesInactivos(): Promise<ClienteParaTabla[]> {
   try {
-    const res = await fetch(`${RESOURCE_URL}/inactivos`, { headers: getAuthHeaders() });
+    const res = await apiFetch(`${RESOURCE_URL}/inactivos`, { headers: getAuthHeaders() });
     if (!res.ok) throw new Error(`Error: ${res.status}`);
     const data = await res.json();
     return data.success ? data.data : [];
@@ -43,7 +43,7 @@ export async function fetchClientesInactivos(): Promise<ClienteParaTabla[]> {
 
 export async function getClienteById(id: number): Promise<ClienteParaTabla | null> {
   try {
-    const res = await fetch(`${RESOURCE_URL}/${id}`, { headers: getAuthHeaders() });
+    const res = await apiFetch(`${RESOURCE_URL}/${id}`, { headers: getAuthHeaders() });
     if (!res.ok) throw new Error(`Error: ${res.status}`);
     const data = await res.json();
     return data.success ? data.data : null;
@@ -55,7 +55,7 @@ export async function getClienteById(id: number): Promise<ClienteParaTabla | nul
 
 export async function getClienteCompleto(id: number): Promise<ClienteCompleto | null> {
   try {
-    const res = await fetch(`${RESOURCE_URL}/${id}/completo`, { headers: getAuthHeaders() });
+    const res = await apiFetch(`${RESOURCE_URL}/${id}/completo`, { headers: getAuthHeaders() });
     if (!res.ok) throw new Error(`Error: ${res.status}`);
     const data = await res.json();
     return data.success ? data.data : null;
@@ -67,7 +67,7 @@ export async function getClienteCompleto(id: number): Promise<ClienteCompleto | 
 
 export async function searchClientes(termino: string): Promise<ClienteParaTabla[]> {
   try {
-    const res = await fetch(`${RESOURCE_URL}/search?q=${encodeURIComponent(termino)}`, {
+    const res = await apiFetch(`${RESOURCE_URL}/search?q=${encodeURIComponent(termino)}`, {
       headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error(`Error: ${res.status}`);
@@ -81,7 +81,7 @@ export async function searchClientes(termino: string): Promise<ClienteParaTabla[
 
 export async function getClienteByRuc(ruc: string): Promise<ClienteParaTabla | null> {
   try {
-    const res = await fetch(`${RESOURCE_URL}/ruc/${ruc}`, { headers: getAuthHeaders() });
+    const res = await apiFetch(`${RESOURCE_URL}/ruc/${ruc}`, { headers: getAuthHeaders() });
     if (!res.ok) throw new Error(`Error: ${res.status}`);
     const data = await res.json();
     return data.success ? data.data : null;
@@ -93,7 +93,7 @@ export async function getClienteByRuc(ruc: string): Promise<ClienteParaTabla | n
 
 export async function createCliente(cliente: any): Promise<number> {
   try {
-    const res = await fetch(`${RESOURCE_URL}`, {
+    const res = await apiFetch(`${RESOURCE_URL}`, {
       method: "POST",
       headers: getAuthHeaders(true),
       body: JSON.stringify(cliente),
@@ -114,7 +114,7 @@ export async function createCliente(cliente: any): Promise<number> {
 
 export async function updateCliente(id: number, cliente: any): Promise<boolean> {
   try {
-    const res = await fetch(`${RESOURCE_URL}/${id}`, {
+    const res = await apiFetch(`${RESOURCE_URL}/${id}`, {
       method: "PUT",
       headers: getAuthHeaders(true),
       body: JSON.stringify(cliente),
@@ -135,7 +135,7 @@ export async function updateCliente(id: number, cliente: any): Promise<boolean> 
 
 export async function deleteCliente(id: number): Promise<boolean> {
   try {
-    const res = await fetch(`${RESOURCE_URL}/${id}`, {
+    const res = await apiFetch(`${RESOURCE_URL}/${id}`, {
       method: "DELETE",
       headers: getAuthHeaders(true)
     });
@@ -152,7 +152,7 @@ export async function deleteCliente(id: number): Promise<boolean> {
 
 export async function activarCliente(id: number): Promise<boolean> {
   try {
-    const res = await fetch(`${RESOURCE_URL}/${id}/activar`, {
+    const res = await apiFetch(`${RESOURCE_URL}/${id}/activar`, {
       method: "PATCH",
       headers: getAuthHeaders(true)
     });
@@ -167,7 +167,7 @@ export async function activarCliente(id: number): Promise<boolean> {
 
 export async function getContratosByCliente(clienteId: number): Promise<Contrato[]> {
   try {
-    const res = await fetch(`${API_BASE}/api/contratos/cliente/${clienteId}`, {
+    const res = await apiFetch(`/api/contratos/cliente/${clienteId}`, {
       headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error(`Error: ${res.status}`);
@@ -181,7 +181,7 @@ export async function getContratosByCliente(clienteId: number): Promise<Contrato
 
 export async function getContratoById(id: number): Promise<Contrato | null> {
   try {
-    const res = await fetch(`${API_BASE}/api/contratos/${id}`, { headers: getAuthHeaders() });
+    const res = await apiFetch(`/api/contratos/${id}`, { headers: getAuthHeaders() });
     if (!res.ok) throw new Error(`Error fetching contrato: ${res.status}`);
     const data = await res.json();
     return data.success ? data.data : null;
@@ -193,7 +193,7 @@ export async function getContratoById(id: number): Promise<Contrato | null> {
 
 export async function createContrato(clienteId: number, contratoData: any) {
   try {
-    const res = await fetch(`${API_BASE}/api/contratos`, {
+    const res = await apiFetch(`/api/contratos`, {
       method: "POST",
       headers: getAuthHeaders(true),
       body: JSON.stringify({
@@ -217,7 +217,7 @@ export async function createContrato(clienteId: number, contratoData: any) {
 
 export async function updateContrato(id: number, contrato: any): Promise<{ success: boolean; advertencia?: string }> {
   try {
-    const res = await fetch(`${API_BASE}/api/contratos/${id}`, {
+    const res = await apiFetch(`/api/contratos/${id}`, {
       method: "PUT",
       headers: getAuthHeaders(true),
       body: JSON.stringify(contrato),
@@ -233,7 +233,7 @@ export async function updateContrato(id: number, contrato: any): Promise<{ succe
 
 export async function deactivateContrato(id: number): Promise<boolean> {
   try {
-    const res = await fetch(`${API_BASE}/api/contratos/${id}`, {
+    const res = await apiFetch(`/api/contratos/${id}`, {
       method: "DELETE",
       headers: getAuthHeaders(true)
     });
@@ -248,7 +248,7 @@ export async function deactivateContrato(id: number): Promise<boolean> {
 
 export async function getInstalacionesByCliente(clienteId: number): Promise<InstalacionActiva[]> {
   try {
-    const res = await fetch(`${RESOURCE_URL}/${clienteId}/instalaciones`, {
+    const res = await apiFetch(`${RESOURCE_URL}/${clienteId}/instalaciones`, {
       headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error(`Error: ${res.status}`);
@@ -262,7 +262,7 @@ export async function getInstalacionesByCliente(clienteId: number): Promise<Inst
 
 export async function createInstalacion(instalacion: any) {
   try {
-    const res = await fetch(`${RESOURCE_URL}/instalaciones`, {
+    const res = await apiFetch(`${RESOURCE_URL}/instalaciones`, {
       method: "POST",
       headers: getAuthHeaders(true),
       body: JSON.stringify(instalacion),
@@ -278,7 +278,7 @@ export async function createInstalacion(instalacion: any) {
 
 export async function retirarInstalacion(id: number, fechaRetiro: string): Promise<boolean> {
   try {
-    const res = await fetch(`${RESOURCE_URL}/instalaciones/${id}/retirar`, {
+    const res = await apiFetch(`${RESOURCE_URL}/instalaciones/${id}/retirar`, {
       method: "PUT",
       headers: getAuthHeaders(true),
       body: JSON.stringify({ fecha_retiro: fechaRetiro }),
@@ -294,7 +294,7 @@ export async function retirarInstalacion(id: number, fechaRetiro: string): Promi
 
 export async function tieneHistorial(clienteId: number): Promise<boolean> {
   try {
-    const res = await fetch(`${RESOURCE_URL}/${clienteId}/tiene-historial`, {
+    const res = await apiFetch(`${RESOURCE_URL}/${clienteId}/tiene-historial`, {
       headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error(`Error: ${res.status}`);
@@ -308,7 +308,7 @@ export async function tieneHistorial(clienteId: number): Promise<boolean> {
 
 export async function getUltimoCambio(clienteId: number): Promise<any | null> {
   try {
-    const res = await fetch(`${RESOURCE_URL}/${clienteId}/ultimo-cambio`, {
+    const res = await apiFetch(`${RESOURCE_URL}/${clienteId}/ultimo-cambio`, {
       headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error(`Error: ${res.status}`);
@@ -322,7 +322,7 @@ export async function getUltimoCambio(clienteId: number): Promise<any | null> {
 
 export async function getHistorialCliente(clienteId: number): Promise<any[]> {
   try {
-    const res = await fetch(`${RESOURCE_URL}/${clienteId}/historial`, {
+    const res = await apiFetch(`${RESOURCE_URL}/${clienteId}/historial`, {
       headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error(`Error: ${res.status}`);

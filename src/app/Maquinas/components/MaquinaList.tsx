@@ -6,8 +6,9 @@ import type { Maquina } from '@models/Maquina/maquina.types';
 
 interface MaquinaListProps {
     maquinas: Maquina[];
-    onEdit: (maquina: Maquina) => void;
-    onToggleActive: (maquina: Maquina) => void;
+    // Sin onEdit ni onToggleActive (rol de solo consulta) no hay columna de acciones
+    onEdit?: (maquina: Maquina) => void;
+    onToggleActive?: (maquina: Maquina) => void;
 }
 
 const POR_PAGINA = 10;
@@ -90,7 +91,8 @@ export const MaquinaList: FC<MaquinaListProps> = ({ maquinas, onEdit, onToggleAc
                 getItemId={(m) => m.id_maquina}
                 emptyMessage="No se encontraron máquinas"
                 onEdit={onEdit}
-                additionalActions={(m) => (
+                showActions={Boolean(onEdit || onToggleActive)}
+                additionalActions={onToggleActive && ((m) => (
                     m.activo ? (
                         <button
                             onClick={(e) => { e.stopPropagation(); onToggleActive(m); }}
@@ -110,7 +112,7 @@ export const MaquinaList: FC<MaquinaListProps> = ({ maquinas, onEdit, onToggleAc
                             <CheckCircle size={18} />
                         </button>
                     )
-                )}
+                ))}
             />
             {maquinas.length > POR_PAGINA && (
                 <Paginacion

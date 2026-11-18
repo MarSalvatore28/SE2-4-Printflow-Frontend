@@ -171,6 +171,7 @@ export interface RetirarInstalacionResponse {
 
 export interface RetirarInstalacionFormData {
   observaciones_retiro?: string;
+  fecha_retiro?: string; // YYYY-MM-DD; no puede ser anterior a la fecha de instalación
 }
 
 export interface UpdateInstalacionFormData {

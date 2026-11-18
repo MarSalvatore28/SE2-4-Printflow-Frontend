@@ -43,6 +43,10 @@ const InstalacionesPage = () => {
         observaciones: ''
     });
 
+    // Fecha de retiro (por defecto hoy, en hora local)
+    const hoy = () => new Date().toLocaleDateString('en-CA');
+    const [fechaRetiro, setFechaRetiro] = useState<string>(hoy());
+
     const [modalEdit, setModalEdit] = useState<{
         isOpen: boolean;
         instalacion: InstalacionActivaCliente | null;
@@ -208,6 +212,7 @@ const InstalacionesPage = () => {
     };
 
     const handleRetirarInstalacion = (instalacion: InstalacionActivaCliente) => {
+        setFechaRetiro(hoy());
         setModalRetirar({
             isOpen: true,
             instalacion: instalacion,
@@ -223,7 +228,8 @@ const InstalacionesPage = () => {
         try {
             setLoading(true);
             const formData: RetirarInstalacionFormData = {
-                observaciones_retiro: observaciones || undefined
+                observaciones_retiro: observaciones || undefined,
+                fecha_retiro: fechaRetiro
             };
 
             await retirarInstalacion(instalacion.id_instalacion, formData);
@@ -421,6 +427,18 @@ const InstalacionesPage = () => {
                         <p className="text-sm text-gray-600 mb-4">
                             Área: <strong>{modalRetirar.instalacion?.area_nombre}</strong>
                         </p>
+                        <div className="mt-4">
+                            <label htmlFor="fecha_retiro" className="block text-sm font-medium text-gray-700 mb-2">
+                                Fecha de retiro
+                            </label>
+                            <input
+                                id="fecha_retiro"
+                                type="date"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                value={fechaRetiro}
+                                onChange={(e) => setFechaRetiro(e.target.value)}
+                            />
+                        </div>
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Observaciones del retiro (opcional)

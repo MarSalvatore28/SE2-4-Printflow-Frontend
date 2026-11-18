@@ -202,30 +202,29 @@ export async function createContrato(clienteId: number, contratoData: any) {
       })
     });
 
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      const errorText = await res.text();
-      console.error('API Error Response [POST contrato]:', errorText);
-      throw new Error(`Error create contrato: ${res.status}`);
+      throw new Error(data.message || `Error al crear el contrato (${res.status})`);
     }
 
-    const data = await res.json();
-    return data.success ? data.data : null;
+    // advertencia: el backend avisa si se superpone con otro contrato activo del cliente
+    return data.success ? { ...data.data, advertencia: data.advertencia as string | undefined } : null;
   } catch (err) {
     console.error("Error createContrato:", err);
     throw err;
   }
 }
 
-export async function updateContrato(id: number, contrato: any): Promise<boolean> {
+export async function updateContrato(id: number, contrato: any): Promise<{ success: boolean; advertencia?: string }> {
   try {
     const res = await fetch(`${API_BASE}/api/contratos/${id}`, {
       method: "PUT",
       headers: getAuthHeaders(true),
       body: JSON.stringify(contrato),
     });
-    if (!res.ok) throw new Error(`Error updating contrato: ${res.status}`);
-    const data = await res.json();
-    return data.success;
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || `Error al actualizar el contrato (${res.status})`);
+    return { success: Boolean(data.success), advertencia: data.advertencia };
   } catch (err) {
     console.error("Error updateContrato:", err);
     throw err;

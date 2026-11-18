@@ -64,10 +64,17 @@ const ClientesPage = () => {
     const [clienteSeleccionado, setClienteSeleccionado] = useState<ClienteParaTabla | null>(null);
     const [isModalDetallesOpen, setIsModalDetallesOpen] = useState(false);
 
-    const [warningModal, setWarningModal] = useState<{ isOpen: boolean; message: string }>({
+    const [warningModal, setWarningModal] = useState<{ isOpen: boolean; message: string; title?: string }>({
         isOpen: false,
         message: ''
     });
+
+    // El backend guarda el contrato pero avisa si se cruza con otro contrato activo del cliente
+    const avisarSuperposicion = (advertencia?: string) => {
+        if (advertencia) {
+            setWarningModal({ isOpen: true, title: 'Contrato superpuesto', message: `El contrato se guardó. ${advertencia}.` });
+        }
+    };
 
     const [modalConfig, setModalConfig] = useState<{
         isOpen: boolean;
@@ -157,10 +164,11 @@ const ClientesPage = () => {
                 };
 
                 if (activeTab === 'Editar Contrato' && formData.id_contrato) {
-                    await updateContrato(formData.id_contrato, {
+                    const resultado = await updateContrato(formData.id_contrato, {
                         ...contractData,
                         cliente_id: Number(formData.cliente_id)
                     });
+                    avisarSuperposicion(resultado.advertencia);
                     setModalConfig({
                         isOpen: true,
                         type: 'activate',
@@ -177,7 +185,8 @@ const ClientesPage = () => {
                         }
                     });
                 } else {
-                    await createContrato(Number(formData.cliente_id), contractData);
+                    const creado = await createContrato(Number(formData.cliente_id), contractData);
+                    avisarSuperposicion(creado?.advertencia);
 
                     setModalConfig({
                         isOpen: true,
@@ -242,7 +251,7 @@ const ClientesPage = () => {
                 await updateCliente(formData.id_cliente, payload);
 
                 if (formData.id_contrato) {
-                    await updateContrato(formData.id_contrato, {
+                    const resultado = await updateContrato(formData.id_contrato, {
                         cliente_id: formData.id_cliente,
                         fecha_inicio: formData.fecha_inicio,
                         fecha_fin: formData.fecha_fin,
@@ -262,6 +271,7 @@ const ClientesPage = () => {
                         tiene_software_control: Boolean(formData.tiene_software_control),
                         printer_bill: formData.printer_bill,
                     });
+                    avisarSuperposicion(resultado.advertencia);
                 }
             } else {
                 await createCliente({
@@ -654,7 +664,7 @@ const ClientesPage = () => {
                                     className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2"
                                 />
                                 <label htmlFor="showInactive" className="ml-2 text-sm font-medium text-gray-700 cursor-pointer select-none">
-                                    Mostrar Inactivos
+                                    Mostrar inactivos
                                 </label>
                             </div>
 
@@ -727,6 +737,7 @@ const ClientesPage = () => {
             <ModalAdvertencia
                 isOpen={warningModal.isOpen}
                 onClose={() => setWarningModal({ isOpen: false, message: '' })}
+                title={warningModal.title}
                 message={warningModal.message}
             />
         </div >

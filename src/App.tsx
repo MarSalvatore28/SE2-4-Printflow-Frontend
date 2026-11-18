@@ -15,15 +15,14 @@ import MaquinasPage from './app/Maquinas/pages/Maquinas.page'; // [A-F1]
 import ClientesPage from './app/Clientes/pages/Clientes.page'; // [B-F1]
 import AreaPage from './app/Area/pages/Area.page'; // [B-F1]
 import AsignacionMaquinaPage from './app/maquina_asignacion/pages/AsignacionMaquina.page'; // [C-F1]
-// import { SocketProvider } from './context/SocketContext'; // [A-F2]
-// import { NotificationProvider } from './context/NotificationContext'; // [A-F2]
+import { SocketProvider } from './context/SocketContext'; // [A-F2]
+import { NotificationProvider } from './context/NotificationContext'; // [A-F2]
 // import NotificacionesPage from './app/Notificaciones/pages/NotificacionesPage'; // [B-F2]
 import InformesPage from './app/Informes/pages/Informes.page'; // [B-F3]
 
 // Notificaciones en tiempo real. En la Fase 2 el Equipo A BORRA la linea que
 // termina en "[BORRAR en A-F2]" y quita el "// " de la que termina en "[A-F2]".
-const ProveedorNotificaciones = ({ children }: { children: ReactNode }) => <>{children}</>; // [BORRAR en A-F2]
-// const ProveedorNotificaciones = ({ children }: { children: ReactNode }) => <SocketProvider><NotificationProvider>{children}</NotificationProvider></SocketProvider>; // [A-F2]
+const ProveedorNotificaciones = ({ children }: { children: ReactNode }) => <SocketProvider><NotificationProvider>{children}</NotificationProvider></SocketProvider>; // [A-F2]
 
 const rutas: { path: string; element: ReactNode }[] = [
   { path: 'maquinas', element: <MaquinasPage /> }, // [A-F1]

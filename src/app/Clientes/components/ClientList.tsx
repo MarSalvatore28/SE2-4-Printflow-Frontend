@@ -81,7 +81,7 @@ export const ClientList: React.FC<ClientListProps> = ({
     },
     {
       key: 'acciones',
-      label: 'Acciones',
+      label: 'Detalle',
       align: 'center' as const,
       render: (client: Client) => (
         <button
@@ -92,7 +92,7 @@ export const ClientList: React.FC<ClientListProps> = ({
           className="inline-flex items-center px-3 py-1.5 rounded-md border-2 border-secondary/50 shadow-sm text-xs font-medium text-gray-700 bg-background/20 hover:bg-accent/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
         >
           <VisibilityOutlinedIcon className='w-4 h-4 mr-1.5 text-primary' />
-          Ver Detalles
+          Ver detalles
         </button>
       )
     }

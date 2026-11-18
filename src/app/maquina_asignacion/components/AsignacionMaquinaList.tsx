@@ -166,7 +166,7 @@ export const InstalacionesList: React.FC<InstalacionesListProps> = ({
             <div className="flex justify-between items-center mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <p className="text-sm text-gray-600">
                     <span className="font-semibold text-gray-900">{totalClientes}</span> cliente{totalClientes !== 1 ? 's' : ''} •
-                    <span className="font-semibold text-gray-900 ml-2">{instalaciones.length}</span> instalación{instalaciones.length !== 1 ? 'es' : ''}
+                    <span className="font-semibold text-gray-900 ml-2">{instalaciones.length}</span> {instalaciones.length === 1 ? 'instalación' : 'instalaciones'}
                 </p>
                 <div className="flex gap-2">
                     <button

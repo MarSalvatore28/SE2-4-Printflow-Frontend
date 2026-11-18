@@ -3,6 +3,8 @@ import AreaList from '@app/Area/components/AreaList';
 import BusquedaInteligenteAreas from '@app/Area/components/BusquedaInteligenteAreas';
 import ModalConfirmacion from '@components/Shared/ModalConfirmacion';
 import ModalAdvertencia from '@components/Shared/ModalAdvertencia';
+import { AvisoSoloLectura } from '@components/auth/AvisoSoloLectura';
+import { usePermisos } from '@hooks/usePermisos';
 import AreasFormPage from './AreasForm.page';
 import { fetchAllClientes } from '@services/Clientes/clientes.service';
 import { type Client } from '../../Clientes/types';
@@ -24,6 +26,8 @@ const INITIAL_FORM_STATE: Partial<Area> = {
 };
 
 const AreaPage = () => {
+    // Crear, editar y desactivar áreas: solo admin (el operador y el auditor consultan)
+    const { puedeEditarCatalogos } = usePermisos();
     const [activeTab, setActiveTab] = useState<'agregar' | 'listar'>('listar');
     const [allAreas, setAllAreas] = useState<Area[]>([]);
     const [clientsList, setClientsList] = useState<Client[]>([]);
@@ -279,6 +283,7 @@ const AreaPage = () => {
     return (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
             <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Áreas</h1>
+            {!puedeEditarCatalogos && <AvisoSoloLectura acciones="crear, editar o desactivar áreas" />}
 
             {/* Tabs - Iguales a Asignaciones */}
             <div className="flex border-b border-gray-100 p-2 gap-4">
@@ -291,6 +296,7 @@ const AreaPage = () => {
                 >
                     Listar
                 </button>
+                {puedeEditarCatalogos && (
                 <button
                     onClick={() => {
                         setEditingArea(null);
@@ -304,6 +310,7 @@ const AreaPage = () => {
                 >
                     {editingArea ? 'Editar Área' : 'Agregar'}
                 </button>
+                )}
             </div>
 
             {/* Content con p-8 idéntico a asignaciones */}
@@ -400,9 +407,9 @@ const AreaPage = () => {
                         ) : (
                             <AreaList
                                 areas={displayedAreas}
-                                onEdit={handleEdit}
-                                onDelete={handleDelete}
-                                onToggleActive={handleToggleActive}
+                                onEdit={puedeEditarCatalogos ? handleEdit : undefined}
+                                onDelete={puedeEditarCatalogos ? handleDelete : undefined}
+                                onToggleActive={puedeEditarCatalogos ? handleToggleActive : undefined}
                             />
                         )}
                     </div>

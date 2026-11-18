@@ -19,6 +19,8 @@ export const AreaList: React.FC<AreaListProps> = ({
     const [expandedClientes, setExpandedClientes] = useState<Set<number>>(new Set());
     const [paginaActual, setPaginaActual] = useState(1);
     const itemsPorPagina = 10;
+    // Sin acciones (rol de solo consulta) no se muestra la columna
+    const conAcciones = Boolean(onEdit || onDelete || onToggleActive);
 
     const areasPorCliente = areas.reduce((acc, area) => {
         const clienteId = area.cliente_id;
@@ -174,9 +176,11 @@ export const AreaList: React.FC<AreaListProps> = ({
                                                 <th className="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
                                                     Estado
                                                 </th>
+                                                {conAcciones && (
                                                 <th className="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
                                                     Acciones
                                                 </th>
+                                                )}
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-200">
@@ -213,6 +217,7 @@ export const AreaList: React.FC<AreaListProps> = ({
                                                             {area.activo === 1 ? '✓ Activo' : '✗ Inactivo'}
                                                         </span>
                                                     </td>
+                                                    {conAcciones && (
                                                     <td className="px-6 py-4">
                                                         <div className="flex items-center justify-center gap-2">
                                                             {onEdit && (
@@ -255,6 +260,7 @@ export const AreaList: React.FC<AreaListProps> = ({
                                                             )}
                                                         </div>
                                                     </td>
+                                                    )}
                                                 </tr>
                                             ))}
                                         </tbody>

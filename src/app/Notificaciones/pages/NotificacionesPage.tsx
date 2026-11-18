@@ -19,6 +19,7 @@ import {
   rechazarNotificacion,
 } from "@services/Notificaciones/Notificaciones.service";
 import { DetalleLoteModal } from "@app/Notificaciones/components/DetalleLoteModal";
+import { ListadoLotes } from "@app/Notificaciones/components/ListadoLotes";
 import { useNotification } from "@context/NotificationContext";
 import React from "react";
 
@@ -34,9 +35,11 @@ const NotificacionesPage = () => {
   const [filterTerm, setFilterTerm] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"todas" | "no-leidas">(
+  const [activeTab, setActiveTab] = useState<"todas" | "no-leidas" | "lotes">(
     "no-leidas",
   );
+  // Sube al aprobar o rechazar un lote desde el detalle: recarga el listado de lotes
+  const [recargaLotes, setRecargaLotes] = useState(0);
   const [totalNoLeidas, setTotalNoLeidas] = useState<number>(0);
   const [selectedLote, setSelectedLote] = useState<number | string | null>(
     null,
@@ -585,7 +588,24 @@ const NotificacionesPage = () => {
         >
           Todas
         </button>
+        <button
+          onClick={() => setActiveTab("lotes")}
+          className={`px-6 py-3 font-medium text-sm transition-all relative ${activeTab === "lotes"
+            ? "text-primary border-b-2 border-primary"
+            : "text-gray-500 hover:text-gray-700"
+            }`}
+        >
+          Lotes
+        </button>
       </div>
+
+      {activeTab === "lotes" ? (
+        <ListadoLotes
+          recarga={version + recargaLotes}
+          onVerDetalle={(loteId) => setSelectedLote(loteId)}
+        />
+      ) : (
+      <>
 
       <div className="mb-6">
         <div className="flex flex-col md:flex-row gap-4 items-end bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -691,13 +711,18 @@ const NotificacionesPage = () => {
           showActions={false}
         />
       )}
+      </>
+      )}
 
       {selectedLote && (
         <DetalleLoteModal
           loteId={selectedLote}
           onClose={() => setSelectedLote(null)}
           onFechaCorteChange={(fecha) => setFechaCorte({ loteId: selectedLote, fecha })}
-          onLoteActualizado={() => fetchNotificaciones()}
+          onLoteActualizado={() => {
+            fetchNotificaciones();
+            setRecargaLotes((n) => n + 1);
+          }}
         />
       )}
 

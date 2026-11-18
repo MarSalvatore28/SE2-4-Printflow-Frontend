@@ -131,6 +131,14 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
 
     const totalPagar = montoTotalBN + montoTotalColor + totalRenta;
 
+    // Páginas B/N, color e importe de cada máquina, tal como los calcula el consolidado del backend.
+    const importeDe = (maquina: MaquinaConsolidada) => parseFloat(maquina.financiero?.monto_total ?? '0') || 0;
+    const totalesPorMaquina = maquinas.reduce((acc, maquina) => ({
+        bn: acc.bn + (maquina.consumo.total_bn || 0),
+        color: acc.color + (maquina.consumo.total_color || 0),
+        importe: acc.importe + importeDe(maquina),
+    }), { bn: 0, color: 0, importe: 0 });
+
     const abrirModalCambio = (cambio: CambioMaquina) => { setModalCambio(cambio); };
     const cerrarModal = () => setModalCambio(null);
 
@@ -148,16 +156,19 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="min-w-full text-sm">
+                    <table data-testid="tabla-consolidado" className="min-w-full text-sm">
                         <thead className="bg-gray-100">
                             <tr className="text-gray-700 uppercase text-xs font-semibold">
                                 <th className="px-4 py-2.5 text-left">Impresora</th>
                                 <th className="px-4 py-2.5 text-left">IP</th>
                                 <th className="px-4 py-2.5 text-left">Área</th>
                                 <th className="px-4 py-2.5 text-left">Serie</th>
-                                <th className="px-4 py-2.5 text-right">Contador Anterior</th>
-                                <th className="px-4 py-2.5 text-right">Contador Actual</th>
+                                <th className="px-4 py-2.5 text-right">Contador inicial</th>
+                                <th className="px-4 py-2.5 text-right">Contador final</th>
+                                <th className="px-4 py-2.5 text-right">Páginas B/N</th>
+                                <th className="px-4 py-2.5 text-right">Páginas color</th>
                                 <th className="px-4 py-2.5 text-right">Consumo Mes</th>
+                                <th className="px-4 py-2.5 text-right">Importe</th>
                                 <th className="px-4 py-2.5 text-center">Estado</th>
                             </tr>
                         </thead>
@@ -196,7 +207,10 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
                                         <td className="px-4 py-2.5 text-gray-500 font-mono text-xs">{maquina.info.serie}</td>
                                         <td className="px-4 py-2.5 text-right text-gray-700 font-mono">{formatNumber(filaAnt)}</td>
                                         <td className="px-4 py-2.5 text-right text-gray-900 font-mono">{formatNumber(filaAct)}</td>
+                                        <td className="px-4 py-2.5 text-right text-gray-800 font-mono">{formatNumber(maquina.consumo.total_bn)}</td>
+                                        <td className="px-4 py-2.5 text-right text-gray-800 font-mono">{formatNumber(maquina.consumo.total_color)}</td>
                                         <td className="px-4 py-2.5 text-right font-bold text-text font-mono">{formatNumber(filaConsumo)}</td>
+                                        <td className="px-4 py-2.5 text-right text-gray-900 font-mono">$ {formatMoney(importeDe(maquina))}</td>
                                         <td className="px-4 py-2.5 text-center">
                                             {maquina.cambio ? (
                                                 <button onClick={() => abrirModalCambio(maquina.cambio!)} className="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-full text-amber-800 text-xs font-semibold transition-colors cursor-pointer">
@@ -215,7 +229,10 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
                                 <td colSpan={4} className="px-4 py-3 text-right uppercase text-sm">Totales Generales:</td>
                                 <td className="px-4 py-3 text-right font-mono">{formatNumber(totalesGenerales.anterior)}</td>
                                 <td className="px-4 py-3 text-right font-mono">{formatNumber(totalesGenerales.actual)}</td>
+                                <td className="px-4 py-3 text-right font-mono">{formatNumber(totalesPorMaquina.bn)}</td>
+                                <td className="px-4 py-3 text-right font-mono">{formatNumber(totalesPorMaquina.color)}</td>
                                 <td className="px-4 py-3 text-right text-text font-mono">{formatNumber(totalesGenerales.consumo)}</td>
+                                <td className="px-4 py-3 text-right font-mono">$ {formatMoney(totalesPorMaquina.importe)}</td>
                                 <td></td>
                             </tr>
                         </tfoot>

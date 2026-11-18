@@ -5,127 +5,115 @@ import { fetchAllClientes, searchClientes } from "@services/Clientes/clientes.se
 import type { ClienteParaTabla } from '@models/Cliente/cliente.types';
 import type { Maquina } from '@models/Maquina/maquina.types';
 import type { ResumenConsolidado, DetalleTransaccion, ResumenDetallado, MaquinaConsolidada } from '@models/Reporte/reporte.types';
-import { meses } from '@data/meses.data'; 
+import { meses } from '@data/meses.data';
+
+// Resultado de una consulta, con la combinación de filtros que lo produjo.
+interface InformeCargado {
+    clave: string;
+    reportes: MaquinaConsolidada[];
+    resumen: ResumenConsolidado;
+    transacciones: DetalleTransaccion[];
+    resumenDetallado: ResumenDetallado;
+}
+
+const mesActual = () => String(new Date().getMonth() + 1).padStart(2, '0');
+const añoActual = () => String(new Date().getFullYear());
+
+const generarAños = () => {
+    const hoy = new Date();
+    const añosArr = [];
+    for (let i = 0; i < 5; i++) {
+        const val = (hoy.getFullYear() - i).toString();
+        añosArr.push({ value: val, label: val });
+    }
+    return añosArr;
+};
 
 export const useInformes = () => {
     const [clientes, setClientes] = useState<ClienteParaTabla[]>([]);
     const [maquinas, setMaquinas] = useState<Maquina[]>([]);
+    const [errorMaestros, setErrorMaestros] = useState<string | null>(null);
 
     const [selectedCliente, setSelectedCliente] = useState<number | null>(null);
     const [selectedMaquina, setSelectedMaquina] = useState<number | null>(null);
     const [selectedArea, setSelectedArea] = useState<number | null>(null);
-    
-    const currentDate = new Date();
-    const [selectedMes, setSelectedMes] = useState<string>(
-        String(currentDate.getMonth() + 1).padStart(2, '0')
-    );
-    const [selectedAño, setSelectedAño] = useState<string>(
-        String(currentDate.getFullYear())
-    );
+    const [selectedMes, setSelectedMes] = useState<string>(mesActual);
+    const [selectedAño, setSelectedAño] = useState<string>(añoActual);
 
-    const [reportes, setReportes] = useState<MaquinaConsolidada[]>([]);
-    const [resumen, setResumen] = useState<ResumenConsolidado | null>(null);
-    
-    const [transacciones, setTransacciones] = useState<DetalleTransaccion[]>([]);
-    const [resumenDetallado, setResumenDetallado] = useState<ResumenDetallado | null>(null);
-    
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [informe, setInforme] = useState<InformeCargado | null>(null);
+    const [errorInforme, setErrorInforme] = useState<{ clave: string; mensaje: string } | null>(null);
+    const [recargas, setRecargas] = useState(0);
 
-    const vistaActual = (reportes.length > 0 || resumen) ? 'consolidado' : 'lista';
-
-    const generarAños = () => {
-        const hoy = new Date();
-        const añosArr = [];
-        for (let i = 0; i < 5; i++) {
-            const val = (hoy.getFullYear() - i).toString();
-            añosArr.push({ value: val, label: val });
-        }
-        return añosArr;
-    };
     const años = generarAños();
-    const totalItems = reportes.length;
 
-    const cargarDatosMaestros = useCallback(async () => {
-        try {
-            const [clientesData, maquinasData] = await Promise.all([
-                fetchAllClientes(),
-                fetchAllMaquinas()
-            ]);
+    // El informe se pide solo cuando están los tres filtros obligatorios.
+    // La clave cambia con cualquier filtro y descarta respuestas viejas.
+    const completos = Boolean(selectedCliente && selectedMes && selectedAño);
+    const periodo = `${selectedAño}-${selectedMes}`;
+    const clave = completos
+        ? `${selectedCliente}|${periodo}|${selectedArea ?? ''}|${selectedMaquina ?? ''}|${recargas}`
+        : null;
 
-            setClientes(clientesData);
-            setMaquinas(maquinasData);
-        } catch (err) {
-            console.error('Error carga maestros:', err);
-            setError('Error al conectar con el servidor para cargar listas.');
-        }
+    useEffect(() => {
+        let cancelado = false;
+        Promise.all([fetchAllClientes(), fetchAllMaquinas()])
+            .then(([clientesData, maquinasData]) => {
+                if (cancelado) return;
+                setClientes(clientesData);
+                setMaquinas(maquinasData);
+            })
+            .catch((err) => {
+                console.error('Error carga maestros:', err);
+                if (!cancelado) setErrorMaestros('Error al conectar con el servidor para cargar listas.');
+            });
+        return () => { cancelado = true; };
     }, []);
 
-    const handleGenerarConsolidado = useCallback(async () => {
-        if (!selectedCliente) return;
-        if (!selectedMes || !selectedAño) {
-            setError('Seleccione mes y año');
-            return;
-        }
+    useEffect(() => {
+        if (!clave || !selectedCliente) return;
+        let cancelado = false;
+        const areaId = selectedArea || undefined;
+        const maquinaId = selectedMaquina || undefined;
 
-        setLoading(true);
-        setError(null);
+        Promise.all([
+            fetchReporteConsolidado(selectedCliente, periodo, areaId, maquinaId),
+            fetchReporteDetallado(selectedCliente, periodo, areaId, maquinaId)
+        ])
+            .then(([consolidado, detallado]) => {
+                if (cancelado) return;
+                setErrorInforme(null);
+                setInforme({
+                    clave,
+                    reportes: consolidado.detalles,
+                    resumen: consolidado.resumen,
+                    transacciones: detallado.detalles,
+                    resumenDetallado: detallado.resumen
+                });
+            })
+            .catch((err) => {
+                console.error(err);
+                if (!cancelado) {
+                    setErrorInforme({ clave, mensaje: err instanceof Error ? err.message : 'Error al generar el informe' });
+                }
+            });
 
-        try {
-            const periodo = `${selectedAño}-${selectedMes}`;
+        return () => { cancelado = true; };
+    }, [clave, selectedCliente, periodo, selectedArea, selectedMaquina]);
 
-            const data = await fetchReporteConsolidado(
-                selectedCliente,
-                periodo,
-                selectedArea || undefined,
-                selectedMaquina || undefined
-            );
+    const vigente = informe && informe.clave === clave ? informe : null;
+    const errorVigente = errorInforme && errorInforme.clave === clave ? errorInforme.mensaje : null;
 
-            setReportes(data.detalles);
-            setResumen(data.resumen);
+    const reportes = vigente?.reportes ?? [];
+    const resumen = vigente?.resumen ?? null;
+    const transacciones = vigente?.transacciones ?? [];
+    const resumenDetallado = vigente?.resumenDetallado ?? null;
+    const loading = Boolean(clave) && !vigente && !errorVigente;
+    const error = errorVigente ?? errorMaestros;
+    const vistaActual = vigente ? 'consolidado' : 'lista';
+    const totalItems = reportes.length;
 
-        } catch (err) {
-            console.error(err);
-            setError(err instanceof Error ? err.message : 'Error al generar reporte');
-            setReportes([]);
-            setResumen(null);
-        } finally {
-            setLoading(false);
-        }
-    }, [selectedCliente, selectedMes, selectedAño, selectedArea, selectedMaquina]);
-
-    const handleGenerarDetallado = useCallback(async () => {
-        if (!selectedCliente) return;
-        if (!selectedMes || !selectedAño) {
-            setError('Seleccione mes y año');
-            return;
-        }
-
-        setLoading(true);
-        setError(null);
-
-        try {
-            const periodo = `${selectedAño}-${selectedMes}`;
-
-            const data = await fetchReporteDetallado(
-                selectedCliente,
-                periodo,
-                selectedArea || undefined,
-                selectedMaquina || undefined
-            );
-
-            setTransacciones(data.detalles);
-            setResumenDetallado(data.resumen);
-
-        } catch (err) {
-            console.error(err);
-            setError(err instanceof Error ? err.message : 'Error al generar detallado');
-            setTransacciones([]);
-            setResumenDetallado(null);
-        } finally {
-            setLoading(false);
-        }
-    }, [selectedCliente, selectedMes, selectedAño, selectedArea, selectedMaquina]);
+    // Vuelve a pedir el informe con los mismos filtros.
+    const recargarInforme = useCallback(() => setRecargas(n => n + 1), []);
 
     const handleSearchClientes = async (term: string) => {
         return await searchClientes(term);
@@ -139,26 +127,9 @@ export const useInformes = () => {
         setSelectedCliente(null);
         setSelectedMaquina(null);
         setSelectedArea(null);
-        setSelectedMes(String(currentDate.getMonth() + 1).padStart(2, '0'));
-        setSelectedAño(String(currentDate.getFullYear()));
-        
-        setReportes([]);
-        setResumen(null);
-        setTransacciones([]);
-        setResumenDetallado(null);
-        setError(null);
+        setSelectedMes(mesActual());
+        setSelectedAño(añoActual());
     };
-
-    useEffect(() => {
-        cargarDatosMaestros();
-    }, [cargarDatosMaestros]);
-
-    const handleBuscarTodos = useCallback(() => {
-        if (selectedCliente && selectedMes && selectedAño) {
-            handleGenerarConsolidado();
-            handleGenerarDetallado();
-        }
-    }, [selectedCliente, selectedMes, selectedAño, handleGenerarConsolidado, handleGenerarDetallado]);
 
     return {
         clientes,
@@ -168,20 +139,19 @@ export const useInformes = () => {
         selectedArea, setSelectedArea,
         selectedMes, setSelectedMes,
         selectedAño, setSelectedAño,
+        filtrosCompletos: completos,
         reportes,
         resumen,
         transacciones,
-        resumenDetallado, 
+        resumenDetallado,
         loading,
         error,
         vistaActual,
         totalItems,
         meses,
         años,
-        handleGenerarConsolidado,
-        handleGenerarDetallado,
+        recargarInforme,
         handleLimpiarFiltros,
-        handleBuscarTodos,
         searchMaquinas: handleSearchMaquinas,
         searchClientes: handleSearchClientes,
     };

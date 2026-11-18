@@ -29,7 +29,7 @@ const InformesPage = () => {
         meses,
         años,
         handleLimpiarFiltros,
-        handleBuscarTodos,
+        filtrosCompletos,
         transacciones,
     } = useInformes();
 
@@ -111,9 +111,7 @@ const InformesPage = () => {
                 selectedArea={selectedArea}
                 onAreaChange={setSelectedArea}
                 onLimpiarFiltros={handleLimpiarFiltros}
-
-                onAplicarFiltros={handleBuscarTodos}
-                autoLoad={false}
+                autoLoad
             />
 
             {selectedCliente && (
@@ -139,7 +137,14 @@ const InformesPage = () => {
                 </div>
             )}
 
-            {vistaActual === 'consolidado' && !loading && resumen && (
+            {vistaActual === 'consolidado' && !loading && resumen && reportes.length === 0 && (
+                <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200 text-gray-700">
+                    <p className="font-semibold">No hay lecturas aprobadas para este cliente en {meses.find(m => m.value === selectedMes)?.label} de {selectedAño}.</p>
+                    <p className="text-sm text-gray-500 mt-1">Pruebe con otro período o revise que los lotes del mes estén aprobados.</p>
+                </div>
+            )}
+
+            {vistaActual === 'consolidado' && !loading && resumen && reportes.length > 0 && (
                 <>
                     {/* ===== CABECERA DEL PERIODO ===== */}
                     <div className="mt-6 mb-6 bg-gradient-to-r from-secondary/90 to-secondary rounded-xl shadow-sm overflow-hidden">
@@ -228,7 +233,7 @@ const InformesPage = () => {
                     </>
             )}
 
-            {vistaActual === 'lista' && !loading && (
+            {!filtrosCompletos && (
                 <div className="text-center py-16 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                     <svg className="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

@@ -181,7 +181,7 @@ const InformesPage = () => {
                             {/* Botones de exportar en cabecera */}
                             <div className="flex items-center gap-2 shrink-0">
                                 <button
-                                    onClick={() => exportToExcel(reportes as any, clienteActual, `${selectedAño}-${selectedMes}`, transacciones, exportParams)}
+                                    onClick={() => exportToExcel(reportes, clienteActual, `${selectedAño}-${selectedMes}`, transacciones, exportParams)}
                                     className="px-4 py-2 bg-green-500 hover:bg-green-400 text-white font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-2 text-sm"
                                     title="Exportar en Excel"
                                 >
@@ -189,7 +189,7 @@ const InformesPage = () => {
                                     Exportar en XLSX
                                 </button>
                                 <button
-                                    onClick={() => exportToPDF(reportes as any, clienteActual, `${selectedAño}-${selectedMes}`, transacciones, exportParams)}
+                                    onClick={() => exportToPDF(reportes, clienteActual, `${selectedAño}-${selectedMes}`, transacciones, exportParams)}
                                     className="px-4 py-2 bg-red-500 hover:bg-red-400 text-white font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-2 text-sm"
                                     title="Exportar en PDF"
                                 >

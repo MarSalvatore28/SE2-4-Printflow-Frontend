@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, X } from 'lucide-react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DataTable from '@components/Shared/DataTable';
-import type { Lote } from '@app/Notificaciones/types/notificaciones';
+import { ETIQUETA_ESTADO_LOTE, type EstadoLote, type Lote } from '@app/Notificaciones/types/notificaciones';
 import { EstadoLoteBadge } from '@app/Notificaciones/components/EstadoLoteBadge';
 import { fetchLotes } from '@services/Notificaciones/Lotes.service';
+import BusquedaInteligenteClientes from '@app/Clientes/components/BusquedaInteligenteClientes';
+import type { ClienteParaTabla } from '@models/Cliente/cliente.types';
+import { fetchAllClientes } from '@services/Clientes/clientes.service';
+
+const ESTADOS = Object.keys(ETIQUETA_ESTADO_LOTE) as EstadoLote[];
 
 interface ListadoLotesProps {
   // Cambia cuando hay que recargar (aviso del socket, lote aprobado o rechazado)
@@ -32,20 +37,47 @@ export const ListadoLotes = ({ recarga, onVerDetalle }: ListadoLotesProps) => {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Filtros: estado, cliente y rango de la fecha de recepción
+  const [estado, setEstado] = useState<EstadoLote | ''>('');
+  const [cliente, setCliente] = useState<ClienteParaTabla | null>(null);
+  const [desde, setDesde] = useState('');
+  const [hasta, setHasta] = useState('');
+  const [clientes, setClientes] = useState<ClienteParaTabla[]>([]);
+  // Cambiarla vuelve a montar el buscador de clientes vacío
+  const [claveBuscador, setClaveBuscador] = useState(0);
+
+  const rangoInvalido = Boolean(desde && hasta && desde > hasta);
+  const hayFiltros = Boolean(estado || cliente || desde || hasta);
+
+  useEffect(() => {
+    fetchAllClientes()
+      .then(setClientes)
+      .catch(() => setClientes([]));
+  }, []);
+
   const cargar = useCallback(async () => {
+    if (rangoInvalido) return;
     try {
-      setLotes(await fetchLotes());
+      setLotes(await fetchLotes({ estado, cliente_id: cliente?.id_cliente ?? null, desde, hasta }));
       setError(null);
     } catch {
       setError('No se pudieron cargar los lotes. Intente de nuevo.');
     } finally {
       setCargando(false);
     }
-  }, []);
+  }, [estado, cliente, desde, hasta, rangoInvalido]);
 
   useEffect(() => {
     void cargar();
   }, [cargar, recarga]);
+
+  const limpiarFiltros = () => {
+    setEstado('');
+    setCliente(null);
+    setDesde('');
+    setHasta('');
+    setClaveBuscador((n) => n + 1);
+  };
 
   const columnas = [
     {
@@ -53,7 +85,7 @@ export const ListadoLotes = ({ recarga, onVerDetalle }: ListadoLotesProps) => {
       label: 'Lote',
       render: (l: Lote) => (
         <div className="flex flex-col">
-          <span className="font-mono text-sm text-primary">{l.codigo_referencia}</span>
+          <span className="font-mono text-sm text-primary whitespace-nowrap">{l.codigo_referencia}</span>
           {l.periodo && <span className="text-xs text-gray-500">Período {l.periodo}</span>}
         </div>
       ),
@@ -114,7 +146,7 @@ export const ListadoLotes = ({ recarga, onVerDetalle }: ListadoLotesProps) => {
             e.stopPropagation();
             onVerDetalle(l.id_lote);
           }}
-          className="inline-flex items-center px-2 py-1.5 rounded-md border-2 border-secondary/50 shadow-sm text-xs font-medium text-gray-700 bg-background/20 hover:bg-accent/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+          className="inline-flex items-center whitespace-nowrap px-2 py-1.5 rounded-md border-2 border-secondary/50 shadow-sm text-xs font-medium text-gray-700 bg-background/20 hover:bg-accent/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
           title="Ver detalle del lote"
         >
           <VisibilityIcon className="mr-1.5 text-primary" fontSize="small" />
@@ -124,32 +156,94 @@ export const ListadoLotes = ({ recarga, onVerDetalle }: ListadoLotesProps) => {
     },
   ];
 
-  if (cargando) {
-    return (
-      <div className="flex justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 flex items-center gap-2">
-        <AlertCircle size={20} />
-        {error}
-      </div>
-    );
-  }
+  const etiquetaCampo = 'block text-sm font-medium text-gray-700 mb-2';
+  const campo = 'w-full h-[42px] px-3 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary';
 
   return (
-    <DataTable<Lote>
-      title="Lotes recibidos"
-      columns={columnas}
-      data={lotes}
-      getItemId={(l) => l.id_lote}
-      emptyMessage="No hay lotes recibidos."
-      rowsPerPage={10}
-      showActions={false}
-    />
+    <div>
+      <div className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200" data-testid="filtros-lotes">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-end">
+          <div>
+            <label htmlFor="filtro-estado" className={etiquetaCampo}>Estado</label>
+            <select
+              id="filtro-estado"
+              value={estado}
+              onChange={(e) => setEstado(e.target.value as EstadoLote | '')}
+              className={campo}
+            >
+              <option value="">Todos los estados</option>
+              {ESTADOS.map((e) => (
+                <option key={e} value={e}>{ETIQUETA_ESTADO_LOTE[e]}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <span className={etiquetaCampo}>Cliente</span>
+            <BusquedaInteligenteClientes
+              key={claveBuscador}
+              itemsCompletos={clientes}
+              onSeleccionar={setCliente}
+              onClear={() => setCliente(null)}
+              placeholder="Todos los clientes"
+            />
+          </div>
+          <div>
+            <label htmlFor="filtro-desde" className={etiquetaCampo}>Recibido desde</label>
+            <input
+              id="filtro-desde"
+              type="date"
+              value={desde}
+              max={hasta || undefined}
+              onChange={(e) => setDesde(e.target.value)}
+              className={campo}
+            />
+          </div>
+          <div>
+            <label htmlFor="filtro-hasta" className={etiquetaCampo}>Recibido hasta</label>
+            <input
+              id="filtro-hasta"
+              type="date"
+              value={hasta}
+              min={desde || undefined}
+              onChange={(e) => setHasta(e.target.value)}
+              className={campo}
+            />
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-2 mt-3 text-xs">
+          <span className={rangoInvalido ? 'text-red-600 font-medium' : 'text-gray-500'}>
+            {rangoInvalido
+              ? 'La fecha «desde» no puede ser posterior a la fecha «hasta».'
+              : `${lotes.length} lote(s)${hayFiltros ? ' con los filtros aplicados' : ''}`}
+          </span>
+          {hayFiltros && (
+            <button onClick={limpiarFiltros} className="text-gray-500 hover:text-red-600 flex items-center gap-1">
+              Limpiar filtros <X className="w-3 h-3" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {cargando ? (
+        <div className="flex justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
+      ) : error ? (
+        <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 flex items-center gap-2">
+          <AlertCircle size={20} />
+          {error}
+        </div>
+      ) : (
+        <DataTable<Lote>
+          title="Lotes recibidos"
+          columns={columnas}
+          data={lotes}
+          getItemId={(l) => l.id_lote}
+          emptyMessage={hayFiltros ? 'Ningún lote cumple los filtros.' : 'No hay lotes recibidos.'}
+          rowsPerPage={10}
+          showActions={false}
+        />
+      )}
+    </div>
   );
 };

@@ -23,11 +23,14 @@ import {
 import { DetalleLoteModal } from "@app/Notificaciones/components/DetalleLoteModal";
 import { ListadoLotes } from "@app/Notificaciones/components/ListadoLotes";
 import { useNotification } from "@context/NotificationContext";
+import { usePermisos } from "@hooks/usePermisos";
 import React from "react";
 
 const NotificacionesPage = () => {
   // version sube cada vez que llega un aviso por el socket
   const { refresh: refrescarCampana, version } = useNotification();
+  // Aprobar o rechazar lotes y eliminar notificaciones: admin y operador (el auditor solo consulta)
+  const { puedeAprobarLotes, puedeEliminarNotificaciones } = usePermisos();
   const [allNotificaciones, setAllNotificaciones] = useState<Notificacion[]>(
     [],
   );
@@ -502,7 +505,7 @@ const NotificacionesPage = () => {
       align: "center" as const,
       render: (notif: Notificacion) => (
         <div className="flex items-center justify-center gap-2">
-          {loteAccionable(notif) ? (
+          {puedeAprobarLotes && loteAccionable(notif) ? (
             <>
               <button
                 onClick={(e) => {
@@ -541,7 +544,7 @@ const NotificacionesPage = () => {
             )
           )}
 
-          {notif.leida && (
+          {notif.leida && puedeEliminarNotificaciones && (
             <button
               onClick={(e) => {
                 e.stopPropagation();

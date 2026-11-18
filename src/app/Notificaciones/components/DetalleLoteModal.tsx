@@ -17,6 +17,7 @@ import {
   validarLote,
 } from '@services/Notificaciones/detalleLote.service';
 import { useNotification } from '@context/NotificationContext';
+import { usePermisos } from '@hooks/usePermisos';
 import { formatNumber } from '@utils/formatUtils';
 
 interface DetalleLoteModalProps {
@@ -55,6 +56,8 @@ const Dato = ({ etiqueta, children }: { etiqueta: string; children: ReactNode })
 // Detalle de un lote: reportes en staging, alertas, validación, y aprobar o rechazar
 export const DetalleLoteModal = ({ loteId, onClose, onFechaCorteChange, onLoteActualizado }: DetalleLoteModalProps) => {
   const { refresh } = useNotification();
+  // Aprobar o rechazar: admin y operador. El auditor ve el detalle sin esas acciones.
+  const { puedeAprobarLotes, etiquetaRol } = usePermisos();
   const [lote, setLote] = useState<Lote | null>(null);
   const [reportes, setReportes] = useState<ReporteStaging[]>([]);
   const [alertas, setAlertas] = useState<AlertaLote[]>([]);
@@ -438,7 +441,10 @@ export const DetalleLoteModal = ({ loteId, onClose, onFechaCorteChange, onLoteAc
 
         {/* Pie con acciones */}
         <div className="flex flex-wrap justify-end gap-2 px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
-          {enStaging && accion === null && (
+          {enStaging && !puedeAprobarLotes && (
+            <p className="mr-auto self-center text-xs text-gray-500">Su rol ({etiquetaRol}) solo puede consultar el lote; aprobar o rechazar lo hace un operador o un administrador.</p>
+          )}
+          {enStaging && accion === null && puedeAprobarLotes && (
             <>
               <button
                 onClick={() => { setAviso(null); setAccion('rechazar'); }}

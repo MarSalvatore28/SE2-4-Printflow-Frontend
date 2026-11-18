@@ -1,8 +1,8 @@
 import { getToken } from "@services/Auth/auth.service";
+import { apiFetch } from '@services/api';
 import type { Area, AreaFormData } from "@models/Area/area.types";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
-const RESOURCE_URL = `${API_BASE}/api/areas`;
+const RESOURCE_URL = '/api/areas'; // apiFetch agrega la URL base
 
 const getAuthHeaders = (isPost = false) => {
     const token = getToken();
@@ -26,7 +26,7 @@ const mapArea = (a: any): Area => ({
 
 export async function fetchAllAreas(): Promise<Area[]> {
     try {
-        const res = await fetch(`${RESOURCE_URL}`, { headers: getAuthHeaders() });
+        const res = await apiFetch(`${RESOURCE_URL}`, { headers: getAuthHeaders() });
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const data = await res.json();
         const areas = data.success ? data.data : [];
@@ -39,7 +39,7 @@ export async function fetchAllAreas(): Promise<Area[]> {
 
 export async function getAreaById(id: number): Promise<Area | null> {
     try {
-        const res = await fetch(`${RESOURCE_URL}/${id}`, { headers: getAuthHeaders() });
+        const res = await apiFetch(`${RESOURCE_URL}/${id}`, { headers: getAuthHeaders() });
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const data = await res.json();
         if (data.success && data.data) {
@@ -54,7 +54,7 @@ export async function getAreaById(id: number): Promise<Area | null> {
 
 export async function searchAreas(termino: string): Promise<Area[]> {
     try {
-        const res = await fetch(`${RESOURCE_URL}/search?q=${encodeURIComponent(termino)}`, { headers: getAuthHeaders() });
+        const res = await apiFetch(`${RESOURCE_URL}/search?q=${encodeURIComponent(termino)}`, { headers: getAuthHeaders() });
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const data = await res.json();
         const areas = data.success ? data.data : [];
@@ -67,7 +67,7 @@ export async function searchAreas(termino: string): Promise<Area[]> {
 
 export async function getAreasByCliente(cliente_id: number): Promise<Area[]> {
     try {
-        const res = await fetch(`${RESOURCE_URL}/cliente/${cliente_id}`, { headers: getAuthHeaders() });
+        const res = await apiFetch(`${RESOURCE_URL}/cliente/${cliente_id}`, { headers: getAuthHeaders() });
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const data = await res.json();
         const areas = data.success ? data.data : [];
@@ -80,7 +80,7 @@ export async function getAreasByCliente(cliente_id: number): Promise<Area[]> {
 
 export async function getAreasActivas(): Promise<Area[]> {
     try {
-        const res = await fetch(`${RESOURCE_URL}/activas`, { headers: getAuthHeaders() });
+        const res = await apiFetch(`${RESOURCE_URL}/activas`, { headers: getAuthHeaders() });
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const data = await res.json();
         const areas = data.success ? data.data : [];
@@ -93,7 +93,7 @@ export async function getAreasActivas(): Promise<Area[]> {
 
 export async function getAreasInactivas(): Promise<Area[]> {
     try {
-        const res = await fetch(`${RESOURCE_URL}/inactivas`, { headers: getAuthHeaders() });
+        const res = await apiFetch(`${RESOURCE_URL}/inactivas`, { headers: getAuthHeaders() });
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const data = await res.json();
         const areas = data.success ? data.data : [];
@@ -106,7 +106,7 @@ export async function getAreasInactivas(): Promise<Area[]> {
 
 export async function createArea(area: AreaFormData): Promise<number | null> {
     try {
-        const res = await fetch(`${RESOURCE_URL}`, {
+        const res = await apiFetch(`${RESOURCE_URL}`, {
             method: "POST",
             headers: getAuthHeaders(true),
             body: JSON.stringify(area),
@@ -122,7 +122,7 @@ export async function createArea(area: AreaFormData): Promise<number | null> {
 
 export async function updateArea(id: number, area: AreaFormData): Promise<boolean> {
     try {
-        const res = await fetch(`${RESOURCE_URL}/${id}`, {
+        const res = await apiFetch(`${RESOURCE_URL}/${id}`, {
             method: "PUT",
             headers: getAuthHeaders(true),
             body: JSON.stringify(area),
@@ -138,7 +138,7 @@ export async function updateArea(id: number, area: AreaFormData): Promise<boolea
 
 export async function deleteArea(id: number): Promise<boolean> {
     try {
-        const res = await fetch(`${RESOURCE_URL}/${id}`, {
+        const res = await apiFetch(`${RESOURCE_URL}/${id}`, {
             method: "DELETE",
             headers: getAuthHeaders()
         });
@@ -153,7 +153,7 @@ export async function deleteArea(id: number): Promise<boolean> {
 
 export async function activarArea(id: number): Promise<boolean> {
     try {
-        const res = await fetch(`${RESOURCE_URL}/${id}/activar`, {
+        const res = await apiFetch(`${RESOURCE_URL}/${id}/activar`, {
             method: "PATCH",
             headers: getAuthHeaders()
         });
@@ -168,7 +168,7 @@ export async function activarArea(id: number): Promise<boolean> {
 
 export async function getEstadisticasArea(id: number): Promise<any> {
     try {
-        const res = await fetch(`${RESOURCE_URL}/${id}/estadisticas`, { headers: getAuthHeaders() });
+        const res = await apiFetch(`${RESOURCE_URL}/${id}/estadisticas`, { headers: getAuthHeaders() });
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const data = await res.json();
         return data.success ? data.data : null;
@@ -180,7 +180,7 @@ export async function getEstadisticasArea(id: number): Promise<any> {
 
 export async function getHistorialCambiosArea(id: number): Promise<any[]> {
     try {
-        const res = await fetch(`${RESOURCE_URL}/${id}/historial-cambios`, { headers: getAuthHeaders() });
+        const res = await apiFetch(`${RESOURCE_URL}/${id}/historial-cambios`, { headers: getAuthHeaders() });
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const data = await res.json();
         return data.success ? data.data : [];

@@ -6,6 +6,8 @@ import BusquedaInteligenteClientes from '@app/Clientes/components/BusquedaInteli
 import { DetalleClienteModal } from '@app/Clientes/components/Detalleclientemodal';
 import ModalConfirmacion from '@components/Shared/ModalConfirmacion';
 import ModalAdvertencia from '@components/Shared/ModalAdvertencia';
+import { AvisoSoloLectura } from '@components/auth/AvisoSoloLectura';
+import { usePermisos } from '@hooks/usePermisos';
 import {
     type ClienteParaTabla,
     fetchAllClientes,
@@ -49,6 +51,8 @@ const INITIAL_FORM_STATE: any = {
 };
 
 const ClientesPage = () => {
+    // Crear, editar y desactivar clientes y contratos: solo admin (el operador y el auditor consultan)
+    const { puedeEditarCatalogos } = usePermisos();
     const [activeTab, setActiveTab] = useState<'agregar' | 'listar' | 'Crear Contrato' | 'Editar Contrato'>('listar');
     const [allClients, setAllClients] = useState<ClienteParaTabla[]>([]);
     const [showInactive, setShowInactive] = useState<boolean>(false);
@@ -509,6 +513,7 @@ const ClientesPage = () => {
     return (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
             <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Clientes</h1>
+            {!puedeEditarCatalogos && <AvisoSoloLectura acciones="crear, editar o desactivar clientes y contratos" />}
 
             <div className="flex border-b border-gray-100 p-2 gap-4">
                 <button
@@ -520,6 +525,7 @@ const ClientesPage = () => {
                 >
                     Listar
                 </button>
+                {puedeEditarCatalogos && (<>
                 <button
                     onClick={() => {
                         setFormData(INITIAL_FORM_STATE);
@@ -559,6 +565,7 @@ const ClientesPage = () => {
                 >
                     Editar Contrato
                 </button>
+                </>)}
             </div>
 
             <div className="p-8">
@@ -687,9 +694,9 @@ const ClientesPage = () => {
                         ) : (
                             <ClientList
                                 clients={displayedClients}
-                                onEdit={handleEdit}
-                                onDelete={handleDelete}
-                                onToggleActive={handleToggleActive}
+                                onEdit={puedeEditarCatalogos ? handleEdit : undefined}
+                                onDelete={puedeEditarCatalogos ? handleDelete : undefined}
+                                onToggleActive={puedeEditarCatalogos ? handleToggleActive : undefined}
                                 onVerDetalles={handleVerDetalles}
                             />
                         )}

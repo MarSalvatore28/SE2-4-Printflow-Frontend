@@ -5,7 +5,9 @@ import ClearIcon from "@mui/icons-material/Clear";
 import DataTable from "@components/Shared/DataTable";
 import { BuscadorInteligente } from "@components/Shared/BuscadorInteligente";
 import ModalConfirmacion from "@components/Shared/ModalConfirmacion";
-import { ErrorAprobacion, type Notificacion } from "@app/Notificaciones/types/notificaciones";
+import { ErrorAprobacion, type Lote, type Notificacion } from "@app/Notificaciones/types/notificaciones";
+import { EstadoLoteBadge } from "@app/Notificaciones/components/EstadoLoteBadge";
+import { fetchLotes } from "@services/Notificaciones/Lotes.service";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
@@ -38,6 +40,8 @@ const NotificacionesPage = () => {
   const [activeTab, setActiveTab] = useState<"todas" | "no-leidas" | "lotes">(
     "no-leidas",
   );
+  // Estado actual de cada lote (Pendiente, Procesado, Descartado, Error) por id
+  const [lotesPorId, setLotesPorId] = useState<Map<number, Lote>>(new Map());
   // Sube al aprobar o rechazar un lote desde el detalle: recarga el listado de lotes
   const [recargaLotes, setRecargaLotes] = useState(0);
   const [totalNoLeidas, setTotalNoLeidas] = useState<number>(0);
@@ -78,6 +82,10 @@ const NotificacionesPage = () => {
 
       setAllNotificaciones(data);
       setFilteredNotificaciones(data);
+
+      // Si falla, la tabla sigue sin el estado del lote
+      const lotes = await fetchLotes().catch(() => [] as Lote[]);
+      setLotesPorId(new Map(lotes.map((l) => [l.id_lote, l])));
 
       const count = await contarNoLeidas();
       setTotalNoLeidas(count);
@@ -339,6 +347,14 @@ const NotificacionesPage = () => {
     }
   }, [version]);
 
+  // Solo un lote que sigue en staging (Pendiente o Error) se puede aprobar o rechazar.
+  // Si no se conoce su estado, se usa la notificación sin leer como antes.
+  const loteAccionable = (notif: Notificacion) => {
+    if (!notif.lote_id) return false;
+    const lote = lotesPorId.get(notif.lote_id);
+    return lote ? lote.estado === "PENDIENTE" || lote.estado === "ERROR" : !notif.leida;
+  };
+
   const columns = [
     {
       key: "tipo",
@@ -409,6 +425,15 @@ const NotificacionesPage = () => {
               <span className="font-medium">Período:</span> {notif.periodo}
             </div>
           )}
+          {notif.lote_id && lotesPorId.get(notif.lote_id) && (
+            <div className="whitespace-nowrap flex items-center gap-1">
+              <span className="font-medium">Lote:</span>
+              <EstadoLoteBadge
+                estado={lotesPorId.get(notif.lote_id)!.estado}
+                title={lotesPorId.get(notif.lote_id)!.motivo ?? undefined}
+              />
+            </div>
+          )}
           {notif.usuario_nombre && (
             <div className="whitespace-nowrap">
               <span className="font-medium">Usuario:</span>{" "}
@@ -477,7 +502,7 @@ const NotificacionesPage = () => {
       align: "center" as const,
       render: (notif: Notificacion) => (
         <div className="flex items-center justify-center gap-2">
-          {notif.lote_id && !notif.leida ? (
+          {loteAccionable(notif) ? (
             <>
               <button
                 onClick={(e) => {
@@ -501,8 +526,7 @@ const NotificacionesPage = () => {
               </button>
             </>
           ) : (
-            !notif.leida &&
-            !notif.lote_id && (
+            !notif.leida && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();

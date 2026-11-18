@@ -116,7 +116,7 @@ export const logout = () => {
     removeUser();
 };
 
-const handleUnauthorized = (response: Response) => {
+export const handleUnauthorized = (response: Response) => {
     if (response.status === 401) {
         logout();
         window.location.replace('/login');

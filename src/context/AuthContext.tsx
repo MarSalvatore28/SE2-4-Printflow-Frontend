@@ -40,7 +40,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     useEffect(() => {
         if (!token) return;
         const interval = setInterval(() => {
-            if (isTokenExpired(token)) {
+            // Lee el token guardado: apiFetch lo renueva con X-Nuevo-Token
+            if (isTokenExpired(authService.getToken() ?? '')) {
                 logout();
             }
         }, 60000); // cada 1 minuto

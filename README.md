@@ -151,6 +151,8 @@ const clienteRoutes = require('@routes/cliente/cliente.routes'); // [B-F1]      
 
 Si tu tarea dice `[BORRAR en X-FN]`, esa línea se **borra completa**.
 
+**Llamadas a la API:** en los servicios de tu módulo usa `apiFetch` (`src/services/api.ts`) en lugar de `fetch`. Ya agrega el token, cierra la sesión si la API responde 401 y guarda el token renovado.
+
 ## Imagen de producción
 
 El `Dockerfile` compila la aplicación con Node y la sirve con **nginx**, que además:

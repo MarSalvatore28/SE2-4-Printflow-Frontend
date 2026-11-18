@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { BuscadorInteligente } from '@components/Shared/BuscadorInteligente';
 import ModalConfirmacion from '@components/Shared/ModalConfirmacion';
 import ModalAdvertencia from '@components/Shared/ModalAdvertencia';
+import { AvisoSoloLectura } from '@components/auth/AvisoSoloLectura';
+import { usePermisos } from '@hooks/usePermisos';
 import MaquinaList from '@app/Maquinas/components/MaquinaList';
 import MaquinaForm from '@app/Maquinas/components/MaquinaForm';
 import {
@@ -38,6 +40,8 @@ const coincide = (m: Maquina, termino: string) => {
 };
 
 const MaquinasPage = () => {
+    // Crear, editar y desactivar máquinas y modelos: solo admin (el operador y el auditor consultan)
+    const { puedeEditarCatalogos } = usePermisos();
     const [activeTab, setActiveTab] = useState<Tab>('listar');
 
     const [maquinas, setMaquinas] = useState<Maquina[]>([]);
@@ -205,14 +209,17 @@ const MaquinasPage = () => {
     return (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
             <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Máquinas</h1>
+            {!puedeEditarCatalogos && <AvisoSoloLectura acciones="crear, editar o desactivar máquinas" />}
 
             <div className="flex border-b border-gray-100 p-2 gap-4">
                 <button onClick={() => setActiveTab('listar')} className={tabClass(activeTab === 'listar')}>
                     Listar
                 </button>
+                {puedeEditarCatalogos && (
                 <button onClick={abrirNueva} className={tabClass(activeTab === 'formulario')}>
                     {activeTab === 'formulario' && editando ? 'Editar Máquina' : 'Agregar'}
                 </button>
+                )}
             </div>
 
             <div className="p-8 min-h-[400px]">
@@ -334,8 +341,8 @@ const MaquinasPage = () => {
                             <MaquinaList
                                 key={`${filtroId ?? ''}|${filtroTermino}|${mostrarInactivas}`}
                                 maquinas={maquinasVisibles}
-                                onEdit={abrirEdicion}
-                                onToggleActive={(m) => setConfirmar({ abierto: true, maquina: m })}
+                                onEdit={puedeEditarCatalogos ? abrirEdicion : undefined}
+                                onToggleActive={puedeEditarCatalogos ? (m) => setConfirmar({ abierto: true, maquina: m }) : undefined}
                             />
                         )}
                     </div>

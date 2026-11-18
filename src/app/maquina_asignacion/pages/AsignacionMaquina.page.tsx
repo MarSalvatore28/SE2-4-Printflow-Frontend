@@ -12,8 +12,12 @@ import {
     updateInstalacion
 } from '@services/Instalaciones/instalaciones.service';
 import { X } from 'lucide-react';
+import { AvisoSoloLectura } from '@components/auth/AvisoSoloLectura';
+import { usePermisos } from '@hooks/usePermisos';
 
 const InstalacionesPage = () => {
+    // Nueva instalación, editar IP y retirar: solo admin (el operador y el auditor consultan)
+    const { puedeEditarCatalogos } = usePermisos();
     const [activeTab, setActiveTab] = useState<'agregar' | 'listar'>('listar');
 
     const [instalaciones, setInstalaciones] = useState<InstalacionActivaCliente[]>([]);
@@ -296,6 +300,7 @@ const InstalacionesPage = () => {
     return (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
             <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Instalaciones</h1>
+            {!puedeEditarCatalogos && <AvisoSoloLectura acciones="crear, editar o retirar instalaciones" />}
 
             {/* Tabs */}
             <div className="flex border-b border-gray-100 p-2 gap-4">
@@ -308,6 +313,7 @@ const InstalacionesPage = () => {
                 >
                     Listar Instalaciones
                 </button>
+                {puedeEditarCatalogos && (
                 <button
                     onClick={() => {
                         setInstalacionEnEdicion(null);
@@ -320,6 +326,7 @@ const InstalacionesPage = () => {
                 >
                     Nueva Instalación
                 </button>
+                )}
             </div>
 
             {/* Content */}
@@ -402,8 +409,8 @@ const InstalacionesPage = () => {
                         ) : (
                             <InstalacionesList
                                 instalaciones={displayedInstalaciones}
-                                onEdit={handleEditInstalacion}
-                                onRetirar={handleRetirarInstalacion}
+                                onEdit={puedeEditarCatalogos ? handleEditInstalacion : undefined}
+                                onRetirar={puedeEditarCatalogos ? handleRetirarInstalacion : undefined}
                                 loading={loading}
                             />
                         )}

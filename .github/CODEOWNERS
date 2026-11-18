@@ -1,0 +1,13 @@
+# Dueños por módulo: GitHub pide su revisión automáticamente en cada PR.
+# Ver PLAN.md del backend, sección 3.
+
+# Equipo A · Kiara + Marlo
+/.github/                    @Kcmoranj @MarSalvatore28
+/Dockerfile                  @Kcmoranj @MarSalvatore28
+/nginx.conf                  @Kcmoranj @MarSalvatore28
+
+# Equipo B · Gabriela + Roberto (estructura de la web y componentes compartidos)
+/src/components/             @MGabrielaVillon @RoberB1
+/src/context/                @MGabrielaVillon @RoberB1
+/src/services/Auth/          @MGabrielaVillon @RoberB1
+/src/app/Auth/               @MGabrielaVillon @RoberB1

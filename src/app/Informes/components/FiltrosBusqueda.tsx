@@ -157,7 +157,7 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700">Cliente</label>
+                    <label className="block text-sm font-semibold text-gray-700">Cliente <span className="text-red-600">*</span></label>
                     <BuscadorInteligente<Cliente>
                         placeholder="Buscar cliente..."
                         buscarFn={async (term) => {
@@ -182,35 +182,41 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
                             </div>
                         )}
                     />
+                    {!selectedCliente && <p className="text-sm text-red-600">Seleccione un cliente</p>}
                 </div>
 
                 <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700">Mes</label>
+                    <label htmlFor="informe-mes" className="block text-sm font-semibold text-gray-700">Mes <span className="text-red-600">*</span></label>
                     <select
+                        id="informe-mes"
                         value={selectedMes}
                         onChange={(e) => onMesChange(e.target.value)}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg"
+                        className={`w-full px-4 py-2.5 border rounded-lg ${selectedMes ? 'border-gray-300' : 'border-red-500'}`}
                     >
+                        <option value="">Seleccione el mes</option>
                         {meses.map((mes) => (
                             <option key={mes.value} value={mes.value}>
                                 {mes.label}
                             </option>
                         ))}
                     </select>
+                    {!selectedMes && <p className="text-sm text-red-600">Seleccione el mes</p>}
                 </div>
 
                 <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700">Año</label>
+                    <label htmlFor="informe-anio" className="block text-sm font-semibold text-gray-700">Año <span className="text-red-600">*</span></label>
                     <select
+                        id="informe-anio"
                         value={selectedAño}
                         onChange={(e) => onAñoChange(e.target.value)}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg"
+                        className={`w-full px-4 py-2.5 border rounded-lg ${selectedAño ? 'border-gray-300' : 'border-red-500'}`}
                     >
-                        <option value="">Todos</option>
+                        <option value="">Seleccione el año</option>
                         {años.map((año) => (
                             <option key={año.value} value={año.value}>{año.label}</option>
                         ))}
                     </select>
+                    {!selectedAño && <p className="text-sm text-red-600">Seleccione el año</p>}
                 </div>
             </div>
 

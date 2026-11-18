@@ -395,7 +395,7 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
             {formData.contrato_id > 0 && (multipleSelection ? maquinasConIP.length > 0 : formData.maquina_id > 0 && formData.area_id > 0) && (
                 <div className="mb-6 p-4 bg-gradient-to-r from-edit/10 to-edit-hover/5 border border-edit-hover rounded-lg">
                     <p className="text-sm font-semibold text-text mb-3 flex items-center gap-2">
-                        <SummarizeIcon fontSize="small" /> Resumen de la{multipleSelection && maquinasConIP.length > 1 ? 's' : ''} Instalación{multipleSelection && maquinasConIP.length > 1 ? 'es' : ''}
+                        <SummarizeIcon fontSize="small" /> {multipleSelection && maquinasConIP.length > 1 ? 'Resumen de las instalaciones' : 'Resumen de la instalación'}
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                         {multipleSelection ? (
@@ -420,7 +420,7 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
                 onCancel={onCancel}
                 isSubmitting={submitting}
                 isDisabled={!canSubmit}
-                submitLabel={multipleSelection && maquinasConIP.length > 0 ? `Crear ${maquinasConIP.length} Instalación${maquinasConIP.length !== 1 ? 'es' : ''}` : 'Crear Instalación'}
+                submitLabel={multipleSelection && maquinasConIP.length > 0 ? `Crear ${maquinasConIP.length} ${maquinasConIP.length === 1 ? 'instalación' : 'instalaciones'}` : 'Crear instalación'}
                 loadingLabel={creationProgress.total > 0 ? `Creando ${creationProgress.current}/${creationProgress.total}...` : 'Creando instalación...'}
             />
         </div>

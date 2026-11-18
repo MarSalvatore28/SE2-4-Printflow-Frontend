@@ -82,7 +82,7 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                     Asignar Cliente
                 </h3>
                 <div>
-                    <label className="input-label mb-1 block text-sm font-medium text-gray-700">Buscar Cliente existencias (Nombre o RUC)</label>
+                    <label className="input-label mb-1 block text-sm font-medium text-gray-700">Buscar cliente existente (nombre o RUC)</label>
                     <BuscadorInteligente<ClienteParaTabla>
                         key={formData.cliente_id ? `cliente-${formData.cliente_id}` : 'sin-cliente'}
                         placeholder="Escriba para buscar..."

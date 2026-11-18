@@ -82,9 +82,9 @@ export const exportToExcel = (
       const finNueva = (m.actual.total_contador_bn || 0) + (m.actual.total_contador_color || 0);
       ant = inicioNueva;
       act = finNueva;
-      consRow = finNueva - inicioNueva;
-      const consumoSaliente = m.cambio.maquina_saliente?.contadores?.consumo?.global || 0;
-      consReal = consumoSaliente + consRow;
+      // Reemplazo: el backend ya suma el tramo de la saliente y el de la entrante
+      consRow = (m.consumo.total_bn || 0) + (m.consumo.total_color || 0);
+      consReal = consRow;
     } else {
       ant = (m.anterior.total_contador_bn || 0) + (m.anterior.total_contador_color || 0);
       act = (m.actual.total_contador_bn || 0) + (m.actual.total_contador_color || 0);
@@ -310,8 +310,8 @@ export const exportToPDF = (
     if (m.cambio) {
       ant = m.cambio.maquina_entrante?.contadores?.anterior?.global || 0;
       act = (m.actual.total_contador_bn || 0) + (m.actual.total_contador_color || 0);
-      consRow = act - ant;
-      totalConsumoReal += (m.cambio.maquina_saliente?.contadores?.consumo?.global || 0) + consRow;
+      consRow = (m.consumo.total_bn || 0) + (m.consumo.total_color || 0);
+      totalConsumoReal += consRow;
     } else {
       ant = (m.anterior.total_contador_bn || 0) + (m.anterior.total_contador_color || 0);
       act = (m.actual.total_contador_bn || 0) + (m.actual.total_contador_color || 0);
@@ -487,17 +487,9 @@ function calcularConsumosReales(data: MaquinaConsolidada[], todoComoColor: boole
     let mConsumoTotal = 0;
 
     if (maquina.cambio) {
-      const consumoSalienteBN = maquina.cambio.maquina_saliente?.contadores?.consumo?.total_bn || 0;
-      const consumoSalienteColor = maquina.cambio.maquina_saliente?.contadores?.consumo?.total_color || 0;
-
-      const restBN = maquina.info.es_acumulativo !== false ? (maquina.cambio.maquina_entrante?.contadores?.anterior?.impresion_bn || 0) : 0;
-      const restColor = maquina.info.es_acumulativo !== false ? (maquina.cambio.maquina_entrante?.contadores?.anterior?.impresion_color || 0) : 0;
-
-      const consumoEntranteBN = Math.max(0, (maquina.actual.imp_bn || 0) - restBN);
-      const consumoEntranteColor = Math.max(0, (maquina.actual.imp_color || 0) - restColor);
-
-      mConsumoBN = consumoSalienteBN + consumoEntranteBN;
-      mConsumoColor = consumoSalienteColor + consumoEntranteColor;
+      // Reemplazo: el backend ya suma el tramo de la saliente y el de la entrante
+      mConsumoBN = maquina.consumo.total_bn || 0;
+      mConsumoColor = maquina.consumo.total_color || 0;
       mConsumoTotal = mConsumoBN + mConsumoColor;
 
       if (todoComoColor && maquina.info.es_color) {

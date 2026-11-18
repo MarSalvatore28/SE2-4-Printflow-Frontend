@@ -107,6 +107,7 @@ export const ClientList: React.FC<ClientListProps> = ({
       onDelete={onDelete}
       onToggleActive={onToggleActive}
       onRowClick={onRowClick}
+      showActions={Boolean(onEdit || onDelete || onToggleActive)}
       getItemId={(client) => client.id_cliente}
       getItemStatus={(client) => client.activo ?? true}
       emptyMessage="No hay clientes registrados en el sistema."

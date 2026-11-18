@@ -31,6 +31,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             } else {
                 setToken(storedToken);
                 setUser(storedUser);
+                // El admin pudo cambiarle el rol mientras tanto: se trae el rol vigente para el menú.
+                // Si el usuario fue desactivado, validateToken cierra la sesión (401).
+                authService.validateToken()
+                    .then(({ usuario }) => {
+                        const actualizado = { ...storedUser, ...usuario };
+                        authService.saveUser(actualizado);
+                        setUser(actualizado);
+                    })
+                    .catch(() => undefined);
             }
         }
         setIsLoading(false);

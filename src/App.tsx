@@ -11,7 +11,7 @@ import { Layout } from './components/layout/Layout';
 // su etiqueta (por ejemplo "// [B-F1]"). La etiqueta del final se queda.
 // ===========================================================================
 
-// import MaquinasPage from './app/Maquinas/pages/Maquinas.page'; // [A-F1]
+import MaquinasPage from './app/Maquinas/pages/Maquinas.page'; // [A-F1]
 import ClientesPage from './app/Clientes/pages/Clientes.page'; // [B-F1]
 import AreaPage from './app/Area/pages/Area.page'; // [B-F1]
 import AsignacionMaquinaPage from './app/maquina_asignacion/pages/AsignacionMaquina.page'; // [C-F1]
@@ -26,7 +26,7 @@ const ProveedorNotificaciones = ({ children }: { children: ReactNode }) => <>{ch
 // const ProveedorNotificaciones = ({ children }: { children: ReactNode }) => <SocketProvider><NotificationProvider>{children}</NotificationProvider></SocketProvider>; // [A-F2]
 
 const rutas: { path: string; element: ReactNode }[] = [
-  // { path: 'maquinas', element: <MaquinasPage /> }, // [A-F1]
+  { path: 'maquinas', element: <MaquinasPage /> }, // [A-F1]
   { path: 'clientes', element: <ClientesPage /> }, // [B-F1]
   { path: 'area', element: <AreaPage /> }, // [B-F1]
   { path: 'asignaciones', element: <AsignacionMaquinaPage /> }, // [C-F1]

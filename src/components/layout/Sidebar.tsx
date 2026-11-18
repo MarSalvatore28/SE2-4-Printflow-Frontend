@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { modulos } from '@data/modulos.data';
 import { useAuth } from '@context/AuthContext';
+import { usePermisos } from '@hooks/usePermisos';
 // Campana de notificaciones. En la Fase 2 el Equipo A BORRA la linea que termina
 // en "[BORRAR en A-F2]" y quita el "// " de las dos que terminan en "[A-F2]".
 import { NotificationBell } from './NotificationBell'; // [A-F2]
@@ -8,6 +9,9 @@ const Campana = NotificationBell; // [A-F2]
 
 export const Sidebar = () => {
     const { logout, user } = useAuth();
+    const { puedeVer } = usePermisos();
+    // Cada rol ve solo los módulos que puede usar (roles en modulos.data.ts)
+    const modulosVisibles = modulos.filter((item) => puedeVer(item.roles));
     return (
         <aside className="w-64 h-full bg-primary text-white shadow-xl flex flex-col flex-shrink-0 transition-all duration-300">
             <div className="p-6 border-b border-secondary/20 flex items-center justify-between">
@@ -16,7 +20,7 @@ export const Sidebar = () => {
             </div>
 
             <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
-                {modulos.map((item) => (
+                {modulosVisibles.map((item) => (
                     <NavLink
                         key={item.path}
                         to={item.path}

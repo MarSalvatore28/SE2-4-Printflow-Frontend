@@ -16,6 +16,8 @@ export interface Modulo {
   name: string;
   path: string;
   icon: SvgIconComponent;
+  // Roles que ven el módulo en el menú y pueden abrirlo. Sin roles = todos.
+  roles?: string[];
 }
 
 export const modulos: Modulo[] = [

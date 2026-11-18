@@ -3,9 +3,8 @@ import { modulos } from '@data/modulos.data';
 import { useAuth } from '@context/AuthContext';
 // Campana de notificaciones. En la Fase 2 el Equipo A BORRA la linea que termina
 // en "[BORRAR en A-F2]" y quita el "// " de las dos que terminan en "[A-F2]".
-// import { NotificationBell } from './NotificationBell'; // [A-F2]
-const Campana = () => null; // [BORRAR en A-F2]
-// const Campana = NotificationBell; // [A-F2]
+import { NotificationBell } from './NotificationBell'; // [A-F2]
+const Campana = NotificationBell; // [A-F2]
 
 export const Sidebar = () => {
     const { logout, user } = useAuth();

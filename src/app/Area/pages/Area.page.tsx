@@ -1,0 +1,451 @@
+import { useState, useEffect } from 'react';
+import AreaList from '@app/Area/components/AreaList';
+import BusquedaInteligenteAreas from '@app/Area/components/BusquedaInteligenteAreas';
+import ModalConfirmacion from '@components/Shared/ModalConfirmacion';
+import ModalAdvertencia from '@components/Shared/ModalAdvertencia';
+import AreasFormPage from './AreasForm.page';
+import { fetchAllClientes } from '@services/Clientes/clientes.service';
+import { type Client } from '../../Clientes/types';
+
+import {
+    type Area,
+    fetchAllAreas,
+    updateArea,
+    deleteArea,
+    createArea,
+    activarArea
+} from '../types';
+
+const INITIAL_FORM_STATE: Partial<Area> = {
+    nombre: '',
+    descripcion: '',
+    cliente_id: undefined,
+    activo: 1
+};
+
+const AreaPage = () => {
+    const [activeTab, setActiveTab] = useState<'agregar' | 'listar'>('listar');
+    const [allAreas, setAllAreas] = useState<Area[]>([]);
+    const [clientsList, setClientsList] = useState<Client[]>([]);
+
+    const [filterClientId, setFilterClientId] = useState<number | null>(null);
+    const [filterAreaId, setFilterAreaId] = useState<number | null>(null);
+    const [filterTerm, setFilterTerm] = useState<string>('');
+    const [showInactive, setShowInactive] = useState<boolean>(false);
+
+    const [loading, setLoading] = useState<boolean>(false);
+    const [submitting, setSubmitting] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const [editingArea, setEditingArea] = useState<Area | null>(null);
+    const [formData, setFormData] = useState(INITIAL_FORM_STATE);
+    const [formKey, setFormKey] = useState(0);
+
+    const [successModal, setSuccessModal] = useState<{ isOpen: boolean; message: string }>({
+        isOpen: false,
+        message: ''
+    });
+
+    const [warningModal, setWarningModal] = useState<{ isOpen: boolean; message: string }>({
+        isOpen: false,
+        message: ''
+    });
+
+    const fetchAreas = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await fetchAllAreas();
+            setAllAreas(data);
+        } catch (err) {
+            console.error('Error fetching areas:', err);
+            setError('Error al cargar la lista de áreas. Por favor, intente de nuevo.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchAreasAndClients = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const [areasData, clientsData] = await Promise.all([
+                fetchAllAreas(),
+                fetchAllClientes()
+            ]);
+
+            setAllAreas(areasData);
+            setClientsList(clientsData);
+
+        } catch (err) {
+            console.error('Error fetching data:', err);
+            setError('Error al cargar los datos. Por favor, intente de nuevo.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchAreasAndClients();
+    }, []);
+
+    useEffect(() => {
+        if (activeTab === 'listar') {
+            fetchAreas();
+        }
+    }, [activeTab]);
+
+    const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: (name === 'activo' || name === 'cliente_id') ? (value !== '' ? Number(value) : undefined) : value
+        }));
+    };
+
+    const handleSelectCliente = (client: Client) => {
+        setFormData(prev => ({
+            ...prev,
+            cliente_id: client.id_cliente,
+            cliente_nombre: client.nombre
+        }));
+    };
+
+    const handleCloseSuccessModal = () => {
+        setSuccessModal(prev => ({ ...prev, isOpen: false }));
+
+        if (editingArea) {
+            setFormData(INITIAL_FORM_STATE);
+            setFormKey(prev => prev + 1);
+            setActiveTab('listar');
+        } else {
+            setFormData(prev => ({
+                ...INITIAL_FORM_STATE,
+                cliente_id: prev.cliente_id,
+                cliente_nombre: prev.cliente_nombre
+            }));
+        }
+        setEditingArea(null);
+    };
+
+    const handleSave = async () => {
+        if (!formData.nombre || !formData.cliente_id) {
+            setWarningModal({
+                isOpen: true,
+                message: 'El Nombre y el Cliente son campos obligatorios para poder guardar el área.'
+            });
+            return;
+        }
+
+        setSubmitting(true);
+        setError(null);
+
+        try {
+            const payload: any = {
+                nombre: formData.nombre.trim(),
+                descripcion: formData.descripcion?.trim() || null,
+                cliente_id: Number(formData.cliente_id),
+                activo: Number(formData.activo)
+            };
+
+            if (editingArea && editingArea.id_area) {
+                await updateArea(editingArea.id_area, payload);
+            } else {
+                await createArea(payload);
+            }
+
+            setSuccessModal({
+                isOpen: true,
+                message: editingArea ? 'Área actualizada correctamente' : 'Área agregada correctamente'
+            });
+
+        } catch (err: any) {
+            console.error('Error saving area:', err);
+            setError(err.message || 'No se pudo guardar el área');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleCancel = () => {
+        setFormData(INITIAL_FORM_STATE);
+        setFormKey(prev => prev + 1); // Limpia también el estado visual al cancelar
+        setEditingArea(null);
+        setActiveTab('listar');
+    };
+
+    const handleEdit = (area: Area) => {
+        setEditingArea(area);
+        setFormData({
+            nombre: area.nombre,
+            descripcion: area.descripcion || '',
+            cliente_id: area.cliente_id,
+            activo: area.activo
+        });
+        setActiveTab('agregar');
+    };
+
+    const [modalConfig, setModalConfig] = useState<{
+        isOpen: boolean;
+        type: 'delete' | 'activate';
+        area: Area | null;
+    }>({
+        isOpen: false,
+        type: 'delete',
+        area: null
+    });
+
+    const handleToggleActive = async (area: Area) => {
+        const actionType = area.activo === 1 ? 'delete' : 'activate';
+        setModalConfig({
+            isOpen: true,
+            type: actionType,
+            area: area
+        });
+    };
+
+    const handleDelete = async (area: Area) => {
+        setModalConfig({
+            isOpen: true,
+            type: 'delete',
+            area: area
+        });
+    };
+
+    const handleConfirmModal = async () => {
+        const { type, area } = modalConfig;
+
+        if (!area) return;
+
+        try {
+            if (type === 'delete') {
+                await deleteArea(area.id_area);
+            } else {
+                await activarArea(area.id_area);
+            }
+            fetchAreas();
+        } catch (err) {
+            console.error('Error toggling area status:', err);
+            setError('No se pudo cambiar el estado del área.');
+        } finally {
+            handleCloseModal();
+        }
+    };
+
+    const handleCloseModal = () => {
+        setModalConfig({
+            isOpen: false,
+            type: 'delete',
+            area: null
+        });
+    };
+
+    const handleRefresh = () => {
+        setFilterClientId(null);
+        setFilterAreaId(null);
+        setFilterTerm('');
+        fetchAreas();
+    };
+
+    const handleEnterSearch = (termino: string) => {
+        setFilterClientId(null);
+        setFilterAreaId(null);
+        setFilterTerm(termino.toLowerCase().trim());
+    };
+
+    const displayedAreas = allAreas.filter(area => {
+        if (!showInactive && area.activo !== 1) return false;
+
+        if (filterAreaId) {
+            return area.id_area === filterAreaId;
+        }
+
+        if (filterClientId && area.cliente_id !== filterClientId) {
+            return false;
+        }
+
+        if (filterTerm) {
+            const searchWords = filterTerm.toLowerCase().split(' ').filter(word => word.length > 0);
+            return searchWords.every(word =>
+                area.nombre.toLowerCase().includes(word) ||
+                area.cliente_nombre?.toLowerCase().includes(word) ||
+                area.descripcion?.toLowerCase().includes(word)
+            );
+        }
+
+        return true;
+    });
+
+    return (
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
+            <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Áreas</h1>
+
+            {/* Tabs - Iguales a Asignaciones */}
+            <div className="flex border-b border-gray-100 p-2 gap-4">
+                <button
+                    onClick={() => setActiveTab('listar')}
+                    className={`px-6 py-2 rounded-md transition-all ${activeTab === 'listar'
+                        ? 'bg-gray-50 text-gray-900 border border-gray-200 shadow-sm font-medium'
+                        : 'text-gray-500 hover:text-gray-800'
+                        }`}
+                >
+                    Listar
+                </button>
+                <button
+                    onClick={() => {
+                        setEditingArea(null);
+                        setFormData(INITIAL_FORM_STATE);
+                        setActiveTab('agregar');
+                    }}
+                    className={`px-6 py-2 rounded-md transition-all ${activeTab === 'agregar'
+                        ? 'bg-gray-50 text-gray-900 border border-gray-200 shadow-sm font-medium'
+                        : 'text-gray-500 hover:text-gray-800'
+                        }`}
+                >
+                    {editingArea ? 'Editar Área' : 'Agregar'}
+                </button>
+            </div>
+
+            {/* Content con p-8 idéntico a asignaciones */}
+            <div className="p-8 min-h-[400px]">
+                {activeTab === 'agregar' ? (
+                    // ✨ CONTENEDOR TIPO TARJETA IDÉNTICO AL DE INSTALACIONES ✨
+                    <div className="bg-white border border-gray-200 rounded-lg p-6 sm:p-8">
+                        <div className="mb-6">
+                            <h2 className="text-xl font-bold text-gray-800">
+                                {editingArea ? 'Editar Área' : 'Nueva Área'}
+                            </h2>
+                            <p className="text-sm text-gray-500 mt-1">
+                                {editingArea
+                                    ? 'Modifica la información del área seleccionada.'
+                                    : 'Ingresa los datos para registrar una nueva área y vincúlala a un cliente.'}
+                            </p>
+                        </div>
+
+                        <hr className="border-gray-200 mb-8" />
+
+                        <AreasFormPage
+                            key={formKey}
+                            formData={formData}
+                            onChange={handleFormChange}
+                            onSelectCliente={handleSelectCliente}
+                            onSave={handleSave}
+                            onCancel={handleCancel}
+                            clientesDisponibles={clientsList}
+                            isSubmitting={submitting}
+                            isEditing={!!editingArea}
+                        />
+                    </div>
+                ) : (
+                    <div className="flex flex-col gap-6">
+                        {/* Filtros */}
+                        <div className="flex flex-col md:flex-row gap-4 items-end bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <div className="flex-1 w-full">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Buscar Área
+                                </label>
+                                <BusquedaInteligenteAreas
+                                    onSeleccionar={(a) => {
+                                        setFilterAreaId(a.id_area);
+                                        setFilterClientId(null);
+                                        setFilterTerm('');
+                                    }}
+                                    onEnter={handleEnterSearch}
+                                    onSearchClick={handleEnterSearch}
+                                    onClear={() => {
+                                        setFilterAreaId(null);
+                                        setFilterClientId(null);
+                                        setFilterTerm('');
+                                    }}
+                                    onInputChange={() => {
+                                        if (filterAreaId || filterClientId) {
+                                            setFilterAreaId(null);
+                                            setFilterClientId(null);
+                                        }
+                                    }}
+                                    itemsCompletos={allAreas}
+                                />
+                            </div>
+
+                            <div className="flex items-center h-[42px] px-4 bg-white rounded-lg border border-gray-300">
+                                <input
+                                    id="showInactive"
+                                    type="checkbox"
+                                    checked={showInactive}
+                                    onChange={(e) => setShowInactive(e.target.checked)}
+                                    className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2 cursor-pointer"
+                                />
+                                <label htmlFor="showInactive" className="ml-2 text-sm font-medium text-gray-700 cursor-pointer select-none">
+                                    Mostrar Inactivas
+                                </label>
+                            </div>
+
+                            <button
+                                onClick={handleRefresh}
+                                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium h-[42px]"
+                            >
+                                Ver Todos
+                            </button>
+                        </div>
+
+                        {/* Lista */}
+                        {loading ? (
+                            <div className="flex justify-center py-12">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                            </div>
+                        ) : error ? (
+                            <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 italic">
+                                {error}
+                            </div>
+                        ) : (
+                            <AreaList
+                                areas={displayedAreas}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                                onToggleActive={handleToggleActive}
+                            />
+                        )}
+                    </div>
+                )}
+            </div>
+
+            <ModalConfirmacion
+                isOpen={modalConfig.isOpen}
+                onClose={handleCloseModal}
+                onConfirm={handleConfirmModal}
+                type={modalConfig.type}
+                title={
+                    modalConfig.type === 'delete'
+                        ? '¿Desactivar Área?'
+                        : '¿Activar Área?'
+                }
+                message={
+                    modalConfig.type === 'delete'
+                        ? `¿Estás seguro de que deseas desactivar el área "${modalConfig.area?.nombre}"? Podrás reactivarla después si lo necesitas.`
+                        : `¿Deseas activar el área "${modalConfig.area?.nombre}"?`
+                }
+                confirmText={modalConfig.type === 'delete' ? 'Desactivar' : 'Activar'}
+                cancelText="Cancelar"
+            />
+
+            <ModalConfirmacion
+                isOpen={successModal.isOpen}
+                onClose={handleCloseSuccessModal}
+                onConfirm={() => { handleCloseSuccessModal() }}
+                title="Éxito"
+                message={successModal.message}
+                type="activate"
+                confirmText="Aceptar"
+                showCancel={false}
+            />
+
+            <ModalAdvertencia
+                isOpen={warningModal.isOpen}
+                onClose={() => setWarningModal({ isOpen: false, message: '' })}
+                message={warningModal.message}
+            />
+        </div>
+    );
+};
+
+export default AreaPage;

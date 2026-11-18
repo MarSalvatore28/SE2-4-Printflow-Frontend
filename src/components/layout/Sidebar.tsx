@@ -9,7 +9,7 @@ const Campana = NotificationBell; // [A-F2]
 
 export const Sidebar = () => {
     const { logout, user } = useAuth();
-    const { puedeVer } = usePermisos();
+    const { puedeVer, etiquetaRol } = usePermisos();
     // Cada rol ve solo los módulos que puede usar (roles en modulos.data.ts)
     const modulosVisibles = modulos.filter((item) => puedeVer(item.roles));
     return (
@@ -40,7 +40,10 @@ export const Sidebar = () => {
             <div className="p-4 border-t border-secondary/20">
                 {user && (
                     <div className="mb-4 px-2">
-                        <p className="text-sm font-semibold truncate">{user.nombre} {user.apellido}</p>
+                        <div className="flex items-center gap-2 min-w-0">
+                            <p className="text-sm font-semibold truncate">{user.nombre} {user.apellido}</p>
+                            <span data-testid="rol-usuario" className="flex-shrink-0 px-2 py-0.5 rounded-full bg-white/15 text-[11px] font-semibold uppercase tracking-wide">{etiquetaRol}</span>
+                        </div>
                         <p className="text-xs text-accent truncate">{user.email}</p>
                     </div>
                 )}

@@ -14,6 +14,8 @@ interface InformeCargado {
     resumen: ResumenConsolidado;
     transacciones: DetalleTransaccion[];
     resumenDetallado: ResumenDetallado;
+    /** Fecha y hora en que se recibió el informe. */
+    generadoEn: Date;
 }
 
 const mesActual = () => String(new Date().getMonth() + 1).padStart(2, '0');
@@ -87,7 +89,8 @@ export const useInformes = () => {
                     reportes: consolidado.detalles,
                     resumen: consolidado.resumen,
                     transacciones: detallado.detalles,
-                    resumenDetallado: detallado.resumen
+                    resumenDetallado: detallado.resumen,
+                    generadoEn: new Date()
                 });
             })
             .catch((err) => {
@@ -107,6 +110,7 @@ export const useInformes = () => {
     const resumen = vigente?.resumen ?? null;
     const transacciones = vigente?.transacciones ?? [];
     const resumenDetallado = vigente?.resumenDetallado ?? null;
+    const generadoEn = vigente?.generadoEn ?? null;
     const loading = Boolean(clave) && !vigente && !errorVigente;
     const error = errorVigente ?? errorMaestros;
     const vistaActual = vigente ? 'consolidado' : 'lista';
@@ -144,6 +148,7 @@ export const useInformes = () => {
         resumen,
         transacciones,
         resumenDetallado,
+        generadoEn,
         loading,
         error,
         vistaActual,

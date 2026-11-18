@@ -3,6 +3,7 @@ import { useInformes } from '@hooks/useInformes';
 import { TablaDetalleConsolidado } from '@app/Clientes/components/TablaDetalleConsolidado';
 import { TablaDetalleUsuario } from '@app/Informes/components/TablaDetalleUsuario';
 import { AlertaHistorialCliente } from '@app/Informes/components/Alertahistorialcliente';
+import { ResumenConsolidadoCard } from '@app/Informes/components/ResumenConsolidadoCard';
 import { exportToExcel, exportToPDF } from '@utils/exportUtils';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
@@ -31,6 +32,7 @@ const InformesPage = () => {
         handleLimpiarFiltros,
         filtrosCompletos,
         transacciones,
+        generadoEn,
     } = useInformes();
 
     const clienteActual = clientes.find(c => c.id_cliente === selectedCliente);
@@ -197,6 +199,14 @@ const InformesPage = () => {
                             </div>
                         </div>
                     </div>
+
+                    {generadoEn && (
+                        <ResumenConsolidadoCard
+                            periodoLabel={`${meses.find(m => m.value === selectedMes)?.label ?? selectedMes} ${selectedAño}`}
+                            resumen={resumen}
+                            generadoEn={generadoEn}
+                        />
+                    )}
 
                     <div className='mb-4 text-lg font-semibold text-gray-900'>
                         <span className="block h-6">Resumen del consolidado:</span>

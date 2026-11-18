@@ -17,7 +17,7 @@ import AreaPage from './app/Area/pages/Area.page'; // [B-F1]
 import AsignacionMaquinaPage from './app/maquina_asignacion/pages/AsignacionMaquina.page'; // [C-F1]
 import { SocketProvider } from './context/SocketContext'; // [A-F2]
 import { NotificationProvider } from './context/NotificationContext'; // [A-F2]
-// import NotificacionesPage from './app/Notificaciones/pages/NotificacionesPage'; // [B-F2]
+import NotificacionesPage from './app/Notificaciones/pages/NotificacionesPage'; // [B-F2]
 import InformesPage from './app/Informes/pages/Informes.page'; // [B-F3]
 
 // Notificaciones en tiempo real. En la Fase 2 el Equipo A BORRA la linea que
@@ -29,7 +29,7 @@ const rutas: { path: string; element: ReactNode }[] = [
   { path: 'clientes', element: <ClientesPage /> }, // [B-F1]
   { path: 'area', element: <AreaPage /> }, // [B-F1]
   { path: 'asignaciones', element: <AsignacionMaquinaPage /> }, // [C-F1]
-  // { path: 'notificaciones', element: <NotificacionesPage /> }, // [B-F2]
+  { path: 'notificaciones', element: <NotificacionesPage /> }, // [B-F2]
   { path: 'informes', element: <InformesPage /> }, // [B-F3]
 ];
 

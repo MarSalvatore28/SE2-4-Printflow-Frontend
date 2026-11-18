@@ -16,7 +16,7 @@ export const login = async (credentials: LoginCredentials): Promise<AuthResponse
         let data;
         try {
             data = await response.json();
-        } catch (e) {
+        } catch {
             if (!response.ok) {
                 throw new Error(`${response.status} ${response.statusText}`);
             }

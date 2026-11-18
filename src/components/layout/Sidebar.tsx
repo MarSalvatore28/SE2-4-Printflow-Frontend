@@ -45,7 +45,7 @@ export const Sidebar = () => {
                     onClick={logout}
                     className="flex items-center gap-3 px-4 py-3 w-full rounded-lg hover:bg-primary-hover transition-colors text-accent"
                 >
-                    <span>Cerrar Sesión</span>
+                    <span>Cerrar sesión</span>
                 </button>
             </div>
         </aside>

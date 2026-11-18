@@ -5,7 +5,8 @@ export interface Role {
 }
 
 export interface User {
-    id_usuario: number;
+    id: number;            // así lo devuelve el login del backend
+    id_usuario?: number;   // lo usan módulos heredados
     nombre: string;
     apellido: string | null;
     email: string;

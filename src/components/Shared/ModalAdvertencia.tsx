@@ -12,7 +12,7 @@ interface ModalAdvertenciaProps {
 export default function ModalAdvertencia({
     isOpen,
     onClose,
-    title = 'Datos Incompletos',
+    title = 'Datos incompletos',
     message,
     buttonText = 'Entendido'
 }: ModalAdvertenciaProps) {

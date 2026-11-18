@@ -55,17 +55,9 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
 
             actTotal = maquina.actual.total_servicio || 0;
 
-            const consumoSalienteBN = maquina.cambio.maquina_saliente.contadores.consumo.total_bn || 0;
-            const consumoSalienteColor = maquina.cambio.maquina_saliente.contadores.consumo.total_color || 0;
-
-            const restBN = maquina.info.es_acumulativo !== false ? (maquina.cambio.maquina_entrante.contadores.anterior.impresion_bn || 0) : 0;
-            const restColor = maquina.info.es_acumulativo !== false ? (maquina.cambio.maquina_entrante.contadores.anterior.impresion_color || 0) : 0;
-
-            const consumoEntranteBN = Math.max(0, (maquina.actual.imp_bn || 0) - restBN);
-            const consumoEntranteColor = Math.max(0, (maquina.actual.imp_color || 0) - restColor);
-
-            consumoBN = consumoSalienteBN + consumoEntranteBN;
-            consumoColor = consumoSalienteColor + consumoEntranteColor;
+            // Reemplazo: el backend ya suma el tramo de la saliente (hasta el daño) y el de la entrante
+            consumoBN = maquina.consumo.total_bn || 0;
+            consumoColor = maquina.consumo.total_color || 0;
 
             if (todoComoColor && maquina.info.es_color) {
                 consumoColor = consumoBN + consumoColor;
@@ -178,9 +170,8 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
                                 if (maquina.cambio) {
                                     filaAnt = maquina.cambio.maquina_entrante.contadores.anterior.global || 0;
                                     filaAct = (maquina.actual.total_contador_bn || 0) + (maquina.actual.total_contador_color || 0);
-                                    
-                                    const restaAnterior = maquina.info.es_acumulativo !== false ? filaAnt : 0;
-                                    filaConsumo = filaAct - restaAnterior;
+                                    // Consumo del puesto en el mes: saliente hasta el daño + entrante desde su instalación
+                                    filaConsumo = (maquina.consumo.total_bn || 0) + (maquina.consumo.total_color || 0);
                                 } else {
                                     filaAnt = ((maquina.anterior.total_contador_bn || 0) + (maquina.anterior.total_contador_color || 0)) || maquina.anterior.total_servicio || 0;
                                     filaAct = ((maquina.actual.total_contador_bn || 0) + (maquina.actual.total_contador_color || 0)) || maquina.actual.total_servicio || 0;

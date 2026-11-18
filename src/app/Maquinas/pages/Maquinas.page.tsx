@@ -6,6 +6,7 @@ import { AvisoSoloLectura } from '@components/auth/AvisoSoloLectura';
 import { usePermisos } from '@hooks/usePermisos';
 import MaquinaList from '@app/Maquinas/components/MaquinaList';
 import MaquinaForm from '@app/Maquinas/components/MaquinaForm';
+import ReemplazosSeccion from '@app/Maquinas/components/ReemplazosSeccion';
 import {
     fetchAllMaquinas,
     searchMaquinas,
@@ -25,7 +26,7 @@ import type {
     FormatoImpresion
 } from '@models/Maquina/maquina.types';
 
-type Tab = 'listar' | 'formulario';
+type Tab = 'listar' | 'formulario' | 'reemplazos';
 
 const mensajeDe = (err: unknown, porDefecto: string) =>
     err instanceof Error && err.message ? err.message : porDefecto;
@@ -220,10 +221,15 @@ const MaquinasPage = () => {
                     {activeTab === 'formulario' && editando ? 'Editar Máquina' : 'Agregar'}
                 </button>
                 )}
+                <button onClick={() => setActiveTab('reemplazos')} className={tabClass(activeTab === 'reemplazos')}>
+                    Reemplazos
+                </button>
             </div>
 
             <div className="p-8 min-h-[400px]">
-                {activeTab === 'formulario' ? (
+                {activeTab === 'reemplazos' ? (
+                    <ReemplazosSeccion puedeRegistrar={puedeEditarCatalogos} onRegistrado={recargarMaquinas} />
+                ) : activeTab === 'formulario' ? (
                     <div className="bg-white border border-gray-200 rounded-lg p-6 sm:p-8">
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-800">

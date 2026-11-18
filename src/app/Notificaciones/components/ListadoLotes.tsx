@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AlertCircle, X } from 'lucide-react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DataTable from '@components/Shared/DataTable';
@@ -71,6 +71,12 @@ export const ListadoLotes = ({ recarga, onVerDetalle }: ListadoLotesProps) => {
     void cargar();
   }, [cargar, recarga]);
 
+  // De la recepción más reciente a la más antigua (la API ya ordena así; se asegura aquí)
+  const lotesOrdenados = useMemo(
+    () => [...lotes].sort((a, b) => Date.parse(b.fecha_carga) - Date.parse(a.fecha_carga) || b.id_lote - a.id_lote),
+    [lotes]
+  );
+
   const limpiarFiltros = () => {
     setEstado('');
     setCliente(null);
@@ -115,7 +121,7 @@ export const ListadoLotes = ({ recarga, onVerDetalle }: ListadoLotesProps) => {
     },
     {
       key: 'fecha_recepcion',
-      label: 'Fecha de recepción',
+      label: 'Fecha de recepción ↓',
       align: 'center' as const,
       render: (l: Lote) => <Fecha valor={l.fecha_carga} />,
     },
@@ -214,7 +220,7 @@ export const ListadoLotes = ({ recarga, onVerDetalle }: ListadoLotesProps) => {
           <span className={rangoInvalido ? 'text-red-600 font-medium' : 'text-gray-500'}>
             {rangoInvalido
               ? 'La fecha «desde» no puede ser posterior a la fecha «hasta».'
-              : `${lotes.length} lote(s)${hayFiltros ? ' con los filtros aplicados' : ''}`}
+              : `${lotes.length} lote(s)${hayFiltros ? ' con los filtros aplicados' : ''} · del más reciente al más antiguo`}
           </span>
           {hayFiltros && (
             <button onClick={limpiarFiltros} className="text-gray-500 hover:text-red-600 flex items-center gap-1">
@@ -237,7 +243,7 @@ export const ListadoLotes = ({ recarga, onVerDetalle }: ListadoLotesProps) => {
         <DataTable<Lote>
           title="Lotes recibidos"
           columns={columnas}
-          data={lotes}
+          data={lotesOrdenados}
           getItemId={(l) => l.id_lote}
           emptyMessage={hayFiltros ? 'Ningún lote cumple los filtros.' : 'No hay lotes recibidos.'}
           rowsPerPage={10}

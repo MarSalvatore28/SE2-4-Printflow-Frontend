@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import { AlertTriangle, CheckCircle, Loader2, X, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, ClipboardPen, Loader2, RotateCcw, X, XCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { MAX_INTENTOS_REPROCESO, reprocesarReporte } from '@services/Notificaciones/reproceso.service';
 import {
   ErrorAprobacion,
   type AlertaLote,
@@ -71,6 +73,9 @@ export const DetalleLoteModal = ({ loteId, onClose, onFechaCorteChange, onLoteAc
   const [procesando, setProcesando] = useState(false);
   const [erroresAprobacion, setErroresAprobacion] = useState<string[]>([]);
   const [aviso, setAviso] = useState<{ tipo: 'ok' | 'error'; texto: string } | null>(null);
+  // S3-05: reporte en ERROR que se está reprocesando
+  const [reprocesandoId, setReprocesandoId] = useState<number | null>(null);
+  const navigate = useNavigate();
 
   // Última versión de los callbacks sin volver a cargar el lote cuando cambian
   const callbacks = useRef({ onFechaCorteChange, onLoteActualizado });
@@ -166,6 +171,25 @@ export const DetalleLoteModal = ({ loteId, onClose, onFechaCorteChange, onLoteAc
       setAviso({ tipo: 'error', texto: err instanceof Error ? err.message : 'No se pudo rechazar el lote.' });
     } finally {
       setProcesando(false);
+    }
+  };
+
+  // S3-05: vuelve a validar un reporte en ERROR y refresca la validación del lote
+  const reprocesar = async (reporte: ReporteStaging) => {
+    setReprocesandoId(reporte.id_staging_consolidado);
+    setProcesando(true);
+    setAviso(null);
+    setErroresAprobacion([]);
+    try {
+      const { message, data } = await reprocesarReporte(reporte.id_staging_consolidado);
+      const texto = data.aviso ? `${message}. ${data.aviso}` : message;
+      setAviso({ tipo: data.corregido && !data.aviso ? 'ok' : 'error', texto });
+    } catch (err) {
+      setAviso({ tipo: 'error', texto: err instanceof Error ? err.message : 'No se pudo reprocesar el reporte.' });
+    } finally {
+      setProcesando(false);
+      setReprocesandoId(null);
+      await despuesDeLaAccion();
     }
   };
 
@@ -320,6 +344,40 @@ export const DetalleLoteModal = ({ loteId, onClose, onFechaCorteChange, onLoteAc
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-300">
                                   <CheckCircle size={12} /> {r.estado_maquina || 'Lista'}
                                 </span>
+                              )}
+                              {/* S3-05: reprocesar (admin y operador); al tercer fallo, descartar o lectura manual */}
+                              {r.procesar_lectura === false && puedeAprobarLotes && (
+                                (r.intentos_reproceso ?? 0) < MAX_INTENTOS_REPROCESO ? (
+                                  <button
+                                    onClick={() => reprocesar(r)}
+                                    disabled={procesando}
+                                    className="mt-1 flex items-center gap-1 whitespace-nowrap px-2 py-0.5 rounded-md border border-primary/40 text-xs font-medium text-primary bg-white hover:bg-primary/5 disabled:opacity-60"
+                                    data-testid="boton-reprocesar"
+                                  >
+                                    {reprocesandoId === r.id_staging_consolidado
+                                      ? <Loader2 size={12} className="animate-spin" />
+                                      : <RotateCcw size={12} />}
+                                    Reprocesar ({(r.intentos_reproceso ?? 0) + 1} de {MAX_INTENTOS_REPROCESO})
+                                  </button>
+                                ) : (
+                                  <div className="mt-1 flex flex-wrap gap-1" data-testid="acciones-sin-intentos">
+                                    <button
+                                      onClick={() => { setAviso(null); setAccion('rechazar'); }}
+                                      disabled={procesando}
+                                      title="Rechaza el lote: sus reportes se eliminan de staging"
+                                      className="flex items-center gap-1 whitespace-nowrap px-2 py-0.5 rounded-md border border-red-300 text-xs font-medium text-red-700 bg-white hover:bg-red-50"
+                                    >
+                                      <XCircle size={12} /> Descartar
+                                    </button>
+                                    <button
+                                      onClick={() => navigate(`/lecturas?serie=${encodeURIComponent(r.serie_maquina || '')}`)}
+                                      disabled={procesando}
+                                      className="flex items-center gap-1 whitespace-nowrap px-2 py-0.5 rounded-md border border-gray-300 text-xs font-medium text-gray-700 bg-white hover:bg-gray-50"
+                                    >
+                                      <ClipboardPen size={12} /> Lectura manual
+                                    </button>
+                                  </div>
+                                )
                               )}
                             </td>
                           </tr>

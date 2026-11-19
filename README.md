@@ -60,7 +60,7 @@ Se incorporan por fases, según el plan del proyecto:
 
 - [Git](https://git-scm.com/)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/), para levantar el sistema completo
-- [Node.js 22](https://nodejs.org/), para el desarrollo local
+- [Node.js 22.22 o más reciente](https://nodejs.org/), para el desarrollo local (las pruebas con Vitest usan jsdom, que no corre en versiones anteriores de Node 22)
 
 ## Inicio rápido con Docker
 
@@ -105,6 +105,7 @@ Las variables `VITE_*` se incluyen en el código compilado: **nunca** deben cont
 | `npm run build` | Verificación de tipos y compilación para producción |
 | `npm run preview` | Sirve localmente la compilación de producción |
 | `npm run lint` | Análisis estático con ESLint |
+| `npm test` | Pruebas con Vitest (también corren en el CI) |
 
 ## Estructura del proyecto
 

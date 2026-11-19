@@ -20,7 +20,7 @@ export const AreaDetailsFields: React.FC<AreaDetailsFieldsProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
             <div className="md:col-span-2 bg-accent/10 p-4 rounded-lg border border-accent/30 mb-2">
                 <label className="input-label !text-primary flex items-center gap-2 mb-2">
-                    Vincular a Cliente
+                    Vincular a cliente
                 </label>
                 <div className="flex flex-col gap-2">
                     <BusquedaInteligenteClientes
@@ -35,7 +35,7 @@ export const AreaDetailsFields: React.FC<AreaDetailsFieldsProps> = ({
             </div>
 
             <div className="input-container md:col-span-1">
-                <label className="input-label">Nombre del Área *</label>
+                <label className="input-label">Nombre del área *</label>
                 <div className="input-wrapper">
                     <input
                         type="text"
@@ -62,7 +62,7 @@ export const AreaDetailsFields: React.FC<AreaDetailsFieldsProps> = ({
                                 ...e.target,
                                 name: 'activo',
                                 value: parseInt(e.target.value)
-                            } as any
+                            } as unknown as EventTarget & HTMLSelectElement
                         })}
                     >
                         <option value="1">Activa</option>

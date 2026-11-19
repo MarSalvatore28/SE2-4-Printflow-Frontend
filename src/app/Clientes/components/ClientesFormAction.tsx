@@ -37,7 +37,7 @@ export const ClientesFormAction: React.FC<ClientesFormActionProps> = ({
                         Guardando...
                     </>
                 ) : (
-                    saveLabel || (isEditing ? 'Actualizar Cliente' : 'Guardar Cliente')
+                    saveLabel || (isEditing ? 'Actualizar cliente' : 'Guardar cliente')
                 )}
             </button>
         </div>

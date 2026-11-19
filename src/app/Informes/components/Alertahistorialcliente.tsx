@@ -72,7 +72,7 @@ export const AlertaHistorialCliente: React.FC<AlertaHistorialClienteProps> = ({
         
         if (historial.cambio_razon_social) {
             cambios.push({
-                campo: 'Razón Social',
+                campo: 'Razón social',
                 anterior: historial.razon_social_anterior || 'Sin especificar',
                 actual: historial.razon_social_actual || 'Sin especificar'
             });

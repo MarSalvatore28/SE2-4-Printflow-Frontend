@@ -56,8 +56,9 @@ const MaquinaTabla: React.FC<MaquinaTablaProps> = ({ maquina, transacciones, fec
         if (!isA_Otro && isB_Otro) return -1;
         if (isA_Otro && isB_Otro) return 0;
 
-        let valA: any = null;
-        let valB: any = null;
+        // Sin columna conocida, los dos quedan en '' y el orden no cambia
+        let valA: string | number = '';
+        let valB: string | number = '';
 
         switch (sortConfig.key) {
             case 'usuario.id':
@@ -168,7 +169,7 @@ const MaquinaTabla: React.FC<MaquinaTablaProps> = ({ maquina, transacciones, fec
                             </th>
                             <th className="px-4 py-3 text-right cursor-pointer hover:bg-gray-200" onClick={() => onSort('contadores.copia_color')}>
                                 <div className="flex items-center justify-end gap-1">
-                                    Copia Color
+                                    Copia color
                                     <span className={`transition-opacity ${sortConfig.key === 'contadores.copia_color' ? 'opacity-100' : 'opacity-0'}`}>
                                         {sortConfig.key === 'contadores.copia_color' && sortConfig.direction === 'desc' ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
                                     </span>
@@ -176,7 +177,7 @@ const MaquinaTabla: React.FC<MaquinaTablaProps> = ({ maquina, transacciones, fec
                             </th>
                             <th className="px-4 py-3 text-right cursor-pointer hover:bg-gray-200" onClick={() => onSort('contadores.print_bn')}>
                                 <div className="flex items-center justify-end gap-1">
-                                    IMPRIMIR B/N
+                                    Imprimir B/N
                                     <span className={`transition-opacity ${sortConfig.key === 'contadores.print_bn' ? 'opacity-100' : 'opacity-0'}`}>
                                         {sortConfig.key === 'contadores.print_bn' && sortConfig.direction === 'desc' ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
                                     </span>
@@ -184,7 +185,7 @@ const MaquinaTabla: React.FC<MaquinaTablaProps> = ({ maquina, transacciones, fec
                             </th>
                             <th className="px-4 py-3 text-right cursor-pointer hover:bg-gray-200" onClick={() => onSort('contadores.print_color')}>
                                 <div className="flex items-center justify-end gap-1">
-                                    IMPRIMIR COLOR
+                                    Imprimir color
                                     <span className={`transition-opacity ${sortConfig.key === 'contadores.print_color' ? 'opacity-100' : 'opacity-0'}`}>
                                         {sortConfig.key === 'contadores.print_color' && sortConfig.direction === 'desc' ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
                                     </span>

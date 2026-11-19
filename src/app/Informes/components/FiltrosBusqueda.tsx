@@ -141,7 +141,7 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
             <div className="flex items-center justify-between mb-5">
                 <h2 className="text-xl font-bold text-gray-800 flex items-center">
                     <FilterAltIcon className="mr-2 text-primary" />
-                    Filtros de Búsqueda
+                    Filtros de búsqueda
                 </h2>
                 <div className="flex items-center gap-3">
                     {hayFiltrosActivos && (
@@ -294,7 +294,7 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                    Limpiar Filtros
+                    Limpiar filtros
                 </button>
 
                 {!autoLoad && onAplicarFiltros && (
@@ -313,7 +313,7 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
                         disabled={!consolidadoListo}
                         className="inline-flex items-center px-5 py-2.5 bg-orange-600 text-white font-semibold rounded-lg hover:bg-orange-700 disabled:bg-gray-400"
                     >
-                        Generar Consolidado
+                        Generar consolidado
                     </button>
                 )}
 

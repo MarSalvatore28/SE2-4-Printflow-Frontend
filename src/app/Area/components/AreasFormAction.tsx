@@ -35,7 +35,7 @@ export const AreasFormAction: React.FC<AreasFormActionProps> = ({
                         Guardando...
                     </>
                 ) : (
-                    isEditing ? 'Actualizar Área' : 'Guardar Área'
+                    isEditing ? 'Actualizar área' : 'Guardar área'
                 )}
             </button>
         </div>

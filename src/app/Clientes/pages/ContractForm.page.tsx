@@ -35,7 +35,7 @@ export const ContractFormPage: React.FC<ContractFormPageProps> = ({
                 onCancel={onCancel}
                 isSubmitting={isSubmitting}
                 isEditing={isEditing}
-                saveLabel={isEditing ? 'Actualizar Contrato' : 'Asignar Contrato'}
+                saveLabel={isEditing ? 'Actualizar contrato' : 'Asignar contrato'}
             />
         </div>
     );

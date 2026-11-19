@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { type ClienteFormData, type ClienteParaTabla } from '@models/Cliente/cliente.types';
 import { BuscadorInteligente } from '@components/Shared/BuscadorInteligente';
 import HomeRepairServiceIcon from '@mui/icons-material/HomeRepairService';
@@ -14,20 +14,13 @@ interface ContractDetailsFieldsProps {
 }
 
 export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ formData, onChange, clients = [] }) => {
-    const [searchTerm, setSearchTerm] = useState('');
 
     const standardInputClass = "w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed";
 
-    useEffect(() => {
-        if (formData.cliente_id && clients.length > 0) {
-            const selected = clients.find(c => c.id_cliente === Number(formData.cliente_id));
-            if (selected) {
-                setSearchTerm(selected.nombre);
-            }
-        } else {
-            setSearchTerm('');
-        }
-    }, [formData.cliente_id, clients]);
+    // Nombre del cliente elegido: sale del formulario, sin un estado aparte
+    const searchTerm = formData.cliente_id
+        ? clients.find(c => c.id_cliente === Number(formData.cliente_id))?.nombre ?? ''
+        : '';
 
     const handleClientSelect = (client: ClienteParaTabla) => {
         onChange({
@@ -35,8 +28,7 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                 name: 'cliente_id',
                 value: client.id_cliente
             }
-        } as any);
-        setSearchTerm(client.nombre);
+        } as unknown as React.ChangeEvent<HTMLInputElement>);
     };
 
     const buscarClientes = async (term: string) => {
@@ -79,7 +71,7 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
             <div>
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                     <SupervisorAccountIcon className="text-primary" fontSize="small" />
-                    Asignar Cliente
+                    Asignar cliente
                 </h3>
                 <div>
                     <label className="input-label mb-1 block text-sm font-medium text-gray-700">Buscar cliente existente (nombre o RUC)</label>
@@ -110,11 +102,11 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                     <svg className="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
                     </svg>
-                    Vigencia del Contrato
+                    Vigencia del contrato
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="input-container">
-                        <label className="input-label block text-sm font-medium text-gray-700 mb-1">Fecha Inicio</label>
+                        <label className="input-label block text-sm font-medium text-gray-700 mb-1">Fecha de inicio</label>
                         <input
                             type="date"
                             name="fecha_inicio"
@@ -124,7 +116,7 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                         />
                     </div>
                     <div className="input-container">
-                        <label className="input-label block text-sm font-medium text-gray-700 mb-1">Fecha Fin (Opcional)</label>
+                        <label className="input-label block text-sm font-medium text-gray-700 mb-1">Fecha de fin (opcional)</label>
                         <input
                             type="date"
                             name="fecha_fin"
@@ -141,35 +133,35 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
             <div>
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                     <HomeRepairServiceIcon className="text-primary" fontSize="small" />
-                    Servicios y Configuración
+                    Servicios y configuración
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="input-container">
-                        <label className="input-label font-bold text-xs mb-1 block text-gray-600">¿Tiene Renta de Equipos?</label>
+                        <label className="input-label font-bold text-xs mb-1 block text-gray-600">¿Tiene renta de equipos?</label>
                         <select
                             name="tiene_renta"
                             className={standardInputClass}
                             value={formData.tiene_renta ? 'true' : 'false'}
-                            onChange={(e) => onChange({ ...e, target: { ...e.target, name: 'tiene_renta', value: e.target.value === 'true' } as any })}
+                            onChange={(e) => onChange({ ...e, target: { ...e.target, name: 'tiene_renta', value: e.target.value === 'true' } as unknown as EventTarget & HTMLSelectElement })}
                         >
-                            <option value="false">No (Propia)</option>
-                            <option value="true">Sí (En Renta)</option>
+                            <option value="false">No (propia)</option>
+                            <option value="true">Sí (en renta)</option>
                         </select>
                     </div>
                     <div className="input-container">
-                        <label className="input-label font-bold text-xs mb-1 block text-gray-600">¿Software de Control?</label>
+                        <label className="input-label font-bold text-xs mb-1 block text-gray-600">¿Software de control?</label>
                         <select
                             name="tiene_software_control"
                             className={standardInputClass}
                             value={formData.tiene_software_control ? 'true' : 'false'}
-                            onChange={(e) => onChange({ ...e, target: { ...e.target, name: 'tiene_software_control', value: e.target.value === 'true' } as any })}
+                            onChange={(e) => onChange({ ...e, target: { ...e.target, name: 'tiene_software_control', value: e.target.value === 'true' } as unknown as EventTarget & HTMLSelectElement })}
                         >
                             <option value="false">No</option>
-                            <option value="true">Sí (Instalado)</option>
+                            <option value="true">Sí (instalado)</option>
                         </select>
                     </div>
                     <div className="input-container">
-                        <label className="input-label font-bold text-xs mb-1 block text-gray-600">Facturación de Impresora</label>
+                        <label className="input-label font-bold text-xs mb-1 block text-gray-600">Facturación de impresora</label>
                         <select
                             name="printer_bill"
                             className={standardInputClass}
@@ -189,7 +181,7 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                 <div className="space-y-4">
                     <h4 className="text-sm font-bold text-gray-700 uppercase flex items-center gap-2 tracking-wide">
                         <CandlestickChartIcon className="text-primary" fontSize="small" />
-                        Cantidades Incluidas
+                        Cantidades incluidas
                     </h4>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="group">
@@ -205,7 +197,7 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                             />
                         </div>
                         <div className="group">
-                            <label className="block text-xs font-semibold text-gray-600 mb-1.5 ml-1">Impresión Color</label>
+                            <label className="block text-xs font-semibold text-gray-600 mb-1.5 ml-1">Impresión color</label>
                             <input
                                 type="text"
                                 name="impresiones_color_incluidas"
@@ -241,7 +233,7 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                             </div>
                         </div>
                         <div className="group">
-                            <label className="block text-xs font-semibold text-gray-600 mb-1.5 ml-1">Impresión Color</label>
+                            <label className="block text-xs font-semibold text-gray-600 mb-1.5 ml-1">Impresión color</label>
                             <div className="relative">
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">$</span>
                                 <input
@@ -265,7 +257,7 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                 <div className="space-y-4">
                     <h4 className="text-sm font-bold text-gray-700 uppercase flex items-center gap-2 tracking-wide">
                         <WarningIcon className="text-primary" fontSize="small" />
-                        Costo por Excedente
+                        Costo por excedente
                     </h4>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="group">
@@ -284,7 +276,7 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                             </div>
                         </div>
                         <div className="group">
-                            <label className="block text-xs font-semibold text-gray-600 mb-1.5 ml-1">Impresión Color</label>
+                            <label className="block text-xs font-semibold text-gray-600 mb-1.5 ml-1">Impresión color</label>
                             <div className="relative">
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">$</span>
                                 <input

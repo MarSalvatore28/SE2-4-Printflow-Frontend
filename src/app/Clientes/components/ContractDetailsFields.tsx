@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { type ClienteFormData, type ClienteParaTabla } from '@models/Cliente/cliente.types';
 import { BuscadorInteligente } from '@components/Shared/BuscadorInteligente';
 import HomeRepairServiceIcon from '@mui/icons-material/HomeRepairService';
@@ -14,20 +14,13 @@ interface ContractDetailsFieldsProps {
 }
 
 export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ formData, onChange, clients = [] }) => {
-    const [searchTerm, setSearchTerm] = useState('');
 
     const standardInputClass = "w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed";
 
-    useEffect(() => {
-        if (formData.cliente_id && clients.length > 0) {
-            const selected = clients.find(c => c.id_cliente === Number(formData.cliente_id));
-            if (selected) {
-                setSearchTerm(selected.nombre);
-            }
-        } else {
-            setSearchTerm('');
-        }
-    }, [formData.cliente_id, clients]);
+    // Nombre del cliente elegido: sale del formulario, sin un estado aparte
+    const searchTerm = formData.cliente_id
+        ? clients.find(c => c.id_cliente === Number(formData.cliente_id))?.nombre ?? ''
+        : '';
 
     const handleClientSelect = (client: ClienteParaTabla) => {
         onChange({
@@ -35,8 +28,7 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                 name: 'cliente_id',
                 value: client.id_cliente
             }
-        } as any);
-        setSearchTerm(client.nombre);
+        } as unknown as React.ChangeEvent<HTMLInputElement>);
     };
 
     const buscarClientes = async (term: string) => {
@@ -150,7 +142,7 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                             name="tiene_renta"
                             className={standardInputClass}
                             value={formData.tiene_renta ? 'true' : 'false'}
-                            onChange={(e) => onChange({ ...e, target: { ...e.target, name: 'tiene_renta', value: e.target.value === 'true' } as any })}
+                            onChange={(e) => onChange({ ...e, target: { ...e.target, name: 'tiene_renta', value: e.target.value === 'true' } as unknown as EventTarget & HTMLSelectElement })}
                         >
                             <option value="false">No (propia)</option>
                             <option value="true">Sí (en renta)</option>
@@ -162,7 +154,7 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                             name="tiene_software_control"
                             className={standardInputClass}
                             value={formData.tiene_software_control ? 'true' : 'false'}
-                            onChange={(e) => onChange({ ...e, target: { ...e.target, name: 'tiene_software_control', value: e.target.value === 'true' } as any })}
+                            onChange={(e) => onChange({ ...e, target: { ...e.target, name: 'tiene_software_control', value: e.target.value === 'true' } as unknown as EventTarget & HTMLSelectElement })}
                         >
                             <option value="false">No</option>
                             <option value="true">Sí (instalado)</option>

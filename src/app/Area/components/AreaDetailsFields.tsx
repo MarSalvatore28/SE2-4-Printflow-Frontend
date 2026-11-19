@@ -62,7 +62,7 @@ export const AreaDetailsFields: React.FC<AreaDetailsFieldsProps> = ({
                                 ...e.target,
                                 name: 'activo',
                                 value: parseInt(e.target.value)
-                            } as any
+                            } as unknown as EventTarget & HTMLSelectElement
                         })}
                     >
                         <option value="1">Activa</option>

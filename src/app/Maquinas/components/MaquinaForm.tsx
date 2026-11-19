@@ -280,5 +280,3 @@ export const MaquinaForm: FC<MaquinaFormProps> = ({
 };
 
 export default MaquinaForm;
-
-// Práctica de Pull Request de RoberB1.

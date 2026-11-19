@@ -57,7 +57,7 @@ export const ModalHistorialCliente: React.FC<ModalHistorialClienteProps> = ({
 
         if (cambio.cambio_razon_social) {
             cambios.push({
-                campo: 'Razón Social',
+                campo: 'Razón social',
                 anterior: cambio.razon_social_anterior || 'Sin especificar',
                 actual: cambio.razon_social_actual || 'Sin especificar'
             });
@@ -115,7 +115,7 @@ export const ModalHistorialCliente: React.FC<ModalHistorialClienteProps> = ({
                         </div>
                         <div>
                             <h2 className="text-xl font-bold text-gray-900">
-                                Historial de Cambios
+                                Historial de cambios
                             </h2>
                             <p className="text-sm text-gray-600 mt-0.5">
                                 Cliente: <strong>{clienteNombre}</strong>

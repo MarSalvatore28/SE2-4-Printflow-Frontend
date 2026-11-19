@@ -140,10 +140,10 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
         <div className="space-y-6 mt-6">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <div className="px-6 py-3 bg-secondary/90 flex justify-between items-center border-b border-gray-200">
-                    <h3 className="text-base font-bold text-white uppercase">Listado de Impresoras</h3>
+                    <h3 className="text-base font-bold text-white uppercase">Listado de impresoras</h3>
                     <span className="text-xs text-white bg-edit border border-edit px-2 py-1 rounded">
                         <LocalPrintshopIcon className="inline-block mr-1 mb-0.5" fontSize="small" />
-                        {maquinas.length} Dispositivos
+                        {maquinas.length} dispositivos
                     </span>
                 </div>
 
@@ -185,7 +185,7 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
                                                 <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary text-white">Acumulativo</span>
                                             )}
                                             {maquina.info.es_acumulativo === false && (
-                                                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-600 text-white">No Acumulativo</span>
+                                                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-600 text-white">No acumulativo</span>
                                             )}
                                             {maquina.info.es_color ? (
                                                 <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-secondary text-white">BN/C</span>
@@ -217,7 +217,7 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
                         </tbody>
                         <tfoot className="bg-gray-50 border-t-2 border-b-2 border-gray-300">
                             <tr className="font-bold text-gray-800">
-                                <td colSpan={4} className="px-4 py-3 text-right uppercase text-sm">Totales Generales:</td>
+                                <td colSpan={4} className="px-4 py-3 text-right uppercase text-sm">Totales generales:</td>
                                 <td className="px-4 py-3 text-right font-mono">{formatNumber(totalesGenerales.anterior)}</td>
                                 <td className="px-4 py-3 text-right font-mono">{formatNumber(totalesGenerales.actual)}</td>
                                 <td className="px-4 py-3 text-right font-mono">{formatNumber(totalesPorMaquina.bn)}</td>
@@ -354,7 +354,7 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
                         <div className="sticky top-0 bg-primary px-6 py-4 flex justify-between items-center border-b border-amber-700">
                             <div className="flex items-center gap-3">
                                 <SwapHorizIcon className="text-white" fontSize="large" />
-                                <h2 className="text-xl font-bold text-white">Detalle de Cambio de Máquina</h2>
+                                <h2 className="text-xl font-bold text-white">Detalle del cambio de máquina</h2>
                             </div>
                             <button onClick={cerrarModal} className="text-white hover:bg-amber-700 rounded-full p-2 transition-colors"><CloseIcon /></button>
                         </div>
@@ -363,11 +363,11 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
                                 <div><p className="text-xs text-gray-500 uppercase font-semibold">Tipo</p><p className="text-sm font-medium text-gray-900">{modalCambio.tipo}</p></div>
                                 <div><p className="text-xs text-gray-500 uppercase font-semibold">Área</p><p className="text-sm font-medium text-gray-900">{modalCambio.area}</p></div>
                                 <div><p className="text-xs text-gray-500 uppercase font-semibold">Periodo</p><p className="text-sm font-medium text-gray-900">{modalCambio.periodo}</p></div>
-                                <div><p className="text-xs text-gray-500 uppercase font-semibold">Total Consolidado</p><p className="text-lg font-bold text-primary">{formatNumber(modalCambio.totales.consumo_total)}</p></div>
+                                <div><p className="text-xs text-gray-500 uppercase font-semibold">Total consolidado</p><p className="text-lg font-bold text-primary">{formatNumber(modalCambio.totales.consumo_total)}</p></div>
                             </div>
                             {modalCambio.razon && (
                                 <div className="mt-3 p-3 bg-amber-50 border-l-4 border-amber-400 rounded">
-                                    <p className="text-xs text-amber-700 uppercase font-semibold mb-1">Razón del Cambio</p>
+                                    <p className="text-xs text-amber-700 uppercase font-semibold mb-1">Razón del cambio</p>
                                     <p className="text-sm text-amber-900">{modalCambio.razon}</p>
                                 </div>
                             )}
@@ -376,22 +376,22 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="border-2 rounded-lg overflow-hidden">
                                     <div className="bg-red-50 px-4 py-3 border-b border-red-200">
-                                        <h3 className="font-bold text-red-800 flex items-center gap-2"><span className="w-3 h-3 bg-red-500 rounded-full"></span>Máquina Saliente (Retirada)</h3>
+                                        <h3 className="font-bold text-red-800 flex items-center gap-2"><span className="w-3 h-3 bg-red-500 rounded-full"></span>Máquina saliente (retirada)</h3>
                                     </div>
                                     <div className="p-4 space-y-3">
                                         <div><p className="text-xs text-gray-500 uppercase">Serie</p><p className="font-mono font-bold text-gray-900">{modalCambio.maquina_saliente.serie}</p></div>
                                         <div><p className="text-xs text-gray-500 uppercase">Modelo</p><p className="font-medium text-gray-700">{modalCambio.maquina_saliente.modelo}</p></div>
                                         <div className="grid grid-cols-2 gap-3 text-sm">
-                                            <div><p className="text-xs text-gray-500">Instalada</p><p className="font-medium">{formatFechaISO(modalCambio.maquina_saliente.fecha_inicio_operacion)}</p></div>
+                                            <div><p className="text-xs text-gray-500">Desde (último corte)</p><p className="font-medium">{formatFechaISO(modalCambio.maquina_saliente.fecha_inicio_operacion)}</p></div>
                                             <div><p className="text-xs text-gray-500">Retirada</p><p className="font-medium text-red-600">{formatFechaISO(modalCambio.maquina_saliente.fecha_retiro)}</p></div>
                                         </div>
-                                        <div className="bg-gray-50 p-3 rounded"><p className="text-xs text-gray-500 uppercase mb-2">Días Operativos</p><p className="text-2xl font-bold text-gray-900">{modalCambio.totales.dias_saliente} días</p></div>
+                                        <div className="bg-gray-50 p-3 rounded"><p className="text-xs text-gray-500 uppercase mb-2">Días operativos</p><p className="text-2xl font-bold text-gray-900">{modalCambio.totales.dias_saliente} días</p></div>
                                         <div className="border-t pt-3 space-y-2">
                                             <p className="text-xs text-gray-500 uppercase font-semibold">Contadores</p>
                                             <div className="space-y-1 text-sm">
                                                 <div className="flex justify-between"><span className="text-gray-600">Anterior:</span><span className="font-mono">{formatNumber(modalCambio.maquina_saliente.contadores.anterior.global)}</span></div>
                                                 <div className="flex justify-between"><span className="text-gray-600">Final:</span><span className="font-mono font-medium">{formatNumber(modalCambio.maquina_saliente.contadores.actual.global)}</span></div>
-                                                <div className="flex justify-between pt-2 border-t-2 border-red-200"><span className="font-bold text-gray-900">Consumo Parcial:</span><span className="font-mono font-bold text-red-600 text-lg">{formatNumber(modalCambio.maquina_saliente.contadores.consumo.global)}</span></div>
+                                                <div className="flex justify-between pt-2 border-t-2 border-red-200"><span className="font-bold text-gray-900">Consumo parcial:</span><span className="font-mono font-bold text-red-600 text-lg">{formatNumber(modalCambio.maquina_saliente.contadores.consumo.global)}</span></div>
                                             </div>
                                         </div>
                                         <div className="bg-blue-50 p-3 rounded text-xs">
@@ -405,7 +405,7 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
                                 </div>
                                 <div className="border-2 rounded-lg overflow-hidden">
                                     <div className="bg-green-50 px-4 py-3 border-b border-green-200">
-                                        <h3 className="font-bold text-green-800 flex items-center gap-2"><span className="w-3 h-3 bg-green-500 rounded-full"></span>Máquina Entrante (Reemplazo)</h3>
+                                        <h3 className="font-bold text-green-800 flex items-center gap-2"><span className="w-3 h-3 bg-green-500 rounded-full"></span>Máquina entrante (reemplazo)</h3>
                                     </div>
                                     <div className="p-4 space-y-3">
                                         <div><p className="text-xs text-gray-500 uppercase">Serie</p><p className="font-mono font-bold text-gray-900">{modalCambio.maquina_entrante.serie}</p></div>
@@ -414,13 +414,13 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
                                             <div className="text-sm"><p className="text-xs text-gray-500">Instalada</p><p className="font-medium text-green-600">{formatFechaISO(modalCambio.maquina_entrante.fecha_instalacion)}</p></div>
                                             <div className="text-sm text-right"><p className="text-xs text-gray-500">Fecha de corte</p><p className="font-medium text-green-600">{formatFechaISO(modalCambio.maquina_entrante.fecha_fin_operacion)}</p></div>
                                         </div>
-                                        <div className="bg-gray-50 p-3 rounded"><p className="text-xs text-gray-500 uppercase mb-2">Días Operativos</p><p className="text-2xl font-bold text-gray-900">{modalCambio.totales.dias_entrante} días</p></div>
+                                        <div className="bg-gray-50 p-3 rounded"><p className="text-xs text-gray-500 uppercase mb-2">Días operativos</p><p className="text-2xl font-bold text-gray-900">{modalCambio.totales.dias_entrante} días</p></div>
                                         <div className="border-t pt-3 space-y-2">
                                             <p className="text-xs text-gray-500 uppercase font-semibold">Contadores</p>
                                             <div className="space-y-1 text-sm">
                                                 <div className="flex justify-between"><span className="text-gray-600">Inicial:</span><span className="font-mono">{formatNumber(modalCambio.maquina_entrante.contadores.anterior.global)}</span></div>
                                                 <div className="flex justify-between"><span className="text-gray-600">Final:</span><span className="font-mono font-medium">{formatNumber(modalCambio.maquina_entrante.contadores.actual.global)}</span></div>
-                                                <div className="flex justify-between pt-2 border-t-2 border-green-200"><span className="font-bold text-gray-900">Consumo Parcial:</span><span className="font-mono font-bold text-green-600 text-lg">{formatNumber(modalCambio.maquina_entrante.contadores.consumo.global)}</span></div>
+                                                <div className="flex justify-between pt-2 border-t-2 border-green-200"><span className="font-bold text-gray-900">Consumo parcial:</span><span className="font-mono font-bold text-green-600 text-lg">{formatNumber(modalCambio.maquina_entrante.contadores.consumo.global)}</span></div>
                                             </div>
                                         </div>
                                         <div className="bg-blue-50 p-3 rounded text-xs">

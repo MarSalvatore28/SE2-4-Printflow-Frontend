@@ -117,7 +117,7 @@ export const DetalleClienteModal: React.FC<DetalleClienteModalProps> = ({ client
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
                                     <div className="space-y-3">
                                         <h4 className="text-sm font-semibold text-text uppercase tracking-wider border-b pb-1">
-                                            Información General
+                                            Información general
                                         </h4>
                                         <div className="flex justify-between">
                                             <span className="text-gray-600">RUC:</span>
@@ -147,10 +147,10 @@ export const DetalleClienteModal: React.FC<DetalleClienteModalProps> = ({ client
 
                                     <div className="space-y-3">
                                         <h4 className="text-sm font-semibold text-text uppercase tracking-wider border-b pb-1">
-                                            Resumen de Actividad
+                                            Resumen de actividad
                                         </h4>
                                         <div className="flex justify-between items-center mb-2">
-                                            <span className="text-gray-600">Máquinas Activas:</span>
+                                            <span className="text-gray-600">Máquinas activas:</span>
                                             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold text-edit">
                                                 {fullData?.total_instalaciones || cliente.total_instalaciones || 0}
                                             </span>
@@ -158,7 +158,7 @@ export const DetalleClienteModal: React.FC<DetalleClienteModalProps> = ({ client
 
                                         <div className="grid grid-cols-3 gap-2">
                                             <div className={`p-2 rounded text-center bg-edit-hover/10 border border-edit`}>
-                                                <div className="text-xs text-text truncate">Inicio Contrato</div>
+                                                <div className="text-xs text-text truncate">Inicio del contrato</div>
                                                 <div className="text-sm font-bold text-edit">
                                                     {contrato ? formatFecha(contrato.fecha_inicio) : '-'}
                                                 </div>
@@ -180,7 +180,7 @@ export const DetalleClienteModal: React.FC<DetalleClienteModalProps> = ({ client
                                 </div>
 
                                 <h4 className="text-sm font-semibold text-text uppercase tracking-wider mb-3">
-                                    Límites y Costos del Contrato
+                                    Límites y costos del contrato
                                 </h4>
                                 {contrato ? (
                                     <div className="overflow-hidden border border-gray-200 rounded-lg shadow-sm mb-6">
@@ -201,7 +201,7 @@ export const DetalleClienteModal: React.FC<DetalleClienteModalProps> = ({ client
                                             <tbody className="bg-white divide-y divide-gray-200 text-sm">
                                                 <tr>
                                                     <td className="px-4 py-3 font-medium text-gray-900 border-r border-gray-200 bg-gray-50/50">
-                                                        Impresiones Incluidas
+                                                        Impresiones incluidas
                                                     </td>
                                                     <td className="px-4 py-3 text-right border-r border-gray-200 font-mono text-gray-900">
                                                         {contrato.impresiones_bn_incluidas?.toLocaleString()}
@@ -212,7 +212,7 @@ export const DetalleClienteModal: React.FC<DetalleClienteModalProps> = ({ client
                                                 </tr>
                                                 <tr>
                                                     <td className="px-4 py-3 font-medium text-gray-900 border-r border-gray-200 bg-gray-50/50">
-                                                        Costo por Impresión
+                                                        Costo por impresión
                                                     </td>
                                                     <td className="px-4 py-3 text-right border-r border-gray-200 font-mono text-gray-900">
                                                         ${Number(contrato.costo_impresion_bn || 0).toFixed(4)}
@@ -223,7 +223,7 @@ export const DetalleClienteModal: React.FC<DetalleClienteModalProps> = ({ client
                                                 </tr>
                                                 <tr>
                                                     <td className="px-4 py-3 font-medium text-gray-900 border-r border-gray-200 bg-gray-50/50">
-                                                        Costo Excedente
+                                                        Costo excedente
                                                     </td>
                                                     <td className="px-4 py-3 text-right border-r border-gray-200 font-mono text-gray-500">
                                                         ${Number(contrato.costo_excedente_impresion_bn || 0).toFixed(4)}
@@ -242,7 +242,7 @@ export const DetalleClienteModal: React.FC<DetalleClienteModalProps> = ({ client
                                 )}
 
                                 <h4 className="text-sm font-semibold text-text uppercase tracking-wider mb-3">
-                                    Instalaciones Activas
+                                    Instalaciones activas
                                 </h4>
                                 <div className="grid grid-cols-1 gap-3 mb-6">
                                     {fullData?.instalaciones_activas && fullData.instalaciones_activas.length > 0 ? (

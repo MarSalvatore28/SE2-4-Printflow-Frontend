@@ -78,7 +78,8 @@ export interface ClienteParaTabla extends Cliente {
 export interface ClienteFormData {
   nombre: string;
   ruc: string;
-  razon_social: string;
+  /** null cuando el cliente no tiene razón social registrada */
+  razon_social: string | null;
   id_contrato?: number;
   cliente_id?: number;
 

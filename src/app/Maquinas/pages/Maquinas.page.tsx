@@ -218,7 +218,7 @@ const MaquinasPage = () => {
                 </button>
                 {puedeEditarCatalogos && (
                 <button onClick={abrirNueva} className={tabClass(activeTab === 'formulario')}>
-                    {activeTab === 'formulario' && editando ? 'Editar Máquina' : 'Agregar'}
+                    {activeTab === 'formulario' && editando ? 'Editar máquina' : 'Agregar'}
                 </button>
                 )}
                 <button onClick={() => setActiveTab('reemplazos')} className={tabClass(activeTab === 'reemplazos')}>
@@ -233,7 +233,7 @@ const MaquinasPage = () => {
                     <div className="bg-white border border-gray-200 rounded-lg p-6 sm:p-8">
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-800">
-                                {editando ? `Editar máquina ${editando.serie}` : 'Nueva Máquina'}
+                                {editando ? `Editar máquina ${editando.serie}` : 'Nueva máquina'}
                             </h2>
                             <p className="text-sm text-gray-500 mt-1">
                                 {editando

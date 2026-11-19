@@ -43,7 +43,7 @@ export interface MaquinaConIP {
 }
 
 interface InstalacionFormFieldsProps {
-    formData: InstalacionFormData | any;
+    formData: InstalacionFormData;
     onSelectCliente: (cliente: Client) => void;
     onSelectArea: (areaId: number, areaName?: string) => void;
     onSelectContrato: (contratoId: number, contratoDesc?: string) => void;
@@ -148,12 +148,12 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
     const [contratos, setContratos] = useState<Contrato[]>([]);
     const [maquinasDisponibles, setMaquinasDisponibles] = useState<MaquinaSinInstalacion[]>([]);
     const [selectedCliente, setSelectedCliente] = useState<Client | null>(null);
-    const [_selectedArea, setSelectedArea] = useState<Area | null>(null);
+    const [, setSelectedArea] = useState<Area | null>(null);
     const [selectedContrato, setSelectedContrato] = useState<Contrato | null>(null);
     const [selectedMaquinaId, setSelectedMaquinaId] = useState<number>(0);
     const [loadingAreas, setLoadingAreas] = useState(false);
     const [loadingContratos, setLoadingContratos] = useState(false);
-    const [_loadingMaquinas, setLoadingMaquinas] = useState(false);
+    const [, setLoadingMaquinas] = useState(false);
 
     useEffect(() => {
         const loadClienteData = async () => {
@@ -246,7 +246,7 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                     Información del Cliente
                 </h3>
                 <div className="input-container">
-                    <label className="input-label">Seleccionar Cliente *</label>
+                    <label className="input-label">Seleccionar cliente *</label>
                     <div className="input-wrapper">
                         <BusquedaInteligenteClientes
                             onSeleccionar={handleSelectCliente}
@@ -271,7 +271,7 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                         Contrato
                     </h3>
                     <div className="input-container">
-                        <label className="input-label">Seleccionar Contrato *</label>
+                        <label className="input-label">Seleccionar contrato *</label>
                         <div className="input-wrapper">
                             {loadingContratos ? (
                                 <div className="p-3 bg-gray-50 text-gray-600 border border-gray-200 rounded-md text-sm">
@@ -307,7 +307,7 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                                     Contrato #{selectedContrato.id_contrato}
                                     {tieneRenta && (
                                         <span className="ml-2 px-2 py-0.5 bg-secondary text-white text-xs rounded-full font-normal">
-                                            Incluye Renta
+                                            Incluye renta
                                         </span>
                                     )}
                                 </p>
@@ -324,7 +324,7 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                         Fecha de Instalación
                     </h3>
                     <div className="input-container">
-                        <label className="input-label">Seleccionar Fecha de Instalación *</label>
+                        <label className="input-label">Seleccionar fecha de instalación *</label>
                         <div className="input-wrapper">
                             <input
                                 type="date"
@@ -345,7 +345,7 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                         Ubicación
                     </h3>
                     <div className="input-container">
-                        <label className="input-label">Seleccionar Área *</label>
+                        <label className="input-label">Seleccionar área *</label>
                         <div className="input-wrapper">
                             {loadingAreas ? (
                                 <div className="p-3 bg-gray-50 text-gray-600 border border-gray-200 rounded-md text-sm">
@@ -392,7 +392,7 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                     {multipleSelection ? (
                         <div className="space-y-6">
                             <div className="input-container">
-                                <label className="input-label">Agregar Máquina</label>
+                                <label className="input-label">Agregar máquina</label>
                                 <div className="flex gap-2">
                                     <div className="flex-1">
                                         <BuscadorInteligente<MaquinaSinInstalacion>
@@ -513,7 +513,7 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                                                     </div>
                                                     <div className={colSpanRow2}>
                                                         <label className="block text-xs font-medium text-gray-700 mb-1">
-                                                            Contador Acumulativo
+                                                            Contador acumulativo
                                                             {!item.contabilidad_por_usuario && (
                                                                 <span className="ml-1 text-xs text-gray-400 font-normal normal-case">(obligatorio sin contabilidad por usuario)</span>
                                                             )}
@@ -530,7 +530,7 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                                                     </div>
                                                     {tieneRenta && (
                                                         <div className={colSpanRow2}>
-                                                            <label className="block text-xs font-medium text-gray-700 mb-1">Costo Renta *</label>
+                                                            <label className="block text-xs font-medium text-gray-700 mb-1">Costo de renta *</label>
                                                             <div className="relative">
                                                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs font-medium">$</span>
                                                                 <input
@@ -555,7 +555,7 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                     ) : (
                         <div className="space-y-6">
                             <div className="input-container">
-                                <label className="input-label">Seleccionar Máquina *</label>
+                                <label className="input-label">Seleccionar máquina *</label>
                                 <div className="input-wrapper">
                                     <BuscadorInteligente<MaquinaSinInstalacion>
                                         placeholder="Buscar máquina por serie o modelo..."
@@ -598,7 +598,7 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
 
                                     {tieneRenta && (
                                         <div className="input-container">
-                                            <label className="input-label">Costo Renta Mensual *</label>
+                                            <label className="input-label">Costo de renta mensual *</label>
                                             <div className="input-wrapper relative">
                                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">$</span>
                                                 <input
@@ -637,7 +637,7 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
 
                                     <div className="input-container">
                                         <label className="input-label">
-                                            Contador Acumulativo
+                                            Contador acumulativo
                                             {!formData.contabilidad_por_usuario && (
                                                 <span className="ml-1 text-xs text-gray-400 font-normal normal-case">(obligatorio)</span>
                                             )}

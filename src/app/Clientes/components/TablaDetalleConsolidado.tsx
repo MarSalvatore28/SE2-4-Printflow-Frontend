@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { formatNumber, formatMoney, formatFechaISO } from '@utils/formatUtils';
+import { importeReferencial, NOTA_IMPORTE_REFERENCIAL } from '@utils/facturacionUtils';
 import type { MaquinaConsolidada, CambioMaquina } from '@models/Reporte/reporte.types';
 import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
@@ -31,8 +32,6 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
         };
     };
 
-    // Páginas B/N, color e importe de cada máquina, tal como los calcula el consolidado del backend.
-    const importeDe = (maquina: MaquinaConsolidada) => parseFloat(maquina.financiero?.monto_total ?? '0') || 0;
     const totalesGenerales = maquinas.reduce((acc, maquina) => {
         const { anterior, actual } = contadoresDe(maquina);
         return {
@@ -44,7 +43,7 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
     const totalesPorMaquina = maquinas.reduce((acc, maquina) => ({
         bn: acc.bn + (maquina.consumo.total_bn || 0),
         color: acc.color + (maquina.consumo.total_color || 0),
-        importe: acc.importe + importeDe(maquina),
+        importe: acc.importe + importeReferencial(maquina),
     }), { bn: 0, color: 0, importe: 0 });
 
     const abrirModalCambio = (cambio: CambioMaquina) => { setModalCambio(cambio); };
@@ -73,8 +72,8 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
                                 <th className="px-4 py-2.5 text-right">Contador final</th>
                                 <th className="px-4 py-2.5 text-right">Páginas B/N</th>
                                 <th className="px-4 py-2.5 text-right">Páginas color</th>
-                                <th className="px-4 py-2.5 text-right">Consumo Mes</th>
-                                <th className="px-4 py-2.5 text-right">Importe</th>
+                                <th className="px-4 py-2.5 text-right">Consumo del mes</th>
+                                <th className="px-4 py-2.5 text-right" title={NOTA_IMPORTE_REFERENCIAL}>Importe referencial*</th>
                                 <th className="px-4 py-2.5 text-center">Estado</th>
                             </tr>
                         </thead>
@@ -107,7 +106,7 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
                                         <td className="px-4 py-2.5 text-right text-gray-800 font-mono">{formatNumber(maquina.consumo.total_bn)}</td>
                                         <td className="px-4 py-2.5 text-right text-gray-800 font-mono">{formatNumber(maquina.consumo.total_color)}</td>
                                         <td className="px-4 py-2.5 text-right font-bold text-text font-mono">{formatNumber(filaConsumo)}</td>
-                                        <td className="px-4 py-2.5 text-right text-gray-900 font-mono">$ {formatMoney(importeDe(maquina))}</td>
+                                        <td className="px-4 py-2.5 text-right text-gray-900 font-mono">$ {formatMoney(importeReferencial(maquina))}</td>
                                         <td className="px-4 py-2.5 text-center">
                                             {maquina.cambio ? (
                                                 <button onClick={() => abrirModalCambio(maquina.cambio!)} className="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-full text-amber-800 text-xs font-semibold transition-colors cursor-pointer">
@@ -135,6 +134,7 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
                         </tfoot>
                     </table>
                 </div>
+                <p data-testid="nota-importe-referencial" className="px-6 py-2 text-xs text-gray-500 border-t border-gray-200">* {NOTA_IMPORTE_REFERENCIAL}</p>
             </div>
 
             {modalCambio && (

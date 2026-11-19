@@ -4,6 +4,7 @@ import { TablaDetalleConsolidado } from '@app/Clientes/components/TablaDetalleCo
 import { TablaDetalleUsuario } from '@app/Informes/components/TablaDetalleUsuario';
 import { AlertaHistorialCliente } from '@app/Informes/components/Alertahistorialcliente';
 import { ResumenConsolidadoCard } from '@app/Informes/components/ResumenConsolidadoCard';
+import { FacturacionPeriodoCard } from '@app/Informes/components/FacturacionPeriodoCard';
 import { exportToExcel, exportToPDF } from '@utils/exportUtils';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
@@ -207,6 +208,11 @@ const InformesPage = () => {
                             generadoEn={generadoEn}
                         />
                     )}
+
+                    <FacturacionPeriodoCard
+                        facturacion={resumen.facturacion}
+                        montoTotalGeneral={resumen.monto_total_general}
+                    />
 
                     <div className='mb-4 text-lg font-semibold text-gray-900'>
                         <span className="block h-6">Resumen del consolidado:</span>

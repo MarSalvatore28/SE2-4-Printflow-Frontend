@@ -247,7 +247,7 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
                 label: key.includes('_') ? 'Revisión' : key.charAt(0).toUpperCase() + key.slice(1),
                 text
             }));
-            mostrarModal('Formulario Incompleto', 'Por favor, revise los siguientes campos antes de guardar:', 'warning', errorDetails);
+            mostrarModal('Formulario incompleto', 'Por favor, revise los siguientes campos antes de guardar:', 'warning', errorDetails);
             return false;
         }
         return true;
@@ -281,10 +281,11 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
                         await createInstalacion(dataToSend);
                         successCount++;
                         setCreationProgress({ current: i + 1, total: maquinasConIP.length });
-                    } catch (err: any) {
+                    } catch (err: unknown) {
+                        const error = err as { message?: string; response?: { data?: { message?: string } } };
                         actionErrors.push({
                             maquina: item.maquina.serie,
-                            error: err.response?.data?.message || err.message || 'Error desconocido'
+                            error: error.response?.data?.message || error.message || 'Error desconocido'
                         });
                     }
                 }
@@ -292,7 +293,7 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
                 if (actionErrors.length > 0) {
                     const details = actionErrors.map(e => ({ label: `Serie ${e.maquina}`, text: e.error }));
                     if (successCount > 0) {
-                        mostrarModal('Instalación Parcial', `Se instalaron ${successCount} máquinas, pero hubo problemas con algunas:`, 'warning', details);
+                        mostrarModal('Instalación parcial', `Se instalaron ${successCount} máquinas, pero hubo problemas con algunas:`, 'warning', details);
                         resetForm();
                         onSuccess(false);
                     } else {
@@ -320,9 +321,10 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
                 onSuccess(true);
             }
 
-        } catch (err: any) {
-            const errorMessage = err.response?.data?.message || err.message || 'Ocurrió un error al procesar la solicitud.';
-            mostrarModal('Error Inesperado', errorMessage, 'warning');
+        } catch (err: unknown) {
+            const error = err as { message?: string; response?: { data?: { message?: string } } };
+            const errorMessage = error.response?.data?.message || error.message || 'Ocurrió un error al procesar la solicitud.';
+            mostrarModal('Error inesperado', errorMessage, 'warning');
         } finally {
             setSubmitting(false);
             setCreationProgress({ current: 0, total: 0 });
@@ -346,7 +348,7 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
             />
 
             <div className="mb-6 border-b pb-4">
-                <h2 className="text-xl font-bold text-gray-800">Nueva Instalación{multipleSelection ? ' (Múltiple)' : ''}</h2>
+                <h2 className="text-xl font-bold text-gray-800">Nueva instalación{multipleSelection ? ' (múltiple)' : ''}</h2>
                 <p className="text-sm text-gray-600 mt-1">
                     {multipleSelection ? 'Agrega múltiples máquinas con sus respectivas direcciones IP y Áreas' : 'Instala una máquina en el área de un cliente con un contrato específico'}
                 </p>
@@ -406,7 +408,7 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
                         ) : (
                             <>
                                 <div className="rounded px-3 py-2"><span className="text-gray-600 block text-xs mb-1">Máquina ID:</span><span className="font-semibold text-gray-900">{formData.maquina_id}</span></div>
-                                <div className="rounded px-3 py-2"><span className="text-gray-600 block text-xs mb-1">Área Global:</span><span className="font-semibold uppercase text-gray-900">{selectedNames.area || formData.area_id}</span></div>
+                                <div className="rounded px-3 py-2"><span className="text-gray-600 block text-xs mb-1">Área global:</span><span className="font-semibold uppercase text-gray-900">{selectedNames.area || formData.area_id}</span></div>
                             </>
                         )}
                         <div className="rounded px-3 py-2 md:col-span-2"><span className="text-gray-600 block text-xs mb-1">Cliente:</span><span className="font-semibold uppercase text-gray-900">{selectedNames.cliente}</span></div>

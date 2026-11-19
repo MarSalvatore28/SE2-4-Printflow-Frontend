@@ -34,7 +34,7 @@ const InstalacionesPage = () => {
         message: ''
     });
 
-    const [_instalacionEnEdicion, setInstalacionEnEdicion] = useState<InstalacionActivaCliente | null>(null);
+    const [, setInstalacionEnEdicion] = useState<InstalacionActivaCliente | null>(null);
     const [lastActionWasEdit, setLastActionWasEdit] = useState(false);
 
     const [modalRetirar, setModalRetirar] = useState<{
@@ -203,9 +203,10 @@ const InstalacionesPage = () => {
 
             handleCloseModalEdit();
 
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const error = err as { message?: string };
             console.error('Error actualizando instalación:', err);
-            setError(err.message || 'No se pudo actualizar la instalación.');
+            setError(error.message || 'No se pudo actualizar la instalación.');
         } finally {
             setLoading(false);
         }
@@ -255,9 +256,10 @@ const InstalacionesPage = () => {
                 observaciones: ''
             });
 
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const error = err as { message?: string };
             console.error('Error retirando instalación:', err);
-            setError(err.message || 'No se pudo retirar la instalación.');
+            setError(error.message || 'No se pudo retirar la instalación.');
         } finally {
             setLoading(false);
         }
@@ -311,7 +313,7 @@ const InstalacionesPage = () => {
                         : 'text-gray-500 hover:text-gray-800'
                         }`}
                 >
-                    Listar Instalaciones
+                    Listar instalaciones
                 </button>
                 {puedeEditarCatalogos && (
                 <button
@@ -324,7 +326,7 @@ const InstalacionesPage = () => {
                         : 'text-gray-500 hover:text-gray-800'
                         }`}
                 >
-                    Nueva Instalación
+                    Nueva instalación
                 </button>
                 )}
             </div>
@@ -393,7 +395,7 @@ const InstalacionesPage = () => {
                                 onClick={handleRefresh}
                                 className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium h-[42px]"
                             >
-                                Ver Todos
+                                Ver todos
                             </button>
                         </div>
 
@@ -424,7 +426,7 @@ const InstalacionesPage = () => {
                 onClose={handleCloseModalRetirar}
                 onConfirm={handleConfirmRetirar}
                 type="delete"
-                title="¿Retirar Instalación?"
+                title="¿Retirar instalación?"
                 message={
                     <>
                         <p className="mb-4">
@@ -462,7 +464,7 @@ const InstalacionesPage = () => {
                         </div>
                     </>
                 }
-                confirmText="Retirar Instalación"
+                confirmText="Retirar instalación"
                 cancelText="Cancelar"
             />
 
@@ -470,7 +472,7 @@ const InstalacionesPage = () => {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md">
                         <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-xl font-bold text-gray-900">Editar Instalación</h3>
+                            <h3 className="text-xl font-bold text-gray-900">Editar instalación</h3>
                             <button
                                 onClick={handleCloseModalEdit}
                                 className="text-gray-400 hover:text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full p-1 transition-colors"
@@ -529,7 +531,7 @@ const InstalacionesPage = () => {
                             {modalEdit.instalacion?.renta_equipo ? (
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">
-                                        Costo de Renta Mensual ($)
+                                        Costo de renta mensual ($)
                                     </label>
                                     <input
                                         type="number"
@@ -545,7 +547,7 @@ const InstalacionesPage = () => {
                             ) : (
                                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
                                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                                        Costo de Renta Mensual
+                                        Costo de renta mensual
                                     </label>
                                     <p className="text-sm font-medium text-gray-500">
                                         El contrato asociado no incluye cobro por renta de equipo.
@@ -563,7 +565,7 @@ const InstalacionesPage = () => {
                                         }
                                         className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
                                     />
-                                    <span className="ml-3 text-sm font-medium text-gray-700">Contador Acumulativo</span>
+                                    <span className="ml-3 text-sm font-medium text-gray-700">Contador acumulativo</span>
                                 </label>
 
                                 <label className="flex items-center cursor-pointer">
@@ -592,7 +594,7 @@ const InstalacionesPage = () => {
                                 className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
                                 disabled={loading || !modalEdit.editData.ip_address.trim()}
                             >
-                                {loading ? 'Guardando...' : 'Guardar Cambios'}
+                                {loading ? 'Guardando...' : 'Guardar cambios'}
                             </button>
                         </div>
                     </div>

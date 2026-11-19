@@ -8,123 +8,39 @@ import CloseIcon from '@mui/icons-material/Close';
 
 interface TablaDetalleConsolidadoProps {
     data: MaquinaConsolidada[];
-    contratoCopiaBN?: number;
-    contratoImpresionBN?: number;
-    contratoCopiaColor?: number;
-    contratoImpresionColor?: number;
-    costoNormalBN?: number;
-    costoNormalColor?: number;
-    costoExcedenteCopiaBN?: number;
-    costoExcedenteImpresionBN?: number;
-    costoExcedenteCopiaColor?: number;
-    costoExcedenteImpresionColor?: number;
-    printerBill?: string;
-    rentaEquipos?: { id_instalacion: number; serie: string; modelo: string; area: string; costo_mensual: number }[];
-    totalRenta?: number;
 }
 
-export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = ({
-    data,
-    contratoCopiaBN = 0,
-    contratoCopiaColor = 0,
-    costoNormalBN = 0,
-    costoNormalColor = 0,
-    costoExcedenteCopiaBN = 0,
-    costoExcedenteCopiaColor = 0,
-    printerBill = 'Diferenciar B/N de Color',
-    rentaEquipos = [],
-    totalRenta = 0,
-}) => {
+export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = ({ data }) => {
     const [modalCambio, setModalCambio] = useState<CambioMaquina | null>(null);
 
     const maquinas = data;
-    const todoComoColor = printerBill === 'Todo como Color';
 
-    const esModeloB = contratoCopiaBN === 0
-        && contratoCopiaColor === 0;
-
-    const totalesGenerales = maquinas.reduce((acc, maquina) => {
-        let antTotal = 0;
-        let actTotal = 0;
-        let consumoBN = 0;
-        let consumoColor = 0;
-
+    // Contadores y consumo de la fila: en un reemplazo, el contador inicial es el de la entrante
+    // y el consumo ya suma el tramo de la saliente (hasta el daño) y el de la entrante.
+    const contadoresDe = (maquina: MaquinaConsolidada) => {
         if (maquina.cambio) {
-            const inicioNueva = maquina.cambio.maquina_entrante.contadores.anterior.global || 0;
-            antTotal = inicioNueva;
-
-            actTotal = maquina.actual.total_servicio || 0;
-
-            // Reemplazo: el backend ya suma el tramo de la saliente (hasta el daño) y el de la entrante
-            consumoBN = maquina.consumo.total_bn || 0;
-            consumoColor = maquina.consumo.total_color || 0;
-
-            if (todoComoColor && maquina.info.es_color) {
-                consumoColor = consumoBN + consumoColor;
-                consumoBN = 0;
-            }
-
-        } else {
-            // Se calcula sumando los contadores para evitar el 0 que manda el backend en total_servicio de no acumulativos
-            antTotal = ((maquina.anterior.total_contador_bn || 0) + (maquina.anterior.total_contador_color || 0)) || maquina.anterior.total_servicio || 0;
-            actTotal = ((maquina.actual.total_contador_bn || 0) + (maquina.actual.total_contador_color || 0)) || maquina.actual.total_servicio || 0;
-
-            consumoBN = maquina.consumo.total_bn || 0;
-            consumoColor = maquina.consumo.total_color || 0;
-
-            if (todoComoColor && maquina.info.es_color) {
-                consumoColor = consumoBN + consumoColor;
-                consumoBN = 0;
-            }
+            return {
+                anterior: maquina.cambio.maquina_entrante.contadores.anterior.global || 0,
+                actual: (maquina.actual.total_contador_bn || 0) + (maquina.actual.total_contador_color || 0),
+            };
         }
-
+        // Se suman los contadores para evitar el 0 que manda el backend en total_servicio de no acumulativos
         return {
-            anterior: acc.anterior + antTotal,
-            actual: acc.actual + actTotal,
-            consumo: acc.consumo + consumoBN + consumoColor,
-            consumoBN: acc.consumoBN + consumoBN,
-            consumoColor: acc.consumoColor + consumoColor,
+            anterior: ((maquina.anterior.total_contador_bn || 0) + (maquina.anterior.total_contador_color || 0)) || maquina.anterior.total_servicio || 0,
+            actual: ((maquina.actual.total_contador_bn || 0) + (maquina.actual.total_contador_color || 0)) || maquina.actual.total_servicio || 0,
         };
-    }, { anterior: 0, actual: 0, consumo: 0, consumoBN: 0, consumoColor: 0 });
-
-    const consumoTotalBN = totalesGenerales.consumoBN;
-    const consumoTotalColor = totalesGenerales.consumoColor;
-
-    let montoTotalBN = 0;
-    let montoBaseBN = 0;
-    let montoExcedenteBN = 0;
-    let excedenteBN = 0;
-
-    let montoTotalColor = 0;
-    let montoBaseColor = 0;
-    let montoExcedenteColor = 0;
-    let excedenteColor = 0;
-
-    if (esModeloB) {
-        // Los totales BN/Color ya están correctamente separados: BN-machines → consumoTotalBN, Color-machines → consumoTotalColor
-        // (para máquinas color con todoComoColor, su BN ya fue movido a Color en el reduce)
-        montoTotalBN = consumoTotalBN * costoNormalBN;
-        montoTotalColor = consumoTotalColor * costoNormalColor;
-    } else {
-        if (contratoCopiaBN > 0) {
-            excedenteBN = Math.max(0, consumoTotalBN - contratoCopiaBN);
-            montoBaseBN = contratoCopiaBN * costoNormalBN;
-            montoExcedenteBN = excedenteBN * costoExcedenteCopiaBN;
-            montoTotalBN = montoBaseBN + montoExcedenteBN;
-        }
-
-        if (contratoCopiaColor > 0) {
-            excedenteColor = Math.max(0, consumoTotalColor - contratoCopiaColor);
-            montoBaseColor = contratoCopiaColor * costoNormalColor;
-            montoExcedenteColor = excedenteColor * costoExcedenteCopiaColor;
-            montoTotalColor = montoBaseColor + montoExcedenteColor;
-        }
-    }
-
-    const totalPagar = montoTotalBN + montoTotalColor + totalRenta;
+    };
 
     // Páginas B/N, color e importe de cada máquina, tal como los calcula el consolidado del backend.
     const importeDe = (maquina: MaquinaConsolidada) => parseFloat(maquina.financiero?.monto_total ?? '0') || 0;
+    const totalesGenerales = maquinas.reduce((acc, maquina) => {
+        const { anterior, actual } = contadoresDe(maquina);
+        return {
+            anterior: acc.anterior + anterior,
+            actual: acc.actual + actual,
+            consumo: acc.consumo + (maquina.consumo.total_bn || 0) + (maquina.consumo.total_color || 0),
+        };
+    }, { anterior: 0, actual: 0, consumo: 0 });
     const totalesPorMaquina = maquinas.reduce((acc, maquina) => ({
         bn: acc.bn + (maquina.consumo.total_bn || 0),
         color: acc.color + (maquina.consumo.total_color || 0),
@@ -133,8 +49,6 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
 
     const abrirModalCambio = (cambio: CambioMaquina) => { setModalCambio(cambio); };
     const cerrarModal = () => setModalCambio(null);
-
-
 
     return (
         <div className="space-y-6 mt-6">
@@ -166,17 +80,9 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
                         </thead>
                         <tbody className="divide-y divide-gray-200 bg-white">
                             {maquinas.map((maquina, idx) => {
-                                let filaAnt = 0, filaAct = 0, filaConsumo = 0;
-                                if (maquina.cambio) {
-                                    filaAnt = maquina.cambio.maquina_entrante.contadores.anterior.global || 0;
-                                    filaAct = (maquina.actual.total_contador_bn || 0) + (maquina.actual.total_contador_color || 0);
-                                    // Consumo del puesto en el mes: saliente hasta el daño + entrante desde su instalación
-                                    filaConsumo = (maquina.consumo.total_bn || 0) + (maquina.consumo.total_color || 0);
-                                } else {
-                                    filaAnt = ((maquina.anterior.total_contador_bn || 0) + (maquina.anterior.total_contador_color || 0)) || maquina.anterior.total_servicio || 0;
-                                    filaAct = ((maquina.actual.total_contador_bn || 0) + (maquina.actual.total_contador_color || 0)) || maquina.actual.total_servicio || 0;
-                                    filaConsumo = (maquina.consumo.total_bn || 0) + (maquina.consumo.total_color || 0);
-                                }
+                                const { anterior: filaAnt, actual: filaAct } = contadoresDe(maquina);
+                                // En un reemplazo: saliente hasta el daño + entrante desde su instalación
+                                const filaConsumo = (maquina.consumo.total_bn || 0) + (maquina.consumo.total_color || 0);
                                 return (
                                     <tr key={maquina.info.maquina_id || idx} className={`hover:bg-gray-50 ${maquina.cambio ? 'bg-amber-50/30' : ''}`}>
                                         <td className="px-4 py-2.5 font-medium text-gray-900">
@@ -228,123 +134,6 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
                             </tr>
                         </tfoot>
                     </table>
-                </div>
-
-                <div className="bg-white px-6 py-4 border-t border-gray-200">
-                    <div className="flex justify-end">
-                        <div className="w-full md:w-96 space-y-3">
-                            <div className="flex justify-between items-center bg-gray-100 px-3 py-2 rounded">
-                                <span className="text-gray-700 font-bold text-sm uppercase">Consumo Impresiones</span>
-                                <span className="font-bold text-text text-lg font-mono">{formatNumber(totalesGenerales.consumo)} <span className="text-xs text-gray-500 font-sans">páginas</span></span>
-                            </div>
-
-                            {esModeloB && consumoTotalBN > 0 && (
-                                <div className="bg-gray-50 p-3 rounded border border-gray-200 mt-2 space-y-2">
-                                    <p className="text-xs font-bold text-gray-500 uppercase mb-1">
-                                        Facturación B/N <span className="text-gray-400 normal-case font-normal">(por consumo)</span>
-                                    </p>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-600 text-xs">Consumo ({formatNumber(consumoTotalBN)} × ${costoNormalBN.toFixed(4)})</span>
-                                        <span className="font-mono text-gray-800 text-sm font-semibold">$ {formatMoney(montoTotalBN)}</span>
-                                    </div>
-                                    <div className="border-t border-gray-300 pt-1 flex justify-between">
-                                        <span className="font-bold text-xs uppercase text-gray-700">Subtotal B/N</span>
-                                        <span className="font-bold text-primary">$ {formatMoney(montoTotalBN)}</span>
-                                    </div>
-                                </div>
-                            )}
-
-                            {esModeloB && consumoTotalColor > 0 && (
-                                <div className="bg-gray-50 p-3 rounded border border-gray-200 mt-2 space-y-2">
-                                    <p className="text-xs font-bold text-gray-500 uppercase mb-1">
-                                        Facturación Color
-                                        <span className="ml-1 text-gray-400 normal-case font-normal">(por consumo)</span>
-                                    </p>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-600 text-xs">Consumo ({formatNumber(consumoTotalColor)} × ${costoNormalColor.toFixed(4)})</span>
-                                        <span className="font-mono text-gray-800 text-sm font-semibold">$ {formatMoney(montoTotalColor)}</span>
-                                    </div>
-                                    <div className="border-t border-gray-300 pt-1 flex justify-between">
-                                        <span className="font-bold text-xs uppercase text-gray-700">Subtotal Color</span>
-                                        <span className="font-bold text-black">$ {formatMoney(montoTotalColor)}</span>
-                                    </div>
-                                </div>
-                            )}
-
-                            {!esModeloB && contratoCopiaBN > 0 && (
-                                <div className="bg-gray-50 p-3 rounded border border-gray-200 mt-2 space-y-2">
-                                    <p className="text-xs font-bold text-gray-500 uppercase mb-1">Facturación B/N</p>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-600 text-xs">Mínimo ({formatNumber(contratoCopiaBN)} × ${costoNormalBN.toFixed(4)})</span>
-                                        <span className="font-mono text-gray-800 text-sm font-semibold">$ {formatMoney(montoBaseBN)}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-xs text-gray-500">
-                                        <span>Consumo real: {formatNumber(consumoTotalBN)} pág. {excedenteBN > 0 ? `(+${formatNumber(excedenteBN)} exc.)` : ''}</span>
-                                    </div>
-                                    {excedenteBN > 0 && (
-                                        <div className="flex justify-between items-center bg-yellow-50 px-2 py-1 rounded border border-yellow-200">
-                                            <span className="text-gray-600 text-xs">Excedente ({formatNumber(excedenteBN)} × ${costoExcedenteCopiaBN.toFixed(4)})</span>
-                                            <span className="text-primary font-bold text-sm">+ $ {formatMoney(montoExcedenteBN)}</span>
-                                        </div>
-                                    )}
-                                    <div className="border-t border-gray-300 pt-1 flex justify-between">
-                                        <span className="font-bold text-xs uppercase text-gray-700">Subtotal B/N</span>
-                                        <span className="font-bold text-primary">$ {formatMoney(montoTotalBN)}</span>
-                                    </div>
-                                </div>
-                            )}
-
-                            {!esModeloB && contratoCopiaColor > 0 && (
-                                <div className="bg-gray-50 p-3 rounded border border-gray-200 mt-2 space-y-2">
-                                    <p className="text-xs font-bold text-gray-500 uppercase mb-1">
-                                        Facturación Color {todoComoColor && <span className="text-blue-500 normal-case">(Todo Color)</span>}
-                                    </p>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-600 text-xs">Mínimo ({formatNumber(contratoCopiaColor)} × ${costoNormalColor.toFixed(4)})</span>
-                                        <span className="font-mono text-gray-800 text-sm font-semibold">$ {formatMoney(montoBaseColor)}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-xs text-gray-500">
-                                        <span>Consumo real: {formatNumber(consumoTotalColor)} pág. {excedenteColor > 0 ? `(+${formatNumber(excedenteColor)} exc.)` : ''}</span>
-                                    </div>
-                                    {excedenteColor > 0 && (
-                                        <div className="flex justify-between items-center bg-yellow-50 px-2 py-1 rounded border border-yellow-200">
-                                            <span className="text-gray-600 text-xs">Excedente ({formatNumber(excedenteColor)} × ${costoExcedenteCopiaColor.toFixed(4)})</span>
-                                            <span className="text-secondary font-bold text-sm">+ $ {formatMoney(montoExcedenteColor)}</span>
-                                        </div>
-                                    )}
-                                    <div className="border-t border-gray-300 pt-1 flex justify-between">
-                                        <span className="font-bold text-xs uppercase text-gray-700">Subtotal Color</span>
-                                        <span className="font-bold text-secondary">$ {formatMoney(montoTotalColor)}</span>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* ✨ RENTA DE EQUIPOS (Ahora dentro del cuadro) */}
-                            {rentaEquipos.length > 0 && (
-                                <div className="bg-blue-50/50 p-3 rounded border border-blue-200 mt-4 space-y-2">
-                                    <p className="text-xs font-bold text-blue-800 uppercase mb-1">Renta de Equipos Fijos</p>
-                                    {rentaEquipos.map((r) => (
-                                        <div key={r.id_instalacion} className="flex justify-between items-center">
-                                            <span className="text-gray-600 text-xs truncate max-w-[200px]" title={`${r.modelo} (${r.serie})`}>
-                                                {r.modelo} <span className="text-gray-400">({r.serie})</span>
-                                            </span>
-                                            <span className="font-mono text-gray-800 text-sm">$ {formatMoney(r.costo_mensual)}</span>
-                                        </div>
-                                    ))}
-                                    <div className="border-t border-blue-200 pt-1 flex justify-between">
-                                        <span className="font-bold text-xs uppercase text-blue-800">Subtotal Renta</span>
-                                        <span className="font-bold text-blue-800 font-mono">$ {formatMoney(totalRenta)}</span>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="flex justify-between items-center border-t-4 border-gray-800 pt-3 mt-4 bg-gray-50 px-3 py-3 rounded-b">
-                                <span className="text-gray-900 font-black text-sm uppercase tracking-wider">Total Final</span>
-                                <span className="font-black text-gray-900 text-lg font-mono text-black">$ {formatMoney(totalPagar)}</span>
-                            </div>
-
-                        </div>
-                    </div>
                 </div>
             </div>
 

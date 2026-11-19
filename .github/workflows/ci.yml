@@ -31,6 +31,9 @@ jobs:
         run: npm run lint
         continue-on-error: true
 
+      - name: Pruebas
+        run: npm test
+
       - name: Tipos + build
         run: npm run build
 

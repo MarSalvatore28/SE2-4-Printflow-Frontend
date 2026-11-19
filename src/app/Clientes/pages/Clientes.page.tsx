@@ -19,7 +19,8 @@ import {
     updateContrato,
     deleteCliente,
     activarCliente,
-    type ClienteFormData
+    type ClienteFormData,
+    type Contrato
 } from '@app/Clientes/types';
 
 // Datos del formulario de cliente y de contrato (al editar un cliente se guarda su id)
@@ -57,6 +58,31 @@ const INITIAL_FORM_STATE: FormularioCliente = {
 // Si no se pudo leer el cliente completo, el formulario se llena con su fila de la tabla
 // (ahí las tarifas pueden venir como texto, igual que antes).
 const formularioDesdeFila = (client: ClienteParaTabla) => ({ ...INITIAL_FORM_STATE, ...client }) as FormularioCliente;
+
+// La API devuelve las tarifas como texto («0.0200»); el formulario trabaja con números
+const aNumero = (valor: unknown) => Number(valor ?? 0) || 0;
+
+// Campos del contrato vigente en el formulario (editar cliente y editar contrato)
+const contratoEnFormulario = (contrato: Contrato) => ({
+    id_contrato: contrato.id_contrato,
+    fecha_inicio: contrato.fecha_inicio?.split('T')[0],
+    fecha_fin: contrato.fecha_fin?.split('T')[0] || null,
+    copias_bn_incluidas: aNumero(contrato.copias_bn_incluidas),
+    copias_color_incluidas: aNumero(contrato.copias_color_incluidas),
+    impresiones_bn_incluidas: aNumero(contrato.impresiones_bn_incluidas),
+    impresiones_color_incluidas: aNumero(contrato.impresiones_color_incluidas),
+    costo_copia_bn: aNumero(contrato.costo_copia_bn),
+    costo_copia_color: aNumero(contrato.costo_copia_color),
+    costo_impresion_bn: aNumero(contrato.costo_impresion_bn),
+    costo_impresion_color: aNumero(contrato.costo_impresion_color),
+    costo_excedente_copia_bn: aNumero(contrato.costo_excedente_copia_bn),
+    costo_excedente_copia_color: aNumero(contrato.costo_excedente_copia_color),
+    costo_excedente_impresion_bn: aNumero(contrato.costo_excedente_impresion_bn),
+    costo_excedente_impresion_color: aNumero(contrato.costo_excedente_impresion_color),
+    tiene_renta: Boolean(contrato.tiene_renta),
+    tiene_software_control: Boolean(contrato.tiene_software_control),
+    printer_bill: contrato.printer_bill || INITIAL_FORM_STATE.printer_bill,
+});
 
 const ClientesPage = () => {
     // Crear, editar y desactivar clientes y contratos: solo admin (el operador y el auditor consultan)
@@ -351,24 +377,7 @@ const ClientesPage = () => {
                 setFormData({
                     ...INITIAL_FORM_STATE,
                     cliente_id: client.id_cliente,
-                    id_contrato: activeContract.id_contrato,
-                    fecha_inicio: activeContract.fecha_inicio?.split('T')[0],
-                    fecha_fin: activeContract.fecha_fin?.split('T')[0] || null,
-                    copias_bn_incluidas: activeContract.copias_bn_incluidas,
-                    copias_color_incluidas: activeContract.copias_color_incluidas,
-                    impresiones_bn_incluidas: activeContract.impresiones_bn_incluidas,
-                    impresiones_color_incluidas: activeContract.impresiones_color_incluidas,
-                    costo_copia_bn: activeContract.costo_copia_bn,
-                    costo_copia_color: activeContract.costo_copia_color,
-                    costo_impresion_bn: activeContract.costo_impresion_bn,
-                    costo_impresion_color: activeContract.costo_impresion_color,
-                    costo_excedente_copia_bn: activeContract.costo_excedente_copia_bn || 0,
-                    costo_excedente_copia_color: activeContract.costo_excedente_copia_color || 0,
-                    costo_excedente_impresion_bn: activeContract.costo_excedente_impresion_bn || 0,
-                    costo_excedente_impresion_color: activeContract.costo_excedente_impresion_color || 0,
-                    printer_bill: activeContract.printer_bill || INITIAL_FORM_STATE.printer_bill,
-                    tiene_renta: Boolean(activeContract.tiene_renta),
-                    tiene_software_control: Boolean(activeContract.tiene_software_control)
+                    ...contratoEnFormulario(activeContract),
                 });
                 setClienteSeleccionado(client);
                 setIsEditing(true);
@@ -449,28 +458,9 @@ const ClientesPage = () => {
             if (fullData) {
                 const activeContract = fullData.contratos?.find(c => c.activo) || fullData.contratos?.[0];
 
-                setFormData({
-                    ...INITIAL_FORM_STATE,
-                    ...client,
-                    id_contrato: activeContract?.id_contrato,
-                    fecha_inicio: activeContract?.fecha_inicio?.split('T')[0],
-                    fecha_fin: activeContract?.fecha_fin?.split('T')[0] || null,
-                    copias_bn_incluidas: activeContract?.copias_bn_incluidas || 0,
-                    copias_color_incluidas: activeContract?.copias_color_incluidas || 0,
-                    impresiones_bn_incluidas: activeContract?.impresiones_bn_incluidas || 0,
-                    impresiones_color_incluidas: activeContract?.impresiones_color_incluidas || 0,
-                    costo_copia_bn: activeContract?.costo_copia_bn || 0,
-                    costo_copia_color: activeContract?.costo_copia_color || 0,
-                    costo_impresion_bn: activeContract?.costo_impresion_bn || 0,
-                    costo_impresion_color: activeContract?.costo_impresion_color || 0,
-                    costo_excedente_copia_bn: activeContract?.costo_excedente_copia_bn || 0,
-                    costo_excedente_copia_color: activeContract?.costo_excedente_copia_color || 0,
-                    costo_excedente_impresion_bn: activeContract?.costo_excedente_impresion_bn || 0,
-                    costo_excedente_impresion_color: activeContract?.costo_excedente_impresion_color || 0,
-                    tiene_renta: Boolean(activeContract?.tiene_renta || false),
-                    tiene_software_control: Boolean(activeContract?.tiene_software_control || false),
-                    printer_bill: activeContract?.printer_bill || 'Todo como Color',
-                });
+                setFormData(activeContract
+                    ? { ...INITIAL_FORM_STATE, ...client, ...contratoEnFormulario(activeContract) }
+                    : formularioDesdeFila(client));
             } else {
                 setFormData(formularioDesdeFila(client));
             }
@@ -638,7 +628,7 @@ const ClientesPage = () => {
                                 onCancel={handleCancel}
                                 isSubmitting={submitting}
                                 isEditing={activeTab === 'Editar Contrato' ? true : isEditing}
-                                clients={clientesSinContrato}
+                                clients={activeTab === 'Editar Contrato' ? clientesConContrato : clientesSinContrato}
                             />
                         </div>
                     )

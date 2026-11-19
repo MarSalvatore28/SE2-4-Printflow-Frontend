@@ -119,6 +119,7 @@ export interface ReporteStaging {
   estado_maquina: string | null;
   procesar_lectura: boolean;
   mensaje_aviso: string | null;
+  intentos_reproceso?: number; // S3-05: veces que se reprocesó (máximo 3)
   lote_codigo: string;
   lote_periodo: string | null;
   lote_fecha_corte: string | null;

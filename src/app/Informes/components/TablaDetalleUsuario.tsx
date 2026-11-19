@@ -169,7 +169,7 @@ const MaquinaTabla: React.FC<MaquinaTablaProps> = ({ maquina, transacciones, fec
                             </th>
                             <th className="px-4 py-3 text-right cursor-pointer hover:bg-gray-200" onClick={() => onSort('contadores.copia_color')}>
                                 <div className="flex items-center justify-end gap-1">
-                                    Copia Color
+                                    Copia color
                                     <span className={`transition-opacity ${sortConfig.key === 'contadores.copia_color' ? 'opacity-100' : 'opacity-0'}`}>
                                         {sortConfig.key === 'contadores.copia_color' && sortConfig.direction === 'desc' ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
                                     </span>
@@ -177,7 +177,7 @@ const MaquinaTabla: React.FC<MaquinaTablaProps> = ({ maquina, transacciones, fec
                             </th>
                             <th className="px-4 py-3 text-right cursor-pointer hover:bg-gray-200" onClick={() => onSort('contadores.print_bn')}>
                                 <div className="flex items-center justify-end gap-1">
-                                    IMPRIMIR B/N
+                                    Imprimir B/N
                                     <span className={`transition-opacity ${sortConfig.key === 'contadores.print_bn' ? 'opacity-100' : 'opacity-0'}`}>
                                         {sortConfig.key === 'contadores.print_bn' && sortConfig.direction === 'desc' ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
                                     </span>
@@ -185,7 +185,7 @@ const MaquinaTabla: React.FC<MaquinaTablaProps> = ({ maquina, transacciones, fec
                             </th>
                             <th className="px-4 py-3 text-right cursor-pointer hover:bg-gray-200" onClick={() => onSort('contadores.print_color')}>
                                 <div className="flex items-center justify-end gap-1">
-                                    IMPRIMIR COLOR
+                                    Imprimir color
                                     <span className={`transition-opacity ${sortConfig.key === 'contadores.print_color' ? 'opacity-100' : 'opacity-0'}`}>
                                         {sortConfig.key === 'contadores.print_color' && sortConfig.direction === 'desc' ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
                                     </span>

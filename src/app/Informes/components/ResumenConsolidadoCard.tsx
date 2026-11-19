@@ -25,7 +25,7 @@ export const ResumenConsolidadoCard: React.FC<ResumenConsolidadoProps> = ({
 }) => {
     const tarjetas = [
         { titulo: 'Páginas B/N', valor: formatNumber(resumen.total_bn), color: 'text-gray-800' },
-        { titulo: 'Páginas Color', valor: formatNumber(resumen.total_color), color: 'text-secondary' },
+        { titulo: 'Páginas color', valor: formatNumber(resumen.total_color), color: 'text-secondary' },
         { titulo: 'Total de páginas', valor: formatNumber(resumen.total_impresiones), color: 'text-primary' },
         { titulo: 'Importe del período', valor: `$ ${formatMoney(Number(resumen.monto_total_general) || 0)}`, color: 'text-green-700' },
         { titulo: 'Máquinas', valor: String(resumen.total_maquinas || 0), color: 'text-edit' }

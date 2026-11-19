@@ -184,7 +184,7 @@ const ClientesPage = () => {
                     setModalConfig({
                         isOpen: true,
                         type: 'activate',
-                        title: 'Contrato Actualizado',
+                        title: 'Contrato actualizado',
                         message: 'El contrato se ha actualizado correctamente.',
                         cliente: null,
                         showCancel: false,
@@ -203,7 +203,7 @@ const ClientesPage = () => {
                     setModalConfig({
                         isOpen: true,
                         type: 'activate',
-                        title: 'Contrato Asignado',
+                        title: 'Contrato asignado',
                         message: 'El contrato se ha creado y asignado correctamente.',
                         cliente: null,
                         showCancel: false,
@@ -222,7 +222,7 @@ const ClientesPage = () => {
                 setModalConfig({
                     isOpen: true,
                     type: 'warning',
-                    title: 'Error al Guardar',
+                    title: 'Error al guardar',
                     message: (err instanceof Error && err.message) || 'No se pudo guardar el contrato.',
                     cliente: null,
                     showCancel: false,
@@ -303,7 +303,7 @@ const ClientesPage = () => {
             setModalConfig({
                 isOpen: true,
                 type: 'activate',
-                title: wasEditing ? 'Cliente Actualizado' : 'Cliente Creado',
+                title: wasEditing ? 'Cliente actualizado' : 'Cliente creado',
                 message: wasEditing
                     ? 'La información del cliente se ha actualizado correctamente.'
                     : 'El cliente se ha registrado exitosamente en el sistema.',
@@ -324,7 +324,7 @@ const ClientesPage = () => {
             setModalConfig({
                 isOpen: true,
                 type: 'warning',
-                title: 'Error al Guardar',
+                title: 'Error al guardar',
                 message: (err instanceof Error && err.message) || 'No se pudo guardar el cliente.',
                 cliente: null,
                 showCancel: false,
@@ -373,7 +373,7 @@ const ClientesPage = () => {
                 setClienteSeleccionado(client);
                 setIsEditing(true);
             } else {
-                setError("El cliente seleccionado no tiene contratos activos. Puede crear uno nuevo en la pestaña 'Crear Contrato'.");
+                setError("El cliente seleccionado no tiene contratos activos. Puede crear uno nuevo en la pestaña «Crear contrato».");
             }
         } catch (e) {
             console.error(e);
@@ -520,7 +520,7 @@ const ClientesPage = () => {
 
     return (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Clientes</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de clientes</h1>
             {!puedeEditarCatalogos && <AvisoSoloLectura acciones="crear, editar o desactivar clientes y contratos" />}
 
             <div className="flex border-b border-gray-100 p-2 gap-4">
@@ -545,7 +545,7 @@ const ClientesPage = () => {
                         : 'text-gray-500 hover:text-gray-800'
                         }`}
                 >
-                    {isEditing && activeTab === 'agregar' ? 'Editar Cliente' : 'Agregar'}
+                    {isEditing && activeTab === 'agregar' ? 'Editar cliente' : 'Agregar'}
                 </button>
                 <button
                     onClick={() => {
@@ -558,7 +558,7 @@ const ClientesPage = () => {
                         : 'text-gray-500 hover:text-gray-800'
                         }`}
                 >
-                    Crear Contrato
+                    Crear contrato
                 </button>
                 <button
                     onClick={() => {
@@ -571,7 +571,7 @@ const ClientesPage = () => {
                         : 'text-gray-500 hover:text-gray-800'
                         }`}
                 >
-                    Editar Contrato
+                    Editar contrato
                 </button>
                 </>)}
             </div>
@@ -581,7 +581,7 @@ const ClientesPage = () => {
                     < div className="bg-white border border-gray-200 rounded-lg p-6 sm:p-8">
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-800">
-                                {isEditing ? 'Editar Cliente' : 'Nuevo Cliente'}
+                                {isEditing ? 'Editar cliente' : 'Nuevo cliente'}
                             </h2>
                             <p className="text-sm text-gray-500 mt-1">
                                 {isEditing
@@ -603,7 +603,7 @@ const ClientesPage = () => {
                     activeTab === 'Editar Contrato' && !isEditing ? (
                         <div className="bg-white border border-gray-200 rounded-lg p-6 sm:p-8">
                             <div className="mb-6">
-                                <h2 className="text-xl font-bold text-gray-800">Editar Contrato</h2>
+                                <h2 className="text-xl font-bold text-gray-800">Editar contrato</h2>
                                 <p className="text-sm text-gray-500 mt-1">Busca y selecciona el cliente al que deseas modificarle su contrato actual.</p>
                             </div>
                             <hr className="border-gray-200 mb-8" />
@@ -611,7 +611,7 @@ const ClientesPage = () => {
                                 <BusquedaInteligenteClientes
                                     key={`buscador-editar-${activeTab}`}
                                     onSeleccionar={handleSelectClientForContractEdit}
-                                    placeholder="Buscar por Nombre o RUC..."
+                                    placeholder="Buscar por nombre o RUC..."
                                     itemsCompletos={clientesConContrato}
                                 />
                                 {loading && (<div className="mt-4 text-center text-gray-500">Cargando contrato...</div>)}
@@ -622,7 +622,7 @@ const ClientesPage = () => {
                         <div className="bg-white border border-gray-200 rounded-lg p-6 sm:p-8">
                             <div className="mb-6">
                                 <h2 className="text-xl font-bold text-gray-800">
-                                    {activeTab === 'Editar Contrato' ? 'Modificar Contrato' : 'Nuevo Contrato'}
+                                    {activeTab === 'Editar Contrato' ? 'Modificar contrato' : 'Nuevo contrato'}
                                 </h2>
                                 <p className="text-sm text-gray-500 mt-1">
                                     {activeTab === 'Editar Contrato'
@@ -687,7 +687,7 @@ const ClientesPage = () => {
                                 onClick={handleRefresh}
                                 className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium h-[42px]"
                             >
-                                Ver Todos
+                                Ver todos
                             </button>
                         </div>
 
@@ -729,8 +729,8 @@ const ClientesPage = () => {
                 title={
                     modalConfig.title || (
                         modalConfig.type === 'delete'
-                            ? '¿Desactivar Cliente?'
-                            : '¿Activar Cliente?'
+                            ? '¿Desactivar cliente?'
+                            : '¿Activar cliente?'
                     )
                 }
                 message={

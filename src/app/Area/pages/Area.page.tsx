@@ -137,7 +137,7 @@ const AreaPage = () => {
         if (!formData.nombre || !formData.cliente_id) {
             setWarningModal({
                 isOpen: true,
-                message: 'El Nombre y el Cliente son campos obligatorios para poder guardar el área.'
+                message: 'El nombre y el cliente son campos obligatorios para poder guardar el área.'
             });
             return;
         }
@@ -283,7 +283,7 @@ const AreaPage = () => {
 
     return (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Áreas</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de áreas</h1>
             {!puedeEditarCatalogos && <AvisoSoloLectura acciones="crear, editar o desactivar áreas" />}
 
             {/* Tabs - Iguales a Asignaciones */}
@@ -309,7 +309,7 @@ const AreaPage = () => {
                         : 'text-gray-500 hover:text-gray-800'
                         }`}
                 >
-                    {editingArea ? 'Editar Área' : 'Agregar'}
+                    {editingArea ? 'Editar área' : 'Agregar'}
                 </button>
                 )}
             </div>
@@ -321,7 +321,7 @@ const AreaPage = () => {
                     <div className="bg-white border border-gray-200 rounded-lg p-6 sm:p-8">
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-800">
-                                {editingArea ? 'Editar Área' : 'Nueva Área'}
+                                {editingArea ? 'Editar área' : 'Nueva área'}
                             </h2>
                             <p className="text-sm text-gray-500 mt-1">
                                 {editingArea
@@ -350,7 +350,7 @@ const AreaPage = () => {
                         <div className="flex flex-col md:flex-row gap-4 items-end bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <div className="flex-1 w-full">
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Buscar Área
+                                    Buscar área
                                 </label>
                                 <BusquedaInteligenteAreas
                                     onSeleccionar={(a) => {
@@ -384,7 +384,7 @@ const AreaPage = () => {
                                     className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2 cursor-pointer"
                                 />
                                 <label htmlFor="showInactive" className="ml-2 text-sm font-medium text-gray-700 cursor-pointer select-none">
-                                    Mostrar Inactivas
+                                    Mostrar inactivas
                                 </label>
                             </div>
 
@@ -392,7 +392,7 @@ const AreaPage = () => {
                                 onClick={handleRefresh}
                                 className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium h-[42px]"
                             >
-                                Ver Todos
+                                Ver todos
                             </button>
                         </div>
 
@@ -424,8 +424,8 @@ const AreaPage = () => {
                 type={modalConfig.type}
                 title={
                     modalConfig.type === 'delete'
-                        ? '¿Desactivar Área?'
-                        : '¿Activar Área?'
+                        ? '¿Desactivar área?'
+                        : '¿Activar área?'
                 }
                 message={
                     modalConfig.type === 'delete'

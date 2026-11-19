@@ -100,7 +100,7 @@ export const ClientList: React.FC<ClientListProps> = ({
 
   return (
     <DataTable<ClienteParaTabla>
-      title="Clientes Registrados"
+      title="Clientes registrados"
       columns={columns}
       data={clients}
       onEdit={onEdit}

@@ -95,7 +95,7 @@ const InformesPage = () => {
 
     return (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Informes</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de informes</h1>
 
             <FiltrosBusqueda
                 clientes={clientes}

@@ -271,7 +271,7 @@ export const MaquinaForm: FC<MaquinaFormProps> = ({
                             Guardando...
                         </>
                     ) : (
-                        maquina ? 'Actualizar Máquina' : 'Guardar Máquina'
+                        maquina ? 'Actualizar máquina' : 'Guardar máquina'
                     )}
                 </button>
             </div>

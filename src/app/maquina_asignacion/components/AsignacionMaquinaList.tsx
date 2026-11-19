@@ -176,14 +176,14 @@ export const InstalacionesList: React.FC<InstalacionesListProps> = ({
                         className="text-xs px-3 py-1.5 bg-primary text-white rounded-md hover:bg-primary-hover transition-colors font-medium flex items-center gap-1"
                     >
                         <ChevronDown className="w-3.5 h-3.5" />
-                        Expandir Todos
+                        Expandir todos
                     </button>
                     <button
                         onClick={contraerTodos}
                         className="text-xs px-3 py-1.5 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors font-medium flex items-center gap-1"
                     >
                         <ChevronRight className="w-3.5 h-3.5" />
-                        Contraer Todos
+                        Contraer todos
                     </button>
                 </div>
             </div>
@@ -295,10 +295,10 @@ export const InstalacionesList: React.FC<InstalacionesListProps> = ({
                                                                         Dirección IP
                                                                     </th>
                                                                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                                                        Fecha Instalación
+                                                                        Fecha de instalación
                                                                     </th>
                                                                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                                                        Costos Contrato
+                                                                        Costos de contrato
                                                                     </th>
                                                                     <th className="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
                                                                         Contador
@@ -407,7 +407,7 @@ export const InstalacionesList: React.FC<InstalacionesListProps> = ({
                                                                                         ? 'bg-green-100 text-green-700'
                                                                                         : 'bg-orange-100 text-orange-700'
                                                                                     }`}>
-                                                                                    {instalacion.contador_acumulativo ? 'Acumulativo' : 'No Acumulativo'}
+                                                                                    {instalacion.contador_acumulativo ? 'Acumulativo' : 'No acumulativo'}
                                                                                 </span>
                                                                                 <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${instalacion.contabilidad_por_usuario
                                                                                         ? 'bg-blue-100 text-blue-700'

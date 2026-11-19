@@ -8,8 +8,8 @@ Proyecto de la materia **Ingeniería de Software II** (ESPOL, sección 4).
 
 | | |
 |---|---|
-| Backend (API, base de datos y Docker) | [MGabrielaVillon/SE2-4-Printflow](https://github.com/MGabrielaVillon/SE2-4-Printflow) |
-| Plan de trabajo | [`PLAN.md`](https://github.com/MGabrielaVillon/SE2-4-Printflow/blob/develop/PLAN.md) en el repositorio del backend |
+| Backend (API, base de datos y Docker) | [MarSalvatore28/SE2-4-Printflow](https://github.com/MarSalvatore28/SE2-4-Printflow) |
+| Plan de trabajo | [`PLAN.md`](https://github.com/MarSalvatore28/SE2-4-Printflow/blob/develop/PLAN.md) en el repositorio del backend |
 
 ---
 
@@ -68,7 +68,7 @@ El sistema completo (base de datos, API, web y n8n) se levanta **desde el reposi
 
 ```powershell
 mkdir C:\printflow; cd C:\printflow
-git clone https://github.com/MGabrielaVillon/SE2-4-Printflow.git
+git clone https://github.com/MarSalvatore28/SE2-4-Printflow.git
 git clone https://github.com/MarSalvatore28/SE2-4-Printflow-Frontend.git
 
 cd SE2-4-Printflow

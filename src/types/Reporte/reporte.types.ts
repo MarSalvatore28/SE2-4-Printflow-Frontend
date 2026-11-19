@@ -98,6 +98,8 @@ export interface ConsumoMaquina {
 
 export interface Financiero {
   monto_total: string;
+  /** Consumo × tarifa por página: solo informativo. El importe oficial es el del contrato (`resumen.facturacion`). */
+  monto_referencial?: string;
 }
 
 export interface MaquinaConsolidada {
@@ -118,11 +120,36 @@ export interface RentaEquipo {
   costo_mensual: number;
 }
 
+/** Páginas y montos de un tipo de página (B/N o color) en un contrato. Los montos vienen como texto con 2 decimales. */
+export interface FacturacionTramo {
+  consumo: number;
+  incluidas: number;
+  excedente: number;
+  cuota_fija: string;
+  monto_excedente: string;
+}
+
+/** DIFERENCIAR: B/N y color por separado. TODO_COLOR: todas las páginas cuentan como color. */
+export type ModoFacturacion = 'DIFERENCIAR' | 'TODO_COLOR';
+
+/** Importe de un contrato en el período, tal como lo calcula el backend (S3-06). */
+export interface FacturacionContrato {
+  contrato_id: number;
+  modo: ModoFacturacion;
+  bn: FacturacionTramo;
+  color: FacturacionTramo;
+  renta: string;
+  total: string;
+}
+
 export interface ResumenConsolidado {
   total_bn: number;
   total_color: number;
   total_impresiones: number;
-  monto_total_general: number;
+  /** Suma de los totales de `facturacion`: número hoy, texto con 2 decimales cuando el backend calcule el importe. */
+  monto_total_general: number | string;
+  /** Un elemento por contrato. Vacío o ausente mientras el importe no se haya calculado. */
+  facturacion?: FacturacionContrato[];
   total_maquinas: number;
   total_cambios: number;
   periodo: string;

@@ -58,7 +58,8 @@ export async function fetchReporteConsolidado(
       cliente_id: clienteId,
       renta_equipos: [],
       total_renta: 0,
-      total_general: 0
+      total_general: 0,
+      facturacion: []
     }
   };
 }

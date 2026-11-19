@@ -18,10 +18,14 @@ import {
     getClienteCompleto,
     updateContrato,
     deleteCliente,
-    activarCliente
+    activarCliente,
+    type ClienteFormData
 } from '@app/Clientes/types';
 
-const INITIAL_FORM_STATE: any = {
+// Datos del formulario de cliente y de contrato (al editar un cliente se guarda su id)
+type FormularioCliente = ClienteFormData & { id_cliente?: number };
+
+const INITIAL_FORM_STATE: FormularioCliente = {
     nombre: '',
     ruc: '',
     razon_social: '',
@@ -50,6 +54,10 @@ const INITIAL_FORM_STATE: any = {
     printer_bill: 'Todo como Color'
 };
 
+// Si no se pudo leer el cliente completo, el formulario se llena con su fila de la tabla
+// (ahí las tarifas pueden venir como texto, igual que antes).
+const formularioDesdeFila = (client: ClienteParaTabla) => ({ ...INITIAL_FORM_STATE, ...client }) as FormularioCliente;
+
 const ClientesPage = () => {
     // Crear, editar y desactivar clientes y contratos: solo admin (el operador y el auditor consultan)
     const { puedeEditarCatalogos } = usePermisos();
@@ -62,7 +70,7 @@ const ClientesPage = () => {
     const [submitting, setSubmitting] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
-    const [formData, setFormData] = useState<any>(INITIAL_FORM_STATE);
+    const [formData, setFormData] = useState<FormularioCliente>(INITIAL_FORM_STATE);
     const [isEditing, setIsEditing] = useState<boolean>(false);
 
     const [clienteSeleccionado, setClienteSeleccionado] = useState<ClienteParaTabla | null>(null);
@@ -120,14 +128,14 @@ const ClientesPage = () => {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
 
-        let finalValue: any = value;
+        let finalValue: string | number | boolean = value;
         if (type === 'checkbox') {
             finalValue = (e.target as HTMLInputElement).checked;
         } else if (type === 'number') {
             finalValue = Number(value);
         }
 
-        setFormData((prev: any) => ({
+        setFormData((prev) => ({
             ...prev,
             [name]: finalValue
         }));
@@ -209,13 +217,13 @@ const ClientesPage = () => {
                     });
                 }
 
-            } catch (err: any) {
+            } catch (err) {
                 console.error('Error saving contract:', err);
                 setModalConfig({
                     isOpen: true,
                     type: 'warning',
                     title: 'Error al Guardar',
-                    message: err.message || 'No se pudo guardar el contrato.',
+                    message: (err instanceof Error && err.message) || 'No se pudo guardar el contrato.',
                     cliente: null,
                     showCancel: false,
                     confirmText: 'Entendido',
@@ -311,13 +319,13 @@ const ClientesPage = () => {
                     }
                 }
             });
-        } catch (err: any) {
+        } catch (err) {
             console.error('Error saving client:', err);
             setModalConfig({
                 isOpen: true,
                 type: 'warning',
                 title: 'Error al Guardar',
-                message: err.message || 'No se pudo guardar el cliente.',
+                message: (err instanceof Error && err.message) || 'No se pudo guardar el cliente.',
                 cliente: null,
                 showCancel: false,
                 confirmText: 'Entendido',
@@ -339,7 +347,7 @@ const ClientesPage = () => {
         try {
             const fullData = await getClienteCompleto(client.id_cliente);
             if (fullData && fullData.contratos && fullData.contratos.length > 0) {
-                const activeContract = fullData.contratos.find((c: any) => c.activo) || fullData.contratos[0];
+                const activeContract = fullData.contratos.find((c) => c.activo) || fullData.contratos[0];
                 setFormData({
                     ...INITIAL_FORM_STATE,
                     cliente_id: client.id_cliente,
@@ -464,14 +472,14 @@ const ClientesPage = () => {
                     printer_bill: activeContract?.printer_bill || 'Todo como Color',
                 });
             } else {
-                setFormData({ ...INITIAL_FORM_STATE, ...client });
+                setFormData(formularioDesdeFila(client));
             }
             setIsEditing(true);
             setActiveTab('agregar');
         } catch (err) {
             console.error('Error fetching full client details for edit:', err);
             setError('No se pudieron cargar todos los detalles del cliente para editar.');
-            setFormData({ ...INITIAL_FORM_STATE, ...client });
+            setFormData(formularioDesdeFila(client));
             setIsEditing(true);
             setActiveTab('agregar');
         } finally {
@@ -717,7 +725,7 @@ const ClientesPage = () => {
                 isOpen={modalConfig.isOpen}
                 onClose={handleCloseModalConfirm}
                 onConfirm={handleConfirmModal}
-                type={modalConfig.type as any}
+                type={modalConfig.type}
                 title={
                     modalConfig.title || (
                         modalConfig.type === 'delete'

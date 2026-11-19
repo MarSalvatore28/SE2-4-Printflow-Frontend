@@ -11,6 +11,7 @@ import { type Client } from '../../Clientes/types';
 
 import {
     type Area,
+    type AreaFormData,
     fetchAllAreas,
     updateArea,
     deleteArea,
@@ -145,7 +146,7 @@ const AreaPage = () => {
         setError(null);
 
         try {
-            const payload: any = {
+            const payload: AreaFormData = {
                 nombre: formData.nombre.trim(),
                 descripcion: formData.descripcion?.trim() || null,
                 cliente_id: Number(formData.cliente_id),
@@ -163,9 +164,9 @@ const AreaPage = () => {
                 message: editingArea ? 'Área actualizada correctamente' : 'Área agregada correctamente'
             });
 
-        } catch (err: any) {
+        } catch (err) {
             console.error('Error saving area:', err);
-            setError(err.message || 'No se pudo guardar el área');
+            setError((err instanceof Error && err.message) || 'No se pudo guardar el área');
         } finally {
             setSubmitting(false);
         }

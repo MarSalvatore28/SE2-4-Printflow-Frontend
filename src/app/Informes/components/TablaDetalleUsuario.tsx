@@ -56,8 +56,9 @@ const MaquinaTabla: React.FC<MaquinaTablaProps> = ({ maquina, transacciones, fec
         if (!isA_Otro && isB_Otro) return -1;
         if (isA_Otro && isB_Otro) return 0;
 
-        let valA: any = null;
-        let valB: any = null;
+        // Sin columna conocida, los dos quedan en '' y el orden no cambia
+        let valA: string | number = '';
+        let valB: string | number = '';
 
         switch (sortConfig.key) {
             case 'usuario.id':

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider } from './context/AuthProvider';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import LoginPage from './app/Auth/pages/LoginPage';
 import { Layout } from './components/layout/Layout';

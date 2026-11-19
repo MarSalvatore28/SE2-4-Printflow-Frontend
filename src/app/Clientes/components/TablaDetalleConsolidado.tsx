@@ -382,7 +382,7 @@ export const TablaDetalleConsolidado: React.FC<TablaDetalleConsolidadoProps> = (
                                         <div><p className="text-xs text-gray-500 uppercase">Serie</p><p className="font-mono font-bold text-gray-900">{modalCambio.maquina_saliente.serie}</p></div>
                                         <div><p className="text-xs text-gray-500 uppercase">Modelo</p><p className="font-medium text-gray-700">{modalCambio.maquina_saliente.modelo}</p></div>
                                         <div className="grid grid-cols-2 gap-3 text-sm">
-                                            <div><p className="text-xs text-gray-500">Instalada</p><p className="font-medium">{formatFechaISO(modalCambio.maquina_saliente.fecha_inicio_operacion)}</p></div>
+                                            <div><p className="text-xs text-gray-500">Desde (último corte)</p><p className="font-medium">{formatFechaISO(modalCambio.maquina_saliente.fecha_inicio_operacion)}</p></div>
                                             <div><p className="text-xs text-gray-500">Retirada</p><p className="font-medium text-red-600">{formatFechaISO(modalCambio.maquina_saliente.fecha_retiro)}</p></div>
                                         </div>
                                         <div className="bg-gray-50 p-3 rounded"><p className="text-xs text-gray-500 uppercase mb-2">Días operativos</p><p className="text-2xl font-bold text-gray-900">{modalCambio.totales.dias_saliente} días</p></div>

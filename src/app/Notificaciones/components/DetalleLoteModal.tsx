@@ -77,6 +77,14 @@ export const DetalleLoteModal = ({ loteId, onClose, onFechaCorteChange, onLoteAc
   // S3-05: reporte en ERROR que se está reprocesando
   const [reprocesandoId, setReprocesandoId] = useState<number | null>(null);
   const navigate = useNavigate();
+  // El resultado de aprobar, rechazar o reprocesar sale arriba del detalle: se muestra aunque
+  // el usuario esté abajo, en los botones (antes el 409 quedaba fuera de la vista)
+  const resultadoRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (aviso || erroresAprobacion.length > 0) {
+      resultadoRef.current?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+    }
+  }, [aviso, erroresAprobacion]);
 
   // Última versión de los callbacks sin volver a cargar el lote cuando cambian
   const callbacks = useRef({ onFechaCorteChange, onLoteActualizado });
@@ -266,6 +274,7 @@ export const DetalleLoteModal = ({ loteId, onClose, onFechaCorteChange, onLoteAc
                 </div>
               )}
 
+              <div ref={resultadoRef} className="scroll-mt-4" aria-hidden="true" />
               {aviso && (
                 <output
                   className={`flex items-start gap-2 p-3 rounded-lg border text-sm ${aviso.tipo === 'ok'

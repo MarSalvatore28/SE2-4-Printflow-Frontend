@@ -1,7 +1,7 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Lote } from '@app/Notificaciones/types/notificaciones';
+import { ErrorAprobacion, type Lote } from '@app/Notificaciones/types/notificaciones';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -94,5 +94,17 @@ describe('DetalleLoteModal · aprobar', () => {
     });
     await clic(/Confirmar aprobación/);
     expect(servicio.aprobarLote).toHaveBeenCalledWith(8, { periodo: '2026-10' });
+  });
+
+  it('si no se puede aprobar (409), lleva la vista a los motivos', async () => {
+    const desplazar = vi.fn();
+    Element.prototype.scrollIntoView = desplazar;
+    servicio.getLote.mockResolvedValue(lote({ estado: 'ERROR' }));
+    servicio.aprobarLote.mockRejectedValue(new ErrorAprobacion('No se puede aprobar el lote', ['Máquina SIMD0004: El equipo reportó: Error de comunicación']));
+    await montar();
+    await clic(/^\s*Aprobar$/);
+    await clic(/Confirmar aprobación/);
+    expect(document.querySelector('[data-testid="errores-aprobacion"]')?.textContent).toContain('SIMD0004');
+    expect(desplazar).toHaveBeenCalled();
   });
 });

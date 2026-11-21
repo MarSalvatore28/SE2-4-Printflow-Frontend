@@ -126,7 +126,7 @@ export const exportToExcel = (
 // ---------------------------------------------------------------------------
 import type { CellDef, CellHookData, RowInput } from "jspdf-autotable";
 import { formatMoney as dineroSinSigno, formatNumber as enteroPDF, formatFechaISO } from "@utils/formatUtils";
-import { aMonto, hayFacturacion, importeReferencial, MENSAJE_IMPORTE_PENDIENTE, NOTA_IMPORTE_REFERENCIAL } from "@utils/facturacionUtils";
+import { aMonto, hayFacturacion, importeReferencial, MENSAJE_IMPORTE_PENDIENTE, nombreContrato, NOTA_FACTURACION_FILTRADA, NOTA_IMPORTE_REFERENCIAL } from "@utils/facturacionUtils";
 
 export interface ExportPDFData {
   /** `resumen` del consolidado: totales y `facturacion` del backend. */
@@ -249,7 +249,7 @@ const filaTramoFacturacion = (tipo: string, t: FacturacionTramo): RowInput => [
 const tablaContratoPDF = (doc: jsPDF, c: FacturacionContrato, y: number): number => {
   const modo = c.modo === "TODO_COLOR" ? "Todo como color: las páginas B/N cuentan como color" : "B/N y color por separado";
   doc.setFontSize(9);
-  doc.text(`Contrato #${c.contrato_id} · ${modo}`, MARGEN, y + 3);
+  doc.text(`${nombreContrato(c)} · ${modo}`, MARGEN, y + 3);
   const totalFila = (concepto: string, valor: string, negrita: boolean): RowInput => [
     { content: concepto, colSpan: 5, styles: { halign: "right", fontStyle: negrita ? "bold" : "normal", fillColor: negrita ? COLOR_TOTAL : undefined } },
     { content: valor, styles: { halign: "right", fontStyle: negrita ? "bold" : "normal", fillColor: negrita ? COLOR_TOTAL : undefined } },
@@ -417,6 +417,14 @@ export const exportToPDF = (
       y = asegurarEspacio(doc, y, 40);
       y = tablaContratoPDF(doc, c, y);
     });
+    // Igual que la tarjeta y el Excel: con filtro se factura el contrato completo
+    if (contratos.some((c) => c.filtrado)) {
+      doc.setFontSize(8);
+      doc.setTextColor(100);
+      doc.text(`${NOTA_FACTURACION_FILTRADA}.`, MARGEN, y);
+      doc.setTextColor(0);
+      y += 8;
+    }
   }
 
   // Totales del período, al final del consolidado

@@ -39,6 +39,8 @@ const maquina = (over: Partial<MaquinaConsolidada> & { serie: string; bn: number
 
 const contrato = (over: Partial<FacturacionContrato> = {}): FacturacionContrato => ({
   contrato_id: 1,
+  contrato_fecha_inicio: '2026-01-01',
+  contrato_fecha_fin: null,
   modo: 'DIFERENCIAR',
   bn: { consumo: 13960, incluidas: 5000, excedente: 8960, cuota_fija: '100.00', monto_excedente: '224.00' },
   color: { consumo: 679, incluidas: 500, excedente: 179, cuota_fija: '50.00', monto_excedente: '21.48' },
@@ -129,7 +131,7 @@ describe('filasMaquinas', () => {
 describe('filasFacturacion', () => {
   it('muestra la tabla del contrato desde resumen.facturacion', () => {
     const filas = filasFacturacion(resumen());
-    expect(valores(filas[1])).toEqual(['Contrato #1 · B/N y color por separado']);
+    expect(valores(filas[1])).toEqual(['Contrato desde el 2026/01/01 · B/N y color por separado']);
     expect(valores(buscar(filas, 'B/N')!)).toEqual(['B/N', 13960, 5000, 8960, 100, 224]);
     expect(valores(buscar(filas, 'Color')!)).toEqual(['Color', 679, 500, 179, 50, 21.48]);
     expect(valores(buscar(filas, 'Renta de equipos')!)).toEqual(['Renta de equipos', null, null, null, null, 0]);
@@ -139,10 +141,10 @@ describe('filasFacturacion', () => {
 
   it('con varios contratos agrega el total del período', () => {
     const filas = filasFacturacion(resumen({
-      facturacion: [contrato(), contrato({ contrato_id: 2, modo: 'TODO_COLOR', total: '100.00' })],
+      facturacion: [contrato(), contrato({ contrato_id: 2, contrato_fecha_inicio: '2026-03-01', contrato_fecha_fin: '2026-12-31', modo: 'TODO_COLOR', total: '100.00' })],
       monto_total_general: '495.48',
     }));
-    expect(filas.some((f) => f.celdas[0] === 'Contrato #2 · Todo como color: las páginas B/N cuentan como color')).toBe(true);
+    expect(filas.some((f) => f.celdas[0] === 'Contrato del 2026/03/01 al 2026/12/31 · Todo como color: las páginas B/N cuentan como color')).toBe(true);
     expect(valores(buscar(filas, 'Total del período')!)).toEqual(['Total del período', null, null, null, null, 495.48]);
   });
 

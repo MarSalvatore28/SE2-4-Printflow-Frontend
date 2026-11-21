@@ -135,6 +135,10 @@ export type ModoFacturacion = 'DIFERENCIAR' | 'TODO_COLOR';
 /** Importe de un contrato en el período, tal como lo calcula el backend (S3-06). */
 export interface FacturacionContrato {
   contrato_id: number;
+  /** Inicio del contrato (AAAA-MM-DD): con él se nombra el contrato en pantalla, PDF y Excel. */
+  contrato_fecha_inicio?: string | null;
+  /** Fin del contrato (AAAA-MM-DD) o null si sigue vigente. */
+  contrato_fecha_fin?: string | null;
   modo: ModoFacturacion;
   bn: FacturacionTramo;
   color: FacturacionTramo;

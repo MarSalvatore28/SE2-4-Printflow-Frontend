@@ -75,6 +75,8 @@ export interface InstalacionActivaCliente {
   cliente_razon_social?: string;
 
   id_contrato: number;
+  contrato_fecha_inicio?: string | null;
+  contrato_fecha_fin?: string | null;
   costo_copia_bn?: string;
   costo_copia_color?: string;
   costo_impresion_bn?: string;

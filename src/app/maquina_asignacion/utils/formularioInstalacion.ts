@@ -10,18 +10,28 @@ const esIPv4 = (ip: string) => {
 
 const vacio = (texto?: string) => !texto || texto.trim() === '';
 
+// La IP en su forma normal (010.020.001.011 = 10.20.1.11), como la guarda el backend
+const ipNormal = (ip: string) => ip.trim().split('.').map(Number).join('.');
+
 export type ErroresFormulario = Record<string, string>;
 
 // Errores de la instalación múltiple: cada máquina necesita área e IP válida
 const erroresMultiple = (maquinas: MaquinaConIP[]): ErroresFormulario => {
     const errores: ErroresFormulario = {};
     if (maquinas.length === 0) errores.maquina = 'Debe agregar al menos una máquina';
+    // Dos máquinas de la misma tanda no pueden llevar la misma IP (la API rechazaría la segunda)
+    const ipsUsadas = new Map<string, string>();
     maquinas.forEach((item, index) => {
         if (!item.area_id) errores[`area_${index}`] = `Seleccione un área para la máquina ${item.maquina.serie}`;
         if (vacio(item.ip_address)) {
             errores[`ip_${index}`] = `La máquina ${item.maquina.serie} requiere una dirección IP`;
         } else if (!esIPv4(item.ip_address.trim())) {
             errores[`ip_${index}`] = `IP inválida para ${item.maquina.serie}`;
+        } else {
+            const ip = ipNormal(item.ip_address);
+            const otra = ipsUsadas.get(ip);
+            if (otra) errores[`ip_${index}`] = `La IP ${ip} de ${item.maquina.serie} ya la lleva ${otra} en esta lista`;
+            else ipsUsadas.set(ip, item.maquina.serie);
         }
     });
     return errores;
@@ -45,15 +55,20 @@ export const validarFormularioInstalacion = ({
     datos,
     multiple,
     maquinas,
+    hoy,
 }: {
     clienteId?: number;
     datos: InstalacionFormData;
     multiple: boolean;
     maquinas: MaquinaConIP[];
+    /** 'YYYY-MM-DD' de hoy: la fecha de instalación no puede ser posterior */
+    hoy?: string;
 }): ErroresFormulario => {
     const errores: ErroresFormulario = {};
     if (!clienteId) errores.cliente = 'Debe seleccionar un cliente';
     if (!datos.contrato_id) errores.contrato = 'Debe seleccionar un contrato';
+    if (!datos.fecha_instalacion) errores.fecha = 'Indique la fecha de instalación';
+    else if (hoy && datos.fecha_instalacion > hoy) errores.fecha = 'La fecha de instalación no puede ser futura';
     return { ...errores, ...(multiple ? erroresMultiple(maquinas) : erroresSimple(datos)) };
 };
 

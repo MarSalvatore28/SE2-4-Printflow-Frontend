@@ -109,7 +109,7 @@ export const UsuarioForm: FC<UsuarioFormProps> = ({
     };
 
     const rolElegido = roles.find(r => String(r.id_rol) === valores.rol_id);
-    const textoGuardar = esNuevo ? 'Guardar Usuario' : 'Actualizar Usuario';
+    const textoGuardar = esNuevo ? 'Guardar usuario' : 'Actualizar usuario';
 
     return (
         <div className="flex flex-col gap-8">

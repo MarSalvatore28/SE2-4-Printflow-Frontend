@@ -25,7 +25,7 @@ const mensajeDe = (err: unknown, porDefecto: string) =>
 const EncabezadoFormulario = ({ editando }: { editando: Usuario | null }) => (
     <div className="mb-6">
         <h2 className="text-xl font-bold text-gray-800">
-            {editando ? `Editar usuario ${editando.email}` : 'Nuevo Usuario'}
+            {editando ? `Editar usuario ${editando.email}` : 'Nuevo usuario'}
         </h2>
         <p className="text-sm text-gray-500 mt-1">
             {editando
@@ -219,14 +219,14 @@ const UsuariosPage = () => {
 
     return (
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Usuarios</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de usuarios</h1>
 
             <div className="flex flex-wrap border-b border-gray-100 p-2 gap-2 md:gap-4">
                 <button onClick={() => setActiveTab('listar')} className={clasePestana(activeTab === 'listar')}>
                     Listar
                 </button>
                 <button onClick={abrirNuevo} className={clasePestana(activeTab === 'formulario')}>
-                    {activeTab === 'formulario' && editando ? 'Editar Usuario' : 'Agregar'}
+                    {activeTab === 'formulario' && editando ? 'Editar usuario' : 'Agregar'}
                 </button>
             </div>
 

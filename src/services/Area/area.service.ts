@@ -22,6 +22,12 @@ type AreaApi = Omit<Area, "cliente_id" | "activo"> & {
     activo: number | boolean | string;
 };
 
+// Error con el motivo que manda el backend (409 nombre repetido, área con máquinas...)
+const errorDeRespuesta = async (res: Response, porDefecto: string) => {
+    const data = await res.json().catch(() => ({}));
+    return new Error(data.message || `${porDefecto} (${res.status})`);
+};
+
 /**
  * Normalizes area data from backend to ensure frontend consistency
  */
@@ -118,7 +124,7 @@ export async function createArea(area: AreaFormData): Promise<number | null> {
             headers: getAuthHeaders(true),
             body: JSON.stringify(area),
         });
-        if (!res.ok) throw new Error(`Error create: ${res.status}`);
+        if (!res.ok) throw await errorDeRespuesta(res, 'No se pudo crear el área');
         const data = await res.json();
         return data.success ? data.data.id_area : null;
     } catch (err) {
@@ -134,7 +140,7 @@ export async function updateArea(id: number, area: AreaFormData): Promise<boolea
             headers: getAuthHeaders(true),
             body: JSON.stringify(area),
         });
-        if (!res.ok) throw new Error(`Error update: ${res.status}`);
+        if (!res.ok) throw await errorDeRespuesta(res, 'No se pudo actualizar el área');
         const data = await res.json();
         return data.success;
     } catch (err) {
@@ -149,7 +155,7 @@ export async function deleteArea(id: number): Promise<boolean> {
             method: "DELETE",
             headers: getAuthHeaders()
         });
-        if (!res.ok) throw new Error(`Error delete: ${res.status}`);
+        if (!res.ok) throw await errorDeRespuesta(res, 'No se pudo desactivar el área');
         const data = await res.json();
         return data.success;
     } catch (err) {
@@ -164,7 +170,7 @@ export async function activarArea(id: number): Promise<boolean> {
             method: "PATCH",
             headers: getAuthHeaders()
         });
-        if (!res.ok) throw new Error(`Error activar: ${res.status}`);
+        if (!res.ok) throw await errorDeRespuesta(res, 'No se pudo activar el área');
         const data = await res.json();
         return data.success;
     } catch (err) {

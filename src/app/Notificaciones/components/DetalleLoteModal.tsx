@@ -77,6 +77,14 @@ export const DetalleLoteModal = ({ loteId, onClose, onFechaCorteChange, onLoteAc
   // S3-05: reporte en ERROR que se está reprocesando
   const [reprocesandoId, setReprocesandoId] = useState<number | null>(null);
   const navigate = useNavigate();
+  // El resultado de aprobar, rechazar o reprocesar sale arriba del detalle: se muestra aunque
+  // el usuario esté abajo, en los botones (antes el 409 quedaba fuera de la vista)
+  const resultadoRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (aviso || erroresAprobacion.length > 0) {
+      resultadoRef.current?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+    }
+  }, [aviso, erroresAprobacion]);
 
   // Última versión de los callbacks sin volver a cargar el lote cuando cambian
   const callbacks = useRef({ onFechaCorteChange, onLoteActualizado });
@@ -139,7 +147,8 @@ export const DetalleLoteModal = ({ loteId, onClose, onFechaCorteChange, onLoteAc
     setAviso(null);
     setErroresAprobacion([]);
     try {
-      const r = await aprobarLote(loteId, periodo ? { periodo } : {});
+      // Con período en el lote, el backend usa ese; el usuario solo elige cuando el lote no lo trae
+      const r = await aprobarLote(loteId, !lote?.periodo && periodo ? { periodo } : {});
       setAccion(null);
       setAviso({ tipo: 'ok', texto: `${r.message}. El lote pasó a «Procesado».` });
       await despuesDeLaAccion();
@@ -265,6 +274,7 @@ export const DetalleLoteModal = ({ loteId, onClose, onFechaCorteChange, onLoteAc
                 </div>
               )}
 
+              <div ref={resultadoRef} className="scroll-mt-4" aria-hidden="true" />
               {aviso && (
                 <output
                   className={`flex items-start gap-2 p-3 rounded-lg border text-sm ${aviso.tipo === 'ok'
@@ -432,15 +442,22 @@ export const DetalleLoteModal = ({ loteId, onClose, onFechaCorteChange, onLoteAc
                   <p className="text-sm text-green-900">
                     Se pasarán los {reportes.length} reporte(s) del lote a los reportes oficiales y se borrarán de staging.
                   </p>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Período del informe<input
-                      type="month"
-                      value={periodo}
-                      onChange={(e) => setPeriodo(e.target.value)}
-                      className="mt-1 block w-48 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                      data-testid="periodo-aprobacion"
-                    />
-                  </label>
+                  {/* El lote se validó con su período: no se puede aprobar en otro mes (el backend responde 409) */}
+                  {lote.periodo ? (
+                    <p className="text-sm text-gray-700" data-testid="periodo-lote">
+                      Período del informe: <span className="font-semibold">{lote.periodo}</span>
+                    </p>
+                  ) : (
+                    <label className="block text-sm font-medium text-gray-700">
+                      Período del informe<input
+                        type="month"
+                        value={periodo}
+                        onChange={(e) => setPeriodo(e.target.value)}
+                        className="mt-1 block w-48 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                        data-testid="periodo-aprobacion"
+                      />
+                    </label>
+                  )}
                   <div className="flex gap-2">
                     <button
                       onClick={confirmarAprobacion}

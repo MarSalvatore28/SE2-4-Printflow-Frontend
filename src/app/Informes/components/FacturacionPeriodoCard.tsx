@@ -1,6 +1,6 @@
 import React from 'react';
 import { formatNumber, formatMoney } from '@utils/formatUtils';
-import { aMonto, MENSAJE_IMPORTE_PENDIENTE } from '@utils/facturacionUtils';
+import { aMonto, MENSAJE_IMPORTE_PENDIENTE, nombreContrato, NOTA_FACTURACION_FILTRADA } from '@utils/facturacionUtils';
 import type { FacturacionContrato, FacturacionTramo } from '@models/Reporte/reporte.types';
 
 interface FacturacionPeriodoCardProps {
@@ -46,7 +46,7 @@ export const FacturacionPeriodoCard: React.FC<FacturacionPeriodoCardProps> = ({ 
             {contratos.map((c) => (
                 <div key={c.contrato_id} data-testid={`facturacion-contrato-${c.contrato_id}`} className="border-b border-gray-200 last:border-b-0">
                     <div className="flex flex-wrap items-center justify-between gap-2 px-6 pt-3">
-                        <p className="text-sm font-semibold text-gray-700">Contrato #{c.contrato_id}</p>
+                        <p className="text-sm font-semibold text-gray-700">{nombreContrato(c)}</p>
                         <span className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
                             {c.modo === 'TODO_COLOR' ? 'Todo como color: las páginas B/N cuentan como color' : 'B/N y color por separado'}
                         </span>
@@ -87,6 +87,12 @@ export const FacturacionPeriodoCard: React.FC<FacturacionPeriodoCardProps> = ({ 
                     <span className="uppercase">Total del período</span>
                     <span data-testid="facturacion-total-periodo" className="font-mono text-lg">{dinero(montoTotalGeneral)}</span>
                 </div>
+            )}
+
+            {contratos.some((c) => c.filtrado) && (
+                <p data-testid="facturacion-filtrada" className="border-t border-gray-200 px-6 py-2 text-xs text-gray-500">
+                    {NOTA_FACTURACION_FILTRADA}.
+                </p>
             )}
         </div>
     );

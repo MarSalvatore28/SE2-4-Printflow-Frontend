@@ -16,6 +16,10 @@ export const AreaDetailsFields: React.FC<AreaDetailsFieldsProps> = ({
     onSelectCliente,
     allClients = []
 }) => {
+    // Al editar, el buscador muestra el cliente actual del área (antes aparecía vacío)
+    const nombreCliente = formData.cliente_nombre
+        || allClients.find((c) => c.id_cliente === formData.cliente_id)?.nombre
+        || '';
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
             <div className="md:col-span-2 bg-accent/10 p-4 rounded-lg border border-accent/30 mb-2">
@@ -25,6 +29,7 @@ export const AreaDetailsFields: React.FC<AreaDetailsFieldsProps> = ({
                 <div className="flex flex-col gap-2">
                     <BusquedaInteligenteClientes
                         inputId="area-cliente"
+                        defaultValue={nombreCliente}
                         onSeleccionar={onSelectCliente}
                         placeholder="Escribe para buscar y vincular un cliente..."
                         itemsCompletos={allClients}
@@ -48,29 +53,6 @@ export const AreaDetailsFields: React.FC<AreaDetailsFieldsProps> = ({
                         onChange={onChange}
                         required
                     />
-                </div>
-            </div>
-
-            <div className="input-container">
-                <label htmlFor="area-estado" className="input-label">Estado</label>
-                <div className="input-wrapper">
-                    <select
-                        id="area-estado"
-                        name="activo"
-                        className="input-field rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                        value={formData?.activo?.toString() || '1'}
-                        onChange={(e) => onChange({
-                            ...e,
-                            target: {
-                                ...e.target,
-                                name: 'activo',
-                                value: Number.parseInt(e.target.value)
-                            } as unknown as EventTarget & HTMLSelectElement
-                        })}
-                    >
-                        <option value="1">Activa</option>
-                        <option value="0">Inactiva</option>
-                    </select>
                 </div>
             </div>
 

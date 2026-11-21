@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Lote, Notificacion } from '@app/Notificaciones/types/notificaciones';
-import { filtrarNotificaciones, loteAccionable } from './notificacionesFiltro';
+import { filtrarNotificaciones, loteAccionable, notificacionEliminable } from './notificacionesFiltro';
 
 const notificacion = (datos: Partial<Notificacion>): Notificacion => ({
   id_notificacion: 1,
@@ -62,5 +62,14 @@ describe('loteAccionable', () => {
   it('si no se conoce el estado del lote, decide si la notificación está sin leer', () => {
     expect(loteAccionable(notificacion({ lote_id: 99, leida: false }), lotes)).toBe(true);
     expect(loteAccionable(notificacion({ lote_id: 99, leida: true }), lotes)).toBe(false);
+  });
+});
+
+describe('notificacionEliminable', () => {
+  it('solo leídas, y de un lote solo si ya está aprobado', () => {
+    expect(notificacionEliminable(notificacion({ leida: false }))).toBe(false);
+    expect(notificacionEliminable(notificacion({ leida: true }))).toBe(true);
+    expect(notificacionEliminable(notificacion({ leida: true, lote_id: 9, fecha_aprobacion: null }))).toBe(false);
+    expect(notificacionEliminable(notificacion({ leida: true, lote_id: 7, fecha_aprobacion: '2026-11-21T16:00:00Z' }))).toBe(true);
   });
 });

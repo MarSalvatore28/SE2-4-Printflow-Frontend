@@ -1,5 +1,6 @@
 import React from 'react';
 import { type ClienteFormData } from '@models/Cliente/cliente.types';
+import { errorRuc, textoPermitido } from '@app/Clientes/utils/formularioCliente';
 
 interface ClientDetailsFieldsProps {
     formData: ClienteFormData;
@@ -10,9 +11,8 @@ export const ClientDetailsFields: React.FC<ClientDetailsFieldsProps> = ({ formDa
 
     const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>, maxLength: number = 80) => {
         const { name, value } = e.target;
-        const regex = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ .,-]*$/;
 
-        if (!regex.test(value)) {
+        if (!textoPermitido(value)) {
             return;
         }
 
@@ -50,29 +50,8 @@ export const ClientDetailsFields: React.FC<ClientDetailsFieldsProps> = ({ formDa
         onChange(syntheticEvent as React.ChangeEvent<HTMLInputElement>);
     };
 
-    const validateRuc = (ruc: string): { isValid: boolean; error?: string } => {
-        if (!ruc) {
-            return { isValid: true };
-        }
-
-        if (ruc.length < 13) {
-            return { isValid: false, error: 'El RUC debe tener exactamente 13 dígitos' };
-        }
-
-        const firstTwoDigits = Number.parseInt(ruc.substring(0, 2));
-        if (firstTwoDigits < 1 || firstTwoDigits > 24) {
-            return { isValid: false, error: 'Los primeros 2 dígitos deben estar entre 01 y 24' };
-        }
-
-        const lastThreeDigits = ruc.substring(10, 13);
-        if (lastThreeDigits !== '001') {
-            return { isValid: false, error: 'El RUC debe terminar en 001' };
-        }
-
-        return { isValid: true };
-    };
-
-    const rucValidation = validateRuc(formData.ruc || '');
+    const mensajeRuc = errorRuc(formData.ruc || '');
+    const rucValidation = { isValid: !mensajeRuc, error: mensajeRuc };
     // Borde del RUC: rojo si es inválido, verde si es válido, gris si está vacío
     let claseBordeRuc = 'border-gray-300 focus:ring-primary focus:border-primary';
     if (formData.ruc) {

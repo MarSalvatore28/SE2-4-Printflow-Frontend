@@ -9,7 +9,33 @@ export interface DatosEdicionInstalacion {
     fecha_instalacion: string;
 }
 
-const hoyIso = () => new Date().toISOString().split('T')[0];
+// Hoy en la hora local del navegador (toISOString daría mañana después de las 19:00 en Ecuador)
+export const hoyIso = (ahora: Date = new Date()) =>
+    `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}-${String(ahora.getDate()).padStart(2, '0')}`;
+
+// 'YYYY-MM-DD...' → 'DD/MM/YYYY', sin pasar por Date (no cambia de día con la zona horaria)
+export const fechaCorta = (fecha?: string | null): string => {
+    const [anio, mes, dia] = (fecha || '').slice(0, 10).split('-');
+    return anio && mes && dia ? `${dia}/${mes}/${anio}` : '';
+};
+
+// Un contrato se reconoce por su vigencia, no por su id interno:
+// «Contrato desde 01/01/2026 hasta 31/12/2026», con un aviso si hoy no está vigente
+export const etiquetaContrato = (
+    contrato: { fecha_inicio: string; fecha_fin?: string | null },
+    hoy: string = hoyIso(),
+): string => {
+    const inicio = contrato.fecha_inicio.slice(0, 10);
+    const fin = contrato.fecha_fin ? contrato.fecha_fin.slice(0, 10) : null;
+    let texto = `Contrato desde ${fechaCorta(inicio)}${fin ? ` hasta ${fechaCorta(fin)}` : ' (sin fecha de fin)'}`;
+    if (fin && fin < hoy) texto += ' · vencido';
+    else if (inicio > hoy) texto += ' · aún no empieza';
+    return texto;
+};
+
+// Máquina para mostrar: serie y modelo
+export const etiquetaMaquina = (maquina?: { serie?: string; modelo_nombre?: string | null } | null): string =>
+    maquina?.serie ? `${maquina.serie} · ${maquina.modelo_nombre || 'Sin modelo'}` : '';
 
 export const datosEdicionVacios = (): DatosEdicionInstalacion => ({
     ip_address: '',

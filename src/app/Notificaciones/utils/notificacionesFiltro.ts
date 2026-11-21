@@ -24,3 +24,8 @@ export const loteAccionable = (notif: Notificacion, lotesPorId: Map<number, Lote
   const lote = lotesPorId.get(notif.lote_id);
   return lote ? lote.estado === 'PENDIENTE' || lote.estado === 'ERROR' : !notif.leida;
 };
+
+// Igual que el backend: la notificación de un lote pendiente o rechazado no se elimina (guarda su
+// estado y el motivo del rechazo); sí la de un lote aprobado o la que no tiene lote
+export const notificacionEliminable = (notif: Notificacion): boolean =>
+  notif.leida && (!notif.lote_id || Boolean(notif.fecha_aprobacion));

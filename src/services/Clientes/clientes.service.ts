@@ -141,7 +141,10 @@ export async function deleteCliente(id: number): Promise<boolean> {
       headers: getAuthHeaders(true)
     });
 
-    if (!res.ok) throw new Error(`Error delete: ${res.status}`);
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.message || `No se pudo desactivar el cliente (${res.status})`);
+    }
 
     const data = await res.json();
     return data.success;
@@ -157,7 +160,10 @@ export async function activarCliente(id: number): Promise<boolean> {
       method: "PATCH",
       headers: getAuthHeaders(true)
     });
-    if (!res.ok) throw new Error(`Error activating: ${res.status}`);
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.message || `No se pudo activar el cliente (${res.status})`);
+    }
     const data = await res.json();
     return data.success;
   } catch (err) {

@@ -3,6 +3,7 @@ import DataTable from '@components/Shared/DataTable';
 import type { Client, ClienteParaTabla } from '@models/Cliente/cliente.types';
 
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import { etiquetaFacturacion } from '@app/Clientes/utils/formularioCliente';
 
 interface ClientListProps {
   clients: ClienteParaTabla[];
@@ -74,7 +75,7 @@ export const ClientList: React.FC<ClientListProps> = ({
       render: (client: Client) => (
         <div className="flex justify-center items-center">
           <span className="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-gray-50 text-gray-600 border border-gray-200">
-            {client.printer_bill || 'No definido'}
+            {client.id_contrato ? etiquetaFacturacion(client.printer_bill) : 'Sin contrato'}
           </span>
         </div>
       )

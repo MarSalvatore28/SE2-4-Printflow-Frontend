@@ -22,7 +22,7 @@ const formatFechaLocal = (fechaStr: string | null | undefined): string => {
     const parte = fechaStr.substring(0, 10);
     const [anio, mes, dia] = parte.split('-');
     if (!anio || !mes || !dia) return parte;
-    return `${parseInt(dia)}/${parseInt(mes)}/${anio}`;
+    return `${Number.parseInt(dia)}/${Number.parseInt(mes)}/${anio}`;
 };
 import InfoIcon from '@mui/icons-material/Info';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -91,7 +91,7 @@ const IpAddressInput = ({ value, onChange, required = false }: { value: string, 
             return;
         }
         if (!/^\d+$/.test(val)) return;
-        const num = parseInt(val, 10);
+        const num = Number.parseInt(val, 10);
         if (num < 0 || num > 255) return;
         const cleanVal = num.toString();
         const newParts = [...parts];
@@ -265,7 +265,7 @@ const CamposMaquinaUnica = ({
                         className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg text-sm"
                         placeholder="0.00"
                         value={formData.costo_renta_mensual || ''}
-                        onChange={(e) => onChangeCostoRenta?.(parseFloat(e.target.value) || 0)}
+                        onChange={(e) => onChangeCostoRenta?.(Number.parseFloat(e.target.value) || 0)}
                     />
                 </div>
             </div>
@@ -678,7 +678,7 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                                                                     className="w-full pl-6 pr-2 py-2 border border-gray-300 rounded-lg text-sm"
                                                                     placeholder="0.00"
                                                                     value={item.costo_renta_mensual || ''}
-                                                                    onChange={(e) => onUpdateMaquinaRenta?.(item.maquina.id_maquina, parseFloat(e.target.value) || 0)}
+                                                                    onChange={(e) => onUpdateMaquinaRenta?.(item.maquina.id_maquina, Number.parseFloat(e.target.value) || 0)}
                                                                 />
                                                             </div>
                                                         </div>

@@ -59,7 +59,7 @@ export const ClientDetailsFields: React.FC<ClientDetailsFieldsProps> = ({ formDa
             return { isValid: false, error: 'El RUC debe tener exactamente 13 dígitos' };
         }
 
-        const firstTwoDigits = parseInt(ruc.substring(0, 2));
+        const firstTwoDigits = Number.parseInt(ruc.substring(0, 2));
         if (firstTwoDigits < 1 || firstTwoDigits > 24) {
             return { isValid: false, error: 'Los primeros 2 dígitos deben estar entre 01 y 24' };
         }

@@ -141,7 +141,7 @@ export const textosModalCliente = (modal: {
         title: modal.title || (desactivar ? '¿Desactivar cliente?' : '¿Activar cliente?'),
         message: modal.message || (desactivar
             ? `¿Estás seguro de que deseas desactivar al cliente "${nombre}"? También se desactivan sus contratos y áreas, y se retiran sus máquinas asignadas. Podrás reactivarlo después, pero las máquinas habrá que asignarlas de nuevo.`
-            : `¿Deseas activar al cliente "${nombre}"? Vuelven sus áreas y los contratos que se desactivaron con él; las máquinas se asignan de nuevo en Asignaciones.`),
+            : `¿Deseas activar al cliente "${nombre}"? Vuelven las áreas y los contratos que se desactivaron con él (los que desactivaste uno por uno siguen inactivos); las máquinas se asignan de nuevo en Asignaciones.`),
         confirmText: modal.confirmText || (desactivar ? 'Desactivar' : 'Activar'),
         showCancel: modal.showCancel ?? true,
     };

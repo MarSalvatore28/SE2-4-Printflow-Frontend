@@ -11,6 +11,7 @@ import {
     faltanteCliente,
     faltanteContrato,
     filtrarClientes,
+    hoyLocal,
     textoPermitido,
     textosModalCliente,
     type FormularioCliente,
@@ -128,6 +129,7 @@ describe('textosModalCliente y pestañas', () => {
         const desactivar = textosModalCliente({ type: 'delete', cliente: cliente(1, { nombre: 'Andina' }) });
         expect(desactivar.title).toBe('¿Desactivar cliente?');
         expect(desactivar.message).toContain('desactivar al cliente "Andina"');
+        expect(desactivar.message).toContain('se retiran sus máquinas asignadas');
         expect(desactivar.showCancel).toBe(true);
         expect(textosModalCliente({ type: 'activate', cliente: cliente(1, { nombre: 'Andina' }) }).confirmText).toBe('Activar');
     });
@@ -136,6 +138,13 @@ describe('textosModalCliente y pestañas', () => {
         expect(esPestanaContrato('Crear Contrato')).toBe(true);
         expect(esPestanaContrato('Editar Contrato')).toBe(true);
         expect(esPestanaContrato('listar')).toBe(false);
+    });
+});
+
+describe('hoyLocal', () => {
+    it('usa la fecha del navegador, no la UTC (a las 20:00 en Ecuador sigue siendo hoy)', () => {
+        expect(hoyLocal(new Date(2026, 10, 21, 20, 30))).toBe('2026-11-21');
+        expect(hoyLocal(new Date(2026, 0, 5, 0, 1))).toBe('2026-01-05');
     });
 });
 

@@ -33,17 +33,20 @@ import {
     type FormularioCliente,
     type PestanaClientes,
     FACTURACION,
+    hoyLocal,
     normalizarFacturacion,
 } from '@app/Clientes/utils/formularioCliente';
 import { clasePestana } from '@utils/pestanas';
 
-const INITIAL_FORM_STATE: FormularioCliente = {
+// Formulario vacío. Es una función: la fecha de inicio es la de hoy al abrir el formulario
+// (antes se calculaba una sola vez, al cargar la página, y en UTC).
+const formularioInicial = (): FormularioCliente => ({
     nombre: '',
     ruc: '',
     razon_social: '',
     activo: true,
 
-    fecha_inicio: new Date().toISOString().split('T')[0],
+    fecha_inicio: hoyLocal(),
     fecha_fin: null,
 
     copias_bn_incluidas: 0,
@@ -64,11 +67,11 @@ const INITIAL_FORM_STATE: FormularioCliente = {
     tiene_renta: false,
     tiene_software_control: false,
     printer_bill: FACTURACION.DIFERENCIAR
-};
+});
 
 // Si no se pudo leer el cliente completo, el formulario se llena con su fila de la tabla
 // (ahí las tarifas pueden venir como texto, igual que antes).
-const formularioDesdeFila = (client: ClienteParaTabla) => ({ ...INITIAL_FORM_STATE, ...client }) as FormularioCliente;
+const formularioDesdeFila = (client: ClienteParaTabla) => ({ ...formularioInicial(), ...client }) as FormularioCliente;
 
 // La API devuelve las tarifas como texto («0.0200»); el formulario trabaja con números
 const aNumero = (valor: unknown) => Number(valor ?? 0) || 0;
@@ -148,7 +151,7 @@ const ClientesPage = () => {
     const [submitting, setSubmitting] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
-    const [formData, setFormData] = useState<FormularioCliente>(INITIAL_FORM_STATE);
+    const [formData, setFormData] = useState<FormularioCliente>(formularioInicial);
     const [isEditing, setIsEditing] = useState<boolean>(false);
 
     const [clienteSeleccionado, setClienteSeleccionado] = useState<ClienteParaTabla | null>(null);
@@ -159,12 +162,10 @@ const ClientesPage = () => {
         message: ''
     });
 
-    // El backend guarda el contrato pero avisa si se cruza con otro contrato activo del cliente
-    const avisarSuperposicion = (advertencia?: string) => {
-        if (advertencia) {
-            setWarningModal({ isOpen: true, title: 'Contrato superpuesto', message: `El contrato se guardó. ${advertencia}.` });
-        }
-    };
+    // El backend guarda el contrato pero avisa si se cruza con otro contrato activo del cliente:
+    // el aviso va en el mismo mensaje de éxito (antes se abrían dos modales a la vez)
+    const conAviso = (mensaje: string, advertencia?: string) =>
+        advertencia ? `${mensaje} Atención: ${advertencia}.` : mensaje;
 
     const [modalConfig, setModalConfig] = useState<{
         isOpen: boolean;
@@ -264,20 +265,18 @@ const ClientesPage = () => {
                     ...contractData,
                     cliente_id: Number(formData.cliente_id)
                 });
-                avisarSuperposicion(resultado.advertencia);
-                mostrarExito('Contrato actualizado', 'El contrato se ha actualizado correctamente.', () => {
+                mostrarExito('Contrato actualizado', conAviso('El contrato se ha actualizado correctamente.', resultado.advertencia), () => {
                     cerrarModal();
                     setActiveTab('listar');
-                    setFormData(INITIAL_FORM_STATE);
+                    setFormData(formularioInicial());
                     void fetchClients();
                 });
             } else {
                 const creado = await createContrato(Number(formData.cliente_id), contractData);
-                avisarSuperposicion(creado?.advertencia);
-                mostrarExito('Contrato asignado', 'El contrato se ha creado y asignado correctamente.', () => {
+                mostrarExito('Contrato asignado', conAviso('El contrato se ha creado y asignado correctamente.', creado?.advertencia), () => {
                     cerrarModal();
                     // NO redirigimos, limpiamos para poder crear otro si lo desea
-                    setFormData(INITIAL_FORM_STATE);
+                    setFormData(formularioInicial());
                     void fetchClients();
                 });
             }
@@ -320,7 +319,7 @@ const ClientesPage = () => {
                     : 'El cliente se ha registrado exitosamente en el sistema.',
                 () => {
                     cerrarModal();
-                    setFormData(INITIAL_FORM_STATE);
+                    setFormData(formularioInicial());
                     setIsEditing(false);
                     if (wasEditing) {
                         setActiveTab('listar');
@@ -338,7 +337,7 @@ const ClientesPage = () => {
     const handleSave = () => (esPestanaContrato(activeTab) ? guardarContrato() : guardarCliente());
 
     const handleCancel = () => {
-        setFormData(INITIAL_FORM_STATE);
+        setFormData(formularioInicial());
         setIsEditing(false);
         setActiveTab('listar');
     };
@@ -351,7 +350,7 @@ const ClientesPage = () => {
             if (contratos.length > 0) {
                 const activeContract = contratos.find((c) => c.activo) || contratos[0];
                 setFormData({
-                    ...INITIAL_FORM_STATE,
+                    ...formularioInicial(),
                     cliente_id: client.id_cliente,
                     ...contratoEnFormulario(activeContract),
                 });
@@ -398,20 +397,21 @@ const ClientesPage = () => {
         try {
             if (type === 'delete') {
                 await deleteCliente(cliente.id_cliente);
-                setAllClients(prev => prev.map((c: ClienteParaTabla) =>
-                    c.id_cliente === cliente.id_cliente ? { ...c, activo: false } : c
-                ));
             } else {
                 await activarCliente(cliente.id_cliente);
-                setAllClients(prev => prev.map((c: ClienteParaTabla) =>
-                    c.id_cliente === cliente.id_cliente ? { ...c, activo: true } : c
-                ));
             }
             handleCloseModalConfirm();
         } catch (err) {
             console.error('Error toggling client status:', err);
-            void fetchClients();
+            handleCloseModalConfirm();
+            setWarningModal({
+                isOpen: true,
+                title: 'No se pudo cambiar el estado',
+                message: (err instanceof Error && err.message) || 'No se pudo cambiar el estado del cliente.',
+            });
         }
+        // La cascada cambia sus contratos: la lista se vuelve a leer
+        void fetchClients();
     };
 
     const handleCloseModalConfirm = () => {
@@ -435,7 +435,7 @@ const ClientesPage = () => {
                 const activeContract = fullData.contratos?.find(c => c.activo) || fullData.contratos?.[0];
 
                 setFormData(activeContract
-                    ? { ...INITIAL_FORM_STATE, ...client, ...contratoEnFormulario(activeContract) }
+                    ? { ...formularioInicial(), ...client, ...contratoEnFormulario(activeContract) }
                     : formularioDesdeFila(client));
             } else {
                 setFormData(formularioDesdeFila(client));
@@ -483,7 +483,7 @@ const ClientesPage = () => {
         ? { onEdit: handleEdit, onDelete: handleDelete, onToggleActive: handleToggleActive }
         : {};
     const abrirPestana = (pestana: PestanaClientes) => {
-        setFormData(INITIAL_FORM_STATE);
+        setFormData(formularioInicial());
         setIsEditing(false);
         setActiveTab(pestana);
     };

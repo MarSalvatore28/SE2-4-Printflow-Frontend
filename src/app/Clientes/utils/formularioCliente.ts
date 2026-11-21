@@ -51,6 +51,13 @@ export const normalizarFacturacion = (valor?: string | null): string =>
 export const etiquetaFacturacion = (valor?: string | null): string =>
     (valor && OPCIONES_FACTURACION.find((o) => o.valor === normalizarFacturacion(valor))?.etiqueta) || '-';
 
+// Fecha de hoy en la hora del navegador (AAAA-MM-DD). toISOString() da la fecha UTC: en Ecuador,
+// desde las 19:00 el contrato nuevo empezaba «mañana».
+export const hoyLocal = (ahora: Date = new Date()): string => {
+    const dosDigitos = (n: number) => String(n).padStart(2, '0');
+    return `${ahora.getFullYear()}-${dosDigitos(ahora.getMonth() + 1)}-${dosDigitos(ahora.getDate())}`;
+};
+
 // Mensaje de advertencia si falta un dato obligatorio, o null si se puede guardar
 export const faltanteContrato = (datos: FormularioCliente): string | null => {
     if (!datos.cliente_id) return 'Debe asignar un cliente para guardar el contrato.';
@@ -133,8 +140,8 @@ export const textosModalCliente = (modal: {
     return {
         title: modal.title || (desactivar ? '¿Desactivar cliente?' : '¿Activar cliente?'),
         message: modal.message || (desactivar
-            ? `¿Estás seguro de que deseas desactivar al cliente "${nombre}"? Podrás reactivarlo después si lo necesitas.`
-            : `¿Deseas activar al cliente "${nombre}"?`),
+            ? `¿Estás seguro de que deseas desactivar al cliente "${nombre}"? También se desactivan sus contratos y áreas, y se retiran sus máquinas asignadas. Podrás reactivarlo después, pero las máquinas habrá que asignarlas de nuevo.`
+            : `¿Deseas activar al cliente "${nombre}"? Vuelven sus áreas y los contratos que se desactivaron con él; las máquinas se asignan de nuevo en Asignaciones.`),
         confirmText: modal.confirmText || (desactivar ? 'Desactivar' : 'Activar'),
         showCancel: modal.showCancel ?? true,
     };

@@ -17,22 +17,22 @@ export const ModalHistorialCliente: React.FC<ModalHistorialClienteProps> = ({
     const [loading, setLoading] = useState<boolean>(false);
 
     useEffect(() => {
-        if (isOpen && clienteId) {
-            void cargarHistorialCompleto();
-        }
-    }, [isOpen, clienteId]);
+        if (!isOpen || !clienteId) return;
 
-    const cargarHistorialCompleto = async () => {
-        setLoading(true);
-        try {
-            const data = await getHistorialCliente(clienteId);
-            setHistorial(data);
-        } catch (error) {
-            console.error('Error al cargar historial completo:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+        const cargarHistorialCompleto = async () => {
+            setLoading(true);
+            try {
+                const data = await getHistorialCliente(clienteId);
+                setHistorial(data);
+            } catch (error) {
+                console.error('Error al cargar historial completo:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        void cargarHistorialCompleto();
+    }, [isOpen, clienteId]);
 
     const formatearFecha = (fecha: string): string => {
         return new Date(fecha).toLocaleString('es-EC', {

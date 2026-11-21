@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { BuscadorInteligente } from '@components/Shared/BuscadorInteligente';
 import type { Maquina } from '@models/Maquina/maquina.types';
 import type { Cliente } from '@models/Cliente/cliente.types';
@@ -54,6 +54,12 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
     const [loadingAreas, setLoadingAreas] = useState(false);
     const [selectedMaquinaObj, setSelectedMaquinaObj] = useState<Maquina | null>(null);
 
+    // Última versión de onAreaChange sin volver a cargar las áreas cuando cambia
+    const onAreaChangeRef = useRef(onAreaChange);
+    useEffect(() => {
+        onAreaChangeRef.current = onAreaChange;
+    }, [onAreaChange]);
+
     useEffect(() => {
         if (!selectedMaquina) {
             setSelectedMaquinaObj(null);
@@ -95,13 +101,13 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
                 } catch (error) {
                     console.error('Error loading areas:', error);
                     setAreasDisponibles([]);
-                    if (onAreaChange) onAreaChange(null);
+                    onAreaChangeRef.current?.(null);
                 } finally {
                     setLoadingAreas(false);
                 }
             } else {
                 setAreasDisponibles([]);
-                if (onAreaChange) onAreaChange(null);
+                onAreaChangeRef.current?.(null);
             }
         };
 

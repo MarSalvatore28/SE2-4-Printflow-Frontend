@@ -26,11 +26,9 @@ jobs:
       # Sin scripts de instalación: ninguna dependencia los necesita para compilar o probar
       - run: npm ci --ignore-scripts
 
-      # El código heredado trae ~114 errores de lint. Por ahora el lint avisa pero no bloquea.
-      # Cuando cada equipo limpie su carpeta, quitar continue-on-error.
+      # ESLint está en 0 errores: un error nuevo hace fallar el CI
       - name: Lint
         run: npm run lint
-        continue-on-error: true
 
       - name: Pruebas
         run: npm test

@@ -54,8 +54,8 @@ Se incorporan por fases, según el plan del proyecto:
 | Compilación | Vite |
 | Componentes y estilos | MUI · Tailwind CSS · Lucide |
 | Navegación | React Router |
-| Comunicación con la API | Axios · Socket.IO Client |
-| Exportación | jsPDF · SheetJS (`xlsx`) |
+| Comunicación con la API | fetch (`apiFetch`) · Socket.IO Client |
+| Exportación | jsPDF · SheetJS (`xlsx-js-style`, con estilos) |
 | Producción | nginx (en Docker) |
 
 ## Requisitos
@@ -162,7 +162,11 @@ El `Dockerfile` compila la aplicación con Node y la sirve con **nginx**, que ad
 
 - reenvía `/api`, `/api-docs` y `/socket.io` al servicio de la API;
 - bloquea desde fuera `/api/ingesta`, que solo puede usar n8n dentro de la red de Docker;
-- redirige cualquier otra ruta a `index.html`, para que funcione la navegación de la aplicación.
+- redirige cualquier otra ruta a `index.html`, para que funcione la navegación de la aplicación;
+- agrega las cabeceras de seguridad (Content-Security-Policy, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`) y no muestra su versión;
+- guarda en caché un año los archivos de `/assets/` (llevan un hash en el nombre) y hace revalidar siempre `index.html`.
+
+Si un componente necesita cargar algo de otro dominio (una fuente, una imagen, otra API), hay que sumarlo a la CSP de `nginx.conf`: si no, el navegador lo bloquea y lo avisa en la consola.
 
 ## Flujo de trabajo
 

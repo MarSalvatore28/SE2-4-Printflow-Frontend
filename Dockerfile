@@ -13,7 +13,7 @@ RUN npm run build
 # Etapa 2: servirla con nginx, que también hace de proxy inverso hacia la API.
 # Imagen sin root: nginx corre con el usuario nginx (uid 101). Docker deja que un usuario
 # sin privilegios escuche en el puerto 80 dentro del contenedor, así que el puerto no cambia.
-FROM nginxinc/nginx-unprivileged:1.27-alpine
+FROM nginxinc/nginx-unprivileged:1.30-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 USER 101

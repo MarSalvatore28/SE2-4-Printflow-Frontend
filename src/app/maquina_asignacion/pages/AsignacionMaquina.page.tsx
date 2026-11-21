@@ -8,6 +8,7 @@ import { type ClienteParaTabla as Client } from '@models/Cliente/cliente.types';
 import { fetchAllClientes } from '@services/Clientes/clientes.service';
 import {
     getInstalacionesActivasByCliente,
+    getTodasInstalacionesActivas,
     retirarInstalacion,
     updateInstalacion
 } from '@services/Instalaciones/instalaciones.service';
@@ -24,14 +25,9 @@ import {
 import { clasePestana } from '@utils/pestanas';
 
 // Instalaciones activas de un cliente, o de todos los clientes si no se indica
-const cargarInstalaciones = async (clienteId?: number): Promise<InstalacionActivaCliente[]> => {
-    if (clienteId) return getInstalacionesActivasByCliente(clienteId);
-    const clientes = await fetchAllClientes();
-    const porCliente = await Promise.all(
-        clientes.map((cliente: Client) => getInstalacionesActivasByCliente(cliente.id_cliente))
-    );
-    return porCliente.flat();
-};
+// (todas en una sola consulta, en lugar de una por cliente)
+const cargarInstalaciones = async (clienteId?: number): Promise<InstalacionActivaCliente[]> =>
+    clienteId ? getInstalacionesActivasByCliente(clienteId) : getTodasInstalacionesActivas();
 
 const InstalacionesPage = () => {
     // Nueva instalación, editar IP y retirar: solo admin (el operador y el auditor consultan)
@@ -46,7 +42,12 @@ const InstalacionesPage = () => {
     const [filterTerm, setFilterTerm] = useState<string>('');
 
     const [loading, setLoading] = useState<boolean>(false);
+    // Guardar o retirar no muestra el «cargando» de la lista: así no se cierran los paneles abiertos
+    const [guardando, setGuardando] = useState(false);
+    // errorCarga: no se pudo leer la lista (la reemplaza); error: falló una acción (aviso arriba, la lista sigue)
+    const [errorCarga, setErrorCarga] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [errorEdicion, setErrorEdicion] = useState<string | null>(null);
     const [successModal, setSuccessModal] = useState<{ isOpen: boolean; message: string }>({
         isOpen: false,
         message: ''
@@ -80,12 +81,12 @@ const InstalacionesPage = () => {
 
     const fetchInstalaciones = useCallback(async (clienteId?: number) => {
         setLoading(true);
-        setError(null);
+        setErrorCarga(null);
         try {
             setInstalaciones(await cargarInstalaciones(clienteId));
         } catch (err) {
             console.error('Error fetching instalaciones:', err);
-            setError('Error al cargar las instalaciones. Por favor, intente de nuevo.');
+            setErrorCarga('Error al cargar las instalaciones. Por favor, intente de nuevo.');
         } finally {
             setLoading(false);
         }
@@ -93,14 +94,14 @@ const InstalacionesPage = () => {
 
     const fetchAllData = useCallback(async () => {
         setLoading(true);
-        setError(null);
+        setErrorCarga(null);
         try {
             const clientsData = await fetchAllClientes();
             setClientsList(clientsData);
             await fetchInstalaciones();
         } catch (err) {
             console.error('Error fetching data:', err);
-            setError('Error al cargar los datos. Por favor, intente de nuevo.');
+            setErrorCarga('Error al cargar los datos. Por favor, intente de nuevo.');
         } finally {
             setLoading(false);
         }
@@ -149,6 +150,7 @@ const InstalacionesPage = () => {
     };
 
     const handleEditInstalacion = (instalacion: InstalacionActivaCliente) => {
+        setErrorEdicion(null);
         setModalEdit({
             isOpen: true,
             instalacion: instalacion,
@@ -160,21 +162,23 @@ const InstalacionesPage = () => {
         const { instalacion, editData } = modalEdit;
 
         if (!instalacion || !editData.ip_address.trim()) {
-            setError('Debe ingresar una dirección IP válida');
+            setErrorEdicion('Debe ingresar una dirección IP válida');
             return;
         }
 
         try {
-            setLoading(true);
+            setGuardando(true);
+            setErrorEdicion(null);
 
-            await updateInstalacion(instalacion.id_instalacion, editData);
+            const guardada = await updateInstalacion(instalacion.id_instalacion, editData);
 
             // Actualizar solo ese registro en el estado local para no colapsar los paneles
             setInstalaciones(prev => prev.map(inst =>
                 inst.id_instalacion === instalacion.id_instalacion
                     ? {
                         ...inst,
-                        ip_address: editData.ip_address,
+                        // La IP como la guardó la API (sin ceros a la izquierda)
+                        ip_address: guardada.ip_address || editData.ip_address,
                         costo_renta_mensual: editData.costo_renta_mensual,
                         contador_acumulativo: editData.contador_acumulativo,
                         contabilidad_por_usuario: editData.contabilidad_por_usuario,
@@ -193,10 +197,10 @@ const InstalacionesPage = () => {
 
         } catch (err: unknown) {
             const error = err as { message?: string };
-            console.error('Error actualizando instalación:', err);
-            setError(error.message || 'No se pudo actualizar la instalación.');
+            // El modal sigue abierto: el motivo se muestra dentro de él
+            setErrorEdicion(error.message || 'No se pudo actualizar la instalación.');
         } finally {
-            setLoading(false);
+            setGuardando(false);
         }
     };
 
@@ -219,7 +223,7 @@ const InstalacionesPage = () => {
         if (!instalacion) return;
 
         try {
-            setLoading(true);
+            setGuardando(true);
             const formData: RetirarInstalacionFormData = {
                 observaciones_retiro: observaciones || undefined,
                 fecha_retiro: fechaRetiro
@@ -246,10 +250,9 @@ const InstalacionesPage = () => {
 
         } catch (err: unknown) {
             const error = err as { message?: string };
-            console.error('Error retirando instalación:', err);
             setError(error.message || 'No se pudo retirar la instalación.');
         } finally {
-            setLoading(false);
+            setGuardando(false);
         }
     };
 
@@ -284,10 +287,10 @@ const InstalacionesPage = () => {
                 </div>
             );
         }
-        if (error) {
+        if (errorCarga) {
             return (
-                <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 italic">
-                    {error}
+                <div role="alert" className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 italic">
+                    {errorCarga}
                 </div>
             );
         }
@@ -328,7 +331,7 @@ const InstalacionesPage = () => {
             <div className="py-4 md:p-8">
                 {/* Error Message */}
                 {error && (
-                    <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div role="alert" className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                         <div className="flex items-start gap-3">
                             <div className="flex-1">
                                 <p className="text-sm font-semibold text-red-800">Error</p>
@@ -336,6 +339,7 @@ const InstalacionesPage = () => {
                             </div>
                             <button
                                 onClick={() => setError(null)}
+                                aria-label="Cerrar aviso"
                                 className="text-red-500 hover:text-red-700"
                             >
                                 <X size={20} />
@@ -423,6 +427,7 @@ const InstalacionesPage = () => {
                             <input
                                 id="fecha_retiro"
                                 type="date"
+                                max={hoy()}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                 value={fechaRetiro}
                                 onChange={(e) => setFechaRetiro(e.target.value)}
@@ -456,7 +461,8 @@ const InstalacionesPage = () => {
                     onCambiar={(editData) => setModalEdit(prev => ({ ...prev, editData }))}
                     onCerrar={handleCloseModalEdit}
                     onGuardar={handleConfirmEdit}
-                    guardando={loading}
+                    guardando={guardando}
+                    error={errorEdicion}
                 />
             )}
 

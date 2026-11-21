@@ -11,6 +11,11 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import LanIcon from '@mui/icons-material/Lan';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import RoomIcon from '@mui/icons-material/Room';
+import { etiquetaContrato, fechaCorta } from '@app/maquina_asignacion/utils/instalaciones';
+
+// Tarifa por página del contrato: «$0.0200», o un guion si no tiene
+const tarifa = (valor?: string | number | null) =>
+    valor === undefined || valor === null || valor === '' ? '—' : `${Number(valor).toFixed(4)}`;
 interface InstalacionesListProps {
     instalaciones: InstalacionActivaCliente[];
     onEdit?: (instalacion: InstalacionActivaCliente) => void;
@@ -302,7 +307,7 @@ export const InstalacionesList: React.FC<InstalacionesListProps> = ({
                                                                         Fecha de instalación
                                                                     </th>
                                                                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                                                        Costos de contrato
+                                                                        Contrato y tarifas
                                                                     </th>
                                                                     <th className="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
                                                                         Contador
@@ -361,14 +366,7 @@ export const InstalacionesList: React.FC<InstalacionesListProps> = ({
                                                                             <div className="flex items-center gap-2 text-sm text-text">
                                                                                 <CalendarTodayIcon className="w-4 h-4 text-text" />
                                                                                 <span>
-                                                                                    {instalacion.fecha_instalacion ? new Date(
-                                                                                        new Date(instalacion.fecha_instalacion).getTime() +
-                                                                                        new Date(instalacion.fecha_instalacion).getTimezoneOffset() * 60000
-                                                                                    ).toLocaleDateString('es-ES', {
-                                                                                        year: 'numeric',
-                                                                                        month: 'short',
-                                                                                        day: 'numeric'
-                                                                                    }) : 'N/A'}
+                                                                                    {fechaCorta(instalacion.fecha_instalacion) || 'N/A'}
                                                                                 </span>
                                                                             </div>
                                                                         </td>
@@ -376,18 +374,23 @@ export const InstalacionesList: React.FC<InstalacionesListProps> = ({
                                                                         {/* Costos Contrato */}
                                                                         <td className="px-6 py-4">
                                                                             <div className="flex flex-col gap-1 text-xs">
+                                                                                {instalacion.contrato_fecha_inicio && (
+                                                                                    <span className="text-gray-600">
+                                                                                        {etiquetaContrato({ fecha_inicio: instalacion.contrato_fecha_inicio, fecha_fin: instalacion.contrato_fecha_fin })}
+                                                                                    </span>
+                                                                                )}
                                                                                 <div className="flex items-center gap-1">
                                                                                     <AttachMoneyIcon className="w-3 h-3 text-text" />
                                                                                     <span className="text-text">B/N:</span>
                                                                                     <span className="font-bold text-text">
-                                                                                        ${instalacion.costo_copia_bn || '0'} / ${instalacion.costo_impresion_bn || '0'}
+                                                                                        {tarifa(instalacion.costo_impresion_bn)} por página
                                                                                     </span>
                                                                                 </div>
                                                                                 <div className="flex items-center gap-1">
                                                                                     <AttachMoneyIcon className="w-3 h-3 text-text" />
                                                                                     <span className="text-text">Color:</span>
                                                                                     <span className="font-bold text-text">
-                                                                                        ${instalacion.costo_copia_color || '0'} / ${instalacion.costo_impresion_color || '0'}
+                                                                                        {tarifa(instalacion.costo_impresion_color)} por página
                                                                                     </span>
                                                                                 </div>
                                                                                 <div className="flex items-center gap-1">
@@ -433,7 +436,8 @@ export const InstalacionesList: React.FC<InstalacionesListProps> = ({
                                                                                             onEdit(instalacion);
                                                                                         }}
                                                                                         className="cursor-pointer p-2 bg-edit/20 text-edit border-edit rounded-lg hover:bg-edit/50 transition-colors hover:text-white"
-                                                                                        title="Editar IP"
+                                                                                        title="Editar instalación"
+                                                                                        aria-label={`Editar la instalación de ${instalacion.serie}`}
                                                                                     >
                                                                                         <Edit size={18} />
                                                                                     </button>
@@ -447,6 +451,7 @@ export const InstalacionesList: React.FC<InstalacionesListProps> = ({
                                                                                         }}
                                                                                         className="p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
                                                                                         title="Retirar instalación"
+                                                                                        aria-label={`Retirar la instalación de ${instalacion.serie}`}
                                                                                     >
                                                                                         <Trash2 size={18} />
                                                                                     </button>

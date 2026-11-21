@@ -24,7 +24,7 @@ import { DetalleLoteModal } from "@app/Notificaciones/components/DetalleLoteModa
 import { ListadoLotes } from "@app/Notificaciones/components/ListadoLotes";
 import { useNotification } from "@context/NotificationContext";
 import { usePermisos } from "@hooks/usePermisos";
-import { filtrarNotificaciones, loteAccionable } from "@app/Notificaciones/utils/notificacionesFiltro";
+import { filtrarNotificaciones, loteAccionable, notificacionEliminable } from "@app/Notificaciones/utils/notificacionesFiltro";
 
 type Pestana = "todas" | "no-leidas" | "lotes";
 
@@ -538,7 +538,7 @@ const NotificacionesPage = () => {
             )
           )}
 
-          {notif.leida && puedeEliminarNotificaciones && (
+          {notificacionEliminable(notif) && puedeEliminarNotificaciones && (
             <button
               onClick={(e) => {
                 e.stopPropagation();

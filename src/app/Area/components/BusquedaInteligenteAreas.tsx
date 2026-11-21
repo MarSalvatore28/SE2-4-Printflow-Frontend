@@ -11,6 +11,7 @@ interface BusquedaInteligenteAreasProps {
     onClear?: () => void;
     onInputChange?: (value: string) => void;
     onSearchClick?: (termino: string) => void;
+    inputId?: string;
 }
 
 export const BusquedaInteligenteAreas: React.FC<BusquedaInteligenteAreasProps> = ({
@@ -21,16 +22,17 @@ export const BusquedaInteligenteAreas: React.FC<BusquedaInteligenteAreasProps> =
     onEnter,
     onClear,
     onInputChange,
-    onSearchClick
+    onSearchClick,
+    inputId
 }) => {
-    const buscarLocalmente = async (termino: string): Promise<Area[]> => {
-        if (!termino) return itemsCompletos;
+    const buscarLocalmente = (termino: string): Promise<Area[]> => {
+        if (!termino) return Promise.resolve(itemsCompletos);
         const term = termino.toLowerCase();
-        return itemsCompletos.filter(area =>
+        return Promise.resolve(itemsCompletos.filter(area =>
             area.nombre.toLowerCase().includes(term) ||
             area.cliente_nombre?.toLowerCase().includes(term) ||
             area.descripcion?.toLowerCase().includes(term)
-        );
+        ));
     };
 
     return (
@@ -42,6 +44,7 @@ export const BusquedaInteligenteAreas: React.FC<BusquedaInteligenteAreasProps> =
             onClear={onClear}
             onInputChange={onInputChange}
             onSearchClick={onSearchClick}
+            inputId={inputId}
             getItemKey={(a) => a.id_area}
             getItemLabel={(a) => a.nombre}
             itemsCompletos={itemsCompletos}

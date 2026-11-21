@@ -22,7 +22,7 @@ const formatFechaLocal = (fechaStr: string | null | undefined): string => {
     const parte = fechaStr.substring(0, 10);
     const [anio, mes, dia] = parte.split('-');
     if (!anio || !mes || !dia) return parte;
-    return `${parseInt(dia)}/${parseInt(mes)}/${anio}`;
+    return `${Number.parseInt(dia)}/${Number.parseInt(mes)}/${anio}`;
 };
 import InfoIcon from '@mui/icons-material/Info';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -64,7 +64,6 @@ interface InstalacionFormFieldsProps {
     onAddMaquina?: (maquina: MaquinaSinInstalacion) => void;
     onRemoveMaquina?: (maquinaId: number) => void;
     onUpdateMaquinaIP?: (maquinaId: number, ip: string) => void;
-    onUpdateMaquinaFecha?: (maquinaId: number, fecha: string) => void;
     onUpdateMaquinaObservaciones?: (maquinaId: number, obs: string) => void;
     onUpdateMaquinaRenta?: (maquinaId: number, costo: number) => void;
     onUpdateMaquinaContador?: (maquinaId: number, val: boolean) => void;
@@ -72,7 +71,8 @@ interface InstalacionFormFieldsProps {
     onUpdateMaquinaArea?: (maquinaId: number, areaId: number) => void;
 }
 
-const IpAddressInput = ({ value, onChange, required = false }: { value: string, onChange: (val: string) => void, required?: boolean }) => {
+// id: va en el primer octeto, para asociarle un <label htmlFor>
+const IpAddressInput = ({ value, onChange, required = false, id }: { value: string, onChange: (val: string) => void, required?: boolean, id?: string }) => {
     const parts = React.useMemo(() => {
         const p = value ? value.split('.') : [];
         return [
@@ -91,7 +91,7 @@ const IpAddressInput = ({ value, onChange, required = false }: { value: string, 
             return;
         }
         if (!/^\d+$/.test(val)) return;
-        const num = parseInt(val, 10);
+        const num = Number.parseInt(val, 10);
         if (num < 0 || num > 255) return;
         const cleanVal = num.toString();
         const newParts = [...parts];
@@ -104,6 +104,7 @@ const IpAddressInput = ({ value, onChange, required = false }: { value: string, 
             {[0, 1, 2, 3].map((index) => (
                 <React.Fragment key={index}>
                     <input
+                        id={index === 0 ? id : undefined}
                         type="text"
                         className="w-full min-w-0 px-1 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm text-center transition-all"
                         placeholder={["192", "168", "1", "100"][index]}
@@ -128,58 +129,72 @@ interface SeccionContratoProps {
     tieneRenta: boolean;
 }
 
-const SeccionContrato = ({ loadingContratos, contratos, formData, handleSelectContrato, selectedContrato, tieneRenta }: SeccionContratoProps) => (
-    <div className="p-6 border-b border-gray-100 last:border-0 rounded-lg bg-white shadow-sm">
-        <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <AssignmentIcon className="text-secondary" />
-            Contrato
-        </h3>
-        <div className="input-container">
-            <label className="input-label">Seleccionar contrato *</label>
-            <div className="input-wrapper">
-                {loadingContratos ? (
-                    <div className="p-3 bg-gray-50 text-gray-600 border border-gray-200 rounded-md text-sm">
-                        Cargando contratos...
-                    </div>
-                ) : contratos.length > 0 ? (
-                    <select
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
-                        value={formData.contrato_id || ''}
-                        onChange={(e) => handleSelectContrato(Number(e.target.value))}
-                        required
-                    >
-                        <option value="">-- Seleccione un contrato --</option>
-                        {contratos.map((contrato) => (
-                            <option key={contrato.id_contrato} value={contrato.id_contrato}>
-                                Contrato {contrato.id_contrato} - Desde {formatFechaLocal(contrato.fecha_inicio)}
-                                {contrato.fecha_fin ? ` hasta ${formatFechaLocal(contrato.fecha_fin)}` : ' (Vigente)'}
-                            </option>
-                        ))}
-                    </select>
-                ) : (
-                    <div className="p-3 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-md text-sm font-medium flex items-center gap-2">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                        Este cliente no tiene contratos activos.
+const SeccionContrato = ({ loadingContratos, contratos, formData, handleSelectContrato, selectedContrato, tieneRenta }: SeccionContratoProps) => {
+    // Selector: cargando, la lista de contratos o el aviso de que no hay
+    const renderSelector = () => {
+        if (loadingContratos) {
+            return (
+                <div className="p-3 bg-gray-50 text-gray-600 border border-gray-200 rounded-md text-sm">
+                    Cargando contratos...
+                </div>
+            );
+        }
+        if (contratos.length > 0) {
+            return (
+                <select
+                    id="instalacion-contrato"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+                    value={formData.contrato_id || ''}
+                    onChange={(e) => handleSelectContrato(Number(e.target.value))}
+                    required
+                >
+                    <option value="">-- Seleccione un contrato --</option>
+                    {contratos.map((contrato) => (
+                        <option key={contrato.id_contrato} value={contrato.id_contrato}>
+                            Contrato {contrato.id_contrato} - Desde {formatFechaLocal(contrato.fecha_inicio)}
+                            {contrato.fecha_fin ? ` hasta ${formatFechaLocal(contrato.fecha_fin)}` : ' (Vigente)'}
+                        </option>
+                    ))}
+                </select>
+            );
+        }
+        return (
+            <div className="p-3 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-md text-sm font-medium flex items-center gap-2">
+                <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                Este cliente no tiene contratos activos.
+            </div>
+        );
+    };
+
+    return (
+        <div className="p-6 border-b border-gray-100 last:border-0 rounded-lg bg-white shadow-sm">
+            <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <AssignmentIcon className="text-secondary" />
+                Contrato
+            </h3>
+            <div className="input-container">
+                <label htmlFor="instalacion-contrato" className="input-label">Seleccionar contrato *</label>
+                <div className="input-wrapper">
+                    {renderSelector()}
+                </div>
+                {selectedContrato && (
+                    <div className="mt-3 p-3 bg-edit/10 border border-edit-hover rounded-md space-y-1">
+                        <p className="text-sm font-semibold text-text">
+                            Contrato #{selectedContrato.id_contrato}
+                            {tieneRenta && (
+                                <span className="ml-2 px-2 py-0.5 bg-secondary text-white text-xs rounded-full font-normal">
+                                    Incluye renta
+                                </span>
+                            )}
+                        </p>
                     </div>
                 )}
             </div>
-            {selectedContrato && (
-                <div className="mt-3 p-3 bg-edit/10 border border-edit-hover rounded-md space-y-1">
-                    <p className="text-sm font-semibold text-text">
-                        Contrato #{selectedContrato.id_contrato}
-                        {tieneRenta && (
-                            <span className="ml-2 px-2 py-0.5 bg-secondary text-white text-xs rounded-full font-normal">
-                                Incluye renta
-                            </span>
-                        )}
-                    </p>
-                </div>
-            )}
         </div>
-    </div>
-);
+    );
+};
 
 interface SeccionAreaProps {
     loadingAreas: boolean;
@@ -188,42 +203,56 @@ interface SeccionAreaProps {
     handleSelectArea: (areaId: number) => void;
 }
 
-const SeccionArea = ({ loadingAreas, areas, formData, handleSelectArea }: SeccionAreaProps) => (
-    <div className="p-6 border-b border-gray-100 last:border-0 rounded-lg bg-white shadow-sm">
-        <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <LocationOnIcon className="text-secondary" />
-            Ubicación
-        </h3>
-        <div className="input-container">
-            <label className="input-label">Seleccionar área *</label>
-            <div className="input-wrapper">
-                {loadingAreas ? (
-                    <div className="p-3 bg-gray-50 text-gray-600 border border-gray-200 rounded-md text-sm">
-                        Cargando áreas...
-                    </div>
-                ) : areas.length > 0 ? (
-                    <select
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
-                        value={formData.area_id || ''}
-                        onChange={(e) => handleSelectArea(Number(e.target.value))}
-                        required
-                    >
-                        <option value="">-- Seleccione un área --</option>
-                        {areas.map((area) => (
-                            <option key={area.id_area} value={area.id_area}>
-                                {area.area_nombre} {area.descripcion ? `- ${area.descripcion}` : ''}
-                            </option>
-                        ))}
-                    </select>
-                ) : (
-                    <div className="p-3 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-md text-sm font-medium">
-                        Este cliente no tiene áreas creadas.
-                    </div>
-                )}
+const SeccionArea = ({ loadingAreas, areas, formData, handleSelectArea }: SeccionAreaProps) => {
+    // Selector: cargando, la lista de áreas o el aviso de que no hay
+    const renderSelector = () => {
+        if (loadingAreas) {
+            return (
+                <div className="p-3 bg-gray-50 text-gray-600 border border-gray-200 rounded-md text-sm">
+                    Cargando áreas...
+                </div>
+            );
+        }
+        if (areas.length > 0) {
+            return (
+                <select
+                    id="instalacion-area"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+                    value={formData.area_id || ''}
+                    onChange={(e) => handleSelectArea(Number(e.target.value))}
+                    required
+                >
+                    <option value="">-- Seleccione un área --</option>
+                    {areas.map((area) => (
+                        <option key={area.id_area} value={area.id_area}>
+                            {area.area_nombre} {area.descripcion ? `- ${area.descripcion}` : ''}
+                        </option>
+                    ))}
+                </select>
+            );
+        }
+        return (
+            <div className="p-3 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-md text-sm font-medium">
+                Este cliente no tiene áreas creadas.
+            </div>
+        );
+    };
+
+    return (
+        <div className="p-6 border-b border-gray-100 last:border-0 rounded-lg bg-white shadow-sm">
+            <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <LocationOnIcon className="text-secondary" />
+                Ubicación
+            </h3>
+            <div className="input-container">
+                <label htmlFor="instalacion-area" className="input-label">Seleccionar área *</label>
+                <div className="input-wrapper">
+                    {renderSelector()}
+                </div>
             </div>
         </div>
-    </div>
-);
+    );
+};
 
 interface CamposMaquinaUnicaProps {
     formData: InstalacionFormData;
@@ -247,34 +276,36 @@ const CamposMaquinaUnica = ({
 }: CamposMaquinaUnicaProps) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <div className="input-container">
-            <label className="input-label">Dirección IP *</label>
+            <label htmlFor="instalacion-ip" className="input-label">Dirección IP *</label>
             <div className="input-wrapper">
-                <IpAddressInput value={formData.ip_address} onChange={(val) => onChangeIP(val)} required />
+                <IpAddressInput id="instalacion-ip" value={formData.ip_address} onChange={(val) => onChangeIP(val)} required />
             </div>
         </div>
 
         {tieneRenta && (
             <div className="input-container">
-                <label className="input-label">Costo de renta mensual *</label>
+                <label htmlFor="instalacion-renta" className="input-label">Costo de renta mensual *</label>
                 <div className="input-wrapper relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">$</span>
                     <input
+                        id="instalacion-renta"
                         type="number"
                         min="0"
                         step="0.01"
                         className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg text-sm"
                         placeholder="0.00"
                         value={formData.costo_renta_mensual || ''}
-                        onChange={(e) => onChangeCostoRenta?.(parseFloat(e.target.value) || 0)}
+                        onChange={(e) => onChangeCostoRenta?.(Number.parseFloat(e.target.value) || 0)}
                     />
                 </div>
             </div>
         )}
 
         <div className="input-container">
-            <label className="input-label">Contabilidad por Usuario</label>
+            <label htmlFor="instalacion-contabilidad" className="input-label">Contabilidad por Usuario</label>
             <div className="input-wrapper">
                 <select
+                    id="instalacion-contabilidad"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                     value={formData.contabilidad_por_usuario ? 'true' : 'false'}
                     onChange={(e) => {
@@ -293,7 +324,7 @@ const CamposMaquinaUnica = ({
         </div>
 
         <div className="input-container">
-            <label className="input-label">
+            <label htmlFor="instalacion-contador" className="input-label">
                 Contador acumulativo
                 {!formData.contabilidad_por_usuario && (
                     <span className="ml-1 text-xs text-gray-400 font-normal normal-case">(obligatorio)</span>
@@ -301,6 +332,7 @@ const CamposMaquinaUnica = ({
             </label>
             <div className="input-wrapper">
                 <select
+                    id="instalacion-contador"
                     className={`w-full px-3 py-2 border rounded-lg text-sm ${!formData.contabilidad_por_usuario ? 'border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed' : 'border-gray-300'}`}
                     value={formData.contador_acumulativo === false ? 'false' : 'true'}
                     onChange={(e) => onChangeContadorAcumulativo?.(e.target.value === 'true')}
@@ -313,9 +345,10 @@ const CamposMaquinaUnica = ({
         </div>
 
         <div className="input-container md:col-span-2">
-            <label className="input-label">Observaciones (Opcional)</label>
+            <label htmlFor="instalacion-observaciones" className="input-label">Observaciones (Opcional)</label>
             <div className="input-wrapper">
                 <textarea
+                    id="instalacion-observaciones"
                     className="input-field resize-none"
                     rows={3}
                     placeholder="Notas adicionales sobre esta instalación..."
@@ -356,19 +389,16 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
     const [contratos, setContratos] = useState<Contrato[]>([]);
     const [maquinasDisponibles, setMaquinasDisponibles] = useState<MaquinaSinInstalacion[]>([]);
     const [selectedCliente, setSelectedCliente] = useState<Client | null>(null);
-    const [, setSelectedArea] = useState<Area | null>(null);
     const [selectedContrato, setSelectedContrato] = useState<Contrato | null>(null);
     const [selectedMaquinaId, setSelectedMaquinaId] = useState<number>(0);
     const [loadingAreas, setLoadingAreas] = useState(false);
     const [loadingContratos, setLoadingContratos] = useState(false);
-    const [, setLoadingMaquinas] = useState(false);
 
     useEffect(() => {
         const loadClienteData = async () => {
             if (!selectedCliente) {
                 setAreas([]);
                 setContratos([]);
-                setSelectedArea(null);
                 setSelectedContrato(null);
                 return;
             }
@@ -394,13 +424,10 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
     useEffect(() => {
         const loadMaquinas = async () => {
             try {
-                setLoadingMaquinas(true);
                 const maquinas = await getMaquinasDisponibles();
                 setMaquinasDisponibles(maquinas);
             } catch (error) {
                 console.error('Error cargando máquinas disponibles:', error);
-            } finally {
-                setLoadingMaquinas(false);
             }
         };
         void loadMaquinas();
@@ -408,14 +435,12 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
 
     const handleSelectCliente = (cliente: Client) => {
         setSelectedCliente(cliente);
-        setSelectedArea(null);
         setSelectedContrato(null);
         onSelectCliente(cliente);
     };
 
     const handleSelectArea = (areaId: number) => {
         const area = areas.find(a => a.id_area === areaId);
-        setSelectedArea(area || null);
         onSelectArea(areaId, area?.area_nombre);
     };
 
@@ -454,9 +479,10 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                     Información del Cliente
                 </h3>
                 <div className="input-container">
-                    <label className="input-label">Seleccionar cliente *</label>
+                    <label htmlFor="instalacion-cliente" className="input-label">Seleccionar cliente *</label>
                     <div className="input-wrapper">
                         <BusquedaInteligenteClientes
+                            inputId="instalacion-cliente"
                             onSeleccionar={handleSelectCliente}
                             placeholder="Escribe para buscar un cliente..."
                             itemsCompletos={allClients}
@@ -490,9 +516,10 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                         Fecha de Instalación
                     </h3>
                     <div className="input-container">
-                        <label className="input-label">Seleccionar fecha de instalación *</label>
+                        <label htmlFor="instalacion-fecha" className="input-label">Seleccionar fecha de instalación *</label>
                         <div className="input-wrapper">
                             <input
+                                id="instalacion-fecha"
                                 type="date"
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm bg-white"
                                 value={formData.fecha_instalacion || ''}
@@ -530,10 +557,11 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                     {multipleSelection ? (
                         <div className="space-y-6">
                             <div className="input-container">
-                                <label className="input-label">Agregar máquina</label>
+                                <label htmlFor="instalacion-agregar-maquina" className="input-label">Agregar máquina</label>
                                 <div className="flex gap-2">
                                     <div className="flex-1">
                                         <BuscadorInteligente<MaquinaSinInstalacion>
+                                            inputId="instalacion-agregar-maquina"
                                             placeholder="Buscar máquina por serie o modelo..."
                                             buscarFn={async (term) => {
                                                 if (!term) return maquinasNoAgregadas;
@@ -599,8 +627,9 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
 
                                                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
                                                     <div className="md:col-span-4">
-                                                        <label className="block text-xs font-medium text-gray-700 mb-1">Área de Instalación *</label>
+                                                        <label htmlFor={`instalacion-${item.maquina.id_maquina}-area`} className="block text-xs font-medium text-gray-700 mb-1">Área de Instalación *</label>
                                                         <select
+                                                            id={`instalacion-${item.maquina.id_maquina}-area`}
                                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
                                                             value={item.area_id || ''}
                                                             onChange={(e) => onUpdateMaquinaArea?.(item.maquina.id_maquina, Number(e.target.value))}
@@ -613,16 +642,18 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                                                         </select>
                                                     </div>
                                                     <div className="md:col-span-4">
-                                                        <label className="block text-xs font-medium text-gray-700 mb-1">Dirección IP *</label>
+                                                        <label htmlFor={`instalacion-${item.maquina.id_maquina}-ip`} className="block text-xs font-medium text-gray-700 mb-1">Dirección IP *</label>
                                                         <IpAddressInput
+                                                            id={`instalacion-${item.maquina.id_maquina}-ip`}
                                                             value={item.ip_address}
                                                             onChange={(val) => onUpdateMaquinaIP?.(item.maquina.id_maquina, val)}
                                                             required
                                                         />
                                                     </div>
                                                     <div className="md:col-span-4">
-                                                        <label className="block text-xs font-medium text-gray-700 mb-1">Observaciones</label>
+                                                        <label htmlFor={`instalacion-${item.maquina.id_maquina}-observaciones`} className="block text-xs font-medium text-gray-700 mb-1">Observaciones</label>
                                                         <input
+                                                            id={`instalacion-${item.maquina.id_maquina}-observaciones`}
                                                             type="text"
                                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
                                                             placeholder="Notas opcionales..."
@@ -632,8 +663,9 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                                                     </div>
 
                                                     <div className={colSpanRow2}>
-                                                        <label className="block text-xs font-medium text-gray-700 mb-1">Contabilidad por Usuario</label>
+                                                        <label htmlFor={`instalacion-${item.maquina.id_maquina}-contabilidad`} className="block text-xs font-medium text-gray-700 mb-1">Contabilidad por Usuario</label>
                                                         <select
+                                                            id={`instalacion-${item.maquina.id_maquina}-contabilidad`}
                                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                                                             value={item.contabilidad_por_usuario ? 'true' : 'false'}
                                                             onChange={(e) => {
@@ -650,13 +682,14 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                                                         </select>
                                                     </div>
                                                     <div className={colSpanRow2}>
-                                                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                                                        <label htmlFor={`instalacion-${item.maquina.id_maquina}-contador`} className="block text-xs font-medium text-gray-700 mb-1">
                                                             Contador acumulativo
                                                             {!item.contabilidad_por_usuario && (
                                                                 <span className="ml-1 text-xs text-gray-400 font-normal normal-case">(obligatorio sin contabilidad por usuario)</span>
                                                             )}
                                                         </label>
                                                         <select
+                                                            id={`instalacion-${item.maquina.id_maquina}-contador`}
                                                             className={`w-full px-3 py-2 border rounded-lg text-sm ${!item.contabilidad_por_usuario ? 'border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed' : 'border-gray-300'}`}
                                                             value={item.contador_acumulativo === false ? 'false' : 'true'}
                                                             onChange={(e) => onUpdateMaquinaContador?.(item.maquina.id_maquina, e.target.value === 'true')}
@@ -668,17 +701,18 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                                                     </div>
                                                     {tieneRenta && (
                                                         <div className={colSpanRow2}>
-                                                            <label className="block text-xs font-medium text-gray-700 mb-1">Costo de renta *</label>
+                                                            <label htmlFor={`instalacion-${item.maquina.id_maquina}-renta`} className="block text-xs font-medium text-gray-700 mb-1">Costo de renta *</label>
                                                             <div className="relative">
                                                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs font-medium">$</span>
                                                                 <input
+                                                                    id={`instalacion-${item.maquina.id_maquina}-renta`}
                                                                     type="number"
                                                                     min="0"
                                                                     step="0.01"
                                                                     className="w-full pl-6 pr-2 py-2 border border-gray-300 rounded-lg text-sm"
                                                                     placeholder="0.00"
                                                                     value={item.costo_renta_mensual || ''}
-                                                                    onChange={(e) => onUpdateMaquinaRenta?.(item.maquina.id_maquina, parseFloat(e.target.value) || 0)}
+                                                                    onChange={(e) => onUpdateMaquinaRenta?.(item.maquina.id_maquina, Number.parseFloat(e.target.value) || 0)}
                                                                 />
                                                             </div>
                                                         </div>
@@ -693,9 +727,10 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                     ) : (
                         <div className="space-y-6">
                             <div className="input-container">
-                                <label className="input-label">Seleccionar máquina *</label>
+                                <label htmlFor="instalacion-maquina" className="input-label">Seleccionar máquina *</label>
                                 <div className="input-wrapper">
                                     <BuscadorInteligente<MaquinaSinInstalacion>
+                                        inputId="instalacion-maquina"
                                         placeholder="Buscar máquina por serie o modelo..."
                                         buscarFn={async (term) => {
                                             if (!term) return maquinasDisponibles;

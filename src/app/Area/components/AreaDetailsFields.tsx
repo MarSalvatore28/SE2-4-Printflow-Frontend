@@ -19,11 +19,12 @@ export const AreaDetailsFields: React.FC<AreaDetailsFieldsProps> = ({
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
             <div className="md:col-span-2 bg-accent/10 p-4 rounded-lg border border-accent/30 mb-2">
-                <label className="input-label !text-primary flex items-center gap-2 mb-2">
+                <label htmlFor="area-cliente" className="input-label !text-primary flex items-center gap-2 mb-2">
                     Vincular a cliente
                 </label>
                 <div className="flex flex-col gap-2">
                     <BusquedaInteligenteClientes
+                        inputId="area-cliente"
                         onSeleccionar={onSelectCliente}
                         placeholder="Escribe para buscar y vincular un cliente..."
                         itemsCompletos={allClients}
@@ -35,9 +36,10 @@ export const AreaDetailsFields: React.FC<AreaDetailsFieldsProps> = ({
             </div>
 
             <div className="input-container md:col-span-1">
-                <label className="input-label">Nombre del área *</label>
+                <label htmlFor="area-nombre" className="input-label">Nombre del área *</label>
                 <div className="input-wrapper">
                     <input
+                        id="area-nombre"
                         type="text"
                         name="nombre"
                         className="input-field w-[65%] rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
@@ -50,9 +52,10 @@ export const AreaDetailsFields: React.FC<AreaDetailsFieldsProps> = ({
             </div>
 
             <div className="input-container">
-                <label className="input-label">Estado</label>
+                <label htmlFor="area-estado" className="input-label">Estado</label>
                 <div className="input-wrapper">
                     <select
+                        id="area-estado"
                         name="activo"
                         className="input-field rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                         value={formData?.activo?.toString() || '1'}
@@ -61,7 +64,7 @@ export const AreaDetailsFields: React.FC<AreaDetailsFieldsProps> = ({
                             target: {
                                 ...e.target,
                                 name: 'activo',
-                                value: parseInt(e.target.value)
+                                value: Number.parseInt(e.target.value)
                             } as unknown as EventTarget & HTMLSelectElement
                         })}
                     >
@@ -72,9 +75,10 @@ export const AreaDetailsFields: React.FC<AreaDetailsFieldsProps> = ({
             </div>
 
             <div className="input-container">
-                <label className="input-label">Descripción</label>
+                <label htmlFor="area-descripcion" className="input-label">Descripción</label>
                 <div className="input-wrapper">
                     <textarea
+                        id="area-descripcion"
                         name="descripcion"
                         rows={2}
                         className="input-field w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"

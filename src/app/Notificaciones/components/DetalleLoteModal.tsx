@@ -46,7 +46,7 @@ const fechaCorteDe = (reportes: ReporteStaging[], lote: Lote): string | null => 
     .map((r) => r.consolidado_fecha_corte)
     .filter((f): f is string => Boolean(f))
     .sort((a, b) => a.localeCompare(b));
-  return fechas.length ? fechas[fechas.length - 1] : lote.fecha_corte;
+  return fechas.at(-1) ?? lote.fecha_corte;
 };
 
 const Dato = ({ etiqueta, children }: { etiqueta: string; children: ReactNode }) => (
@@ -266,16 +266,15 @@ export const DetalleLoteModal = ({ loteId, onClose, onFechaCorteChange, onLoteAc
               )}
 
               {aviso && (
-                <div
+                <output
                   className={`flex items-start gap-2 p-3 rounded-lg border text-sm ${aviso.tipo === 'ok'
                     ? 'bg-green-50 border-green-200 text-green-800'
                     : 'bg-red-50 border-red-200 text-red-800'}`}
-                  role="status"
                   data-testid="aviso-lote"
                 >
                   {aviso.tipo === 'ok' ? <CheckCircle className="w-4 h-4 mt-0.5" /> : <XCircle className="w-4 h-4 mt-0.5" />}
                   <span>{aviso.texto}</span>
-                </div>
+                </output>
               )}
 
               {erroresAprobacion.length > 0 && (
@@ -434,8 +433,7 @@ export const DetalleLoteModal = ({ loteId, onClose, onFechaCorteChange, onLoteAc
                     Se pasarán los {reportes.length} reporte(s) del lote a los reportes oficiales y se borrarán de staging.
                   </p>
                   <label className="block text-sm font-medium text-gray-700">
-                    Período del informe
-                    <input
+                    Período del informe<input
                       type="month"
                       value={periodo}
                       onChange={(e) => setPeriodo(e.target.value)}
@@ -468,8 +466,7 @@ export const DetalleLoteModal = ({ loteId, onClose, onFechaCorteChange, onLoteAc
                     Al rechazar el lote se eliminan sus reportes de staging. Esta acción no se puede deshacer.
                   </p>
                   <label className="block text-sm font-medium text-gray-700">
-                    Motivo del rechazo (opcional)
-                    <textarea
+                    Motivo del rechazo (opcional)<textarea
                       value={motivo}
                       onChange={(e) => setMotivo(e.target.value)}
                       maxLength={500}

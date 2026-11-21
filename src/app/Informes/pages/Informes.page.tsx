@@ -111,7 +111,7 @@ const InformesPage = () => {
 
             {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 flex items-center">
-                    <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <svg aria-hidden="true" className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
                     {error}
@@ -134,7 +134,7 @@ const InformesPage = () => {
                             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                                 <div className="flex items-center gap-3">
                                     <div className="bg-white/20 rounded-lg p-2">
-                                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg aria-hidden="true" className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
                                     </div>
@@ -146,7 +146,7 @@ const InformesPage = () => {
                                 <div className="hidden sm:block text-white/40 text-2xl font-light">→</div>
                                 <div className="flex items-center gap-3">
                                     <div className="bg-white/20 rounded-lg p-2">
-                                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg aria-hidden="true" className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                     </div>
@@ -203,8 +203,6 @@ const InformesPage = () => {
                     {transacciones.length > 0 && (
                         <TablaDetalleUsuario
                             data={transacciones}
-                            periodo={`${selectedAño}-${selectedMes}`}
-                            clienteNombre={clienteActual?.nombre}
                             consolidado={reportes}
                         />
                     )}
@@ -214,7 +212,7 @@ const InformesPage = () => {
 
             {!filtrosCompletos && (
                 <div className="text-center py-16 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                    <svg className="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg aria-hidden="true" className="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     <h3 className="text-lg font-semibold text-gray-800 mb-2">Selecciona filtros para ver el consolidado</h3>
@@ -223,7 +221,7 @@ const InformesPage = () => {
                         El consolidado se generará automáticamente.
                     </p>
                     <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <svg aria-hidden="true" className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                         </svg>
                         <span>La carga es automática, no necesitas presionar ningún botón</span>

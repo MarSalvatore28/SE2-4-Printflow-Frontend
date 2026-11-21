@@ -2,7 +2,9 @@ import * as XLSX from "xlsx-js-style";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import type { ClienteParaTabla } from "@models/Cliente/cliente.types";
-import type { MaquinaConsolidada, DetalleTransaccion } from "@models/Reporte/reporte.types";
+import type {
+  MaquinaConsolidada, DetalleTransaccion, FacturacionContrato, FacturacionTramo, ResumenConsolidado,
+} from "@models/Reporte/reporte.types";
 import {
   FORMATO_DINERO, FORMATO_ENTERO, hojaConsolidado, hojaUsuarios, nombreArchivoExcel,
   type Celda, type DatosExcel, type EstiloFila, type HojaExcel,
@@ -33,7 +35,7 @@ const ESTILOS_EXCEL: Record<EstiloFila, EstiloCelda> = {
 };
 
 /** Filas que ocupan todo el ancho de la hoja. */
-const FILAS_ANCHAS: EstiloFila[] = ["titulo", "seccion", "subseccion", "nota"];
+const FILAS_ANCHAS = new Set<EstiloFila>(["titulo", "seccion", "subseccion", "nota"]);
 
 /** Celda de xlsx: los contadores y las páginas como número entero, los importes como número con 2 decimales. */
 const celdaXlsx = (c: Celda, estilo: EstiloFila): XLSX.CellObject => {
@@ -74,7 +76,7 @@ const hojaXlsx = (hoja: HojaExcel): XLSX.WorkSheet => {
   let ultimaColumna = hoja.columnas - 1;
 
   hoja.filas.forEach((f, r) => {
-    const ancha = FILAS_ANCHAS.includes(f.estilo);
+    const ancha = FILAS_ANCHAS.has(f.estilo);
     const columnas = ancha ? hoja.columnas : f.celdas.length;
     for (let c = 0; c < columnas; c++) {
       const celda = celdaDeFila(f, c);
@@ -119,10 +121,10 @@ export const exportToExcel = (
 // ---------------------------------------------------------------------------
 // PDF del consolidado (S4-01)
 // Lo que usa solo el PDF se importa aquí, junto a sus funciones, para que el PDF
-// y el Excel de este archivo se puedan cambiar por separado.
+// y el Excel de este archivo se puedan cambiar por separado (los tipos del reporte
+// van arriba, en un solo import).
 // ---------------------------------------------------------------------------
 import type { CellDef, CellHookData, RowInput } from "jspdf-autotable";
-import type { FacturacionContrato, FacturacionTramo, ResumenConsolidado } from "@models/Reporte/reporte.types";
 import { formatMoney as dineroSinSigno, formatNumber as enteroPDF, formatFechaISO } from "@utils/formatUtils";
 import { aMonto, hayFacturacion, importeReferencial, MENSAJE_IMPORTE_PENDIENTE, NOTA_IMPORTE_REFERENCIAL } from "@utils/facturacionUtils";
 
@@ -216,8 +218,7 @@ const filasDetallePDF = (data: MaquinaConsolidada[]): RowInput[] => {
       { content: enteroPDF(bn), ...reemplazo },
       { content: enteroPDF(color), ...reemplazo },
       { content: importe, ...reemplazo },
-    ]);
-    filas.push([
+    ], [
       celdaTramo(sale.serie),
       celdaTramo(sale.modelo || ""),
       celdaTramo(`Sale el ${formatFechaISO(sale.fecha_retiro)}`),
@@ -226,8 +227,7 @@ const filasDetallePDF = (data: MaquinaConsolidada[]): RowInput[] => {
       celdaTramo(enteroPDF(sale.contadores.consumo.total_bn)),
       celdaTramo(enteroPDF(sale.contadores.consumo.total_color)),
       celdaTramo(""),
-    ]);
-    filas.push([
+    ], [
       celdaTramo(entra.serie),
       celdaTramo(entra.modelo || ""),
       celdaTramo(`Entra el ${formatFechaISO(entra.fecha_instalacion)}`),
@@ -297,7 +297,7 @@ const anexoUsuariosPDF = (doc: jsPDF, transacciones: DetalleTransaccion[]) => {
   porMaquina.forEach((trans) => {
     const maquina = trans[0].maquina;
     y = asegurarEspacio(doc, y, 30);
-    const fecha = trans[0].transaccion.fecha ? String(trans[0].transaccion.fecha).substring(0, 16).replace("T", " ").replace(/-/g, "/") : "N/A";
+    const fecha = trans[0].transaccion.fecha ? String(trans[0].transaccion.fecha).substring(0, 16).replace("T", " ").replaceAll("-", "/") : "N/A";
     doc.setFontSize(9);
     doc.text(`${maquina.area || "Sin área"} · ${maquina.modelo || "Sin modelo"} · Serie ${maquina.serie || "N/A"} · IP ${maquina.ip} · Tomado el ${fecha}`, MARGEN, y);
 

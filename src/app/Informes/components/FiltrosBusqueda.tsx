@@ -70,7 +70,7 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
         const mapa = new Map();
         if (Array.isArray(clientes)) {
             clientes.forEach(c => {
-                if (c && c.id_cliente && !mapa.has(c.id_cliente)) {
+                if (c?.id_cliente && !mapa.has(c.id_cliente)) {
                     mapa.set(c.id_cliente, c);
                 }
             });
@@ -141,6 +141,9 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
 
     const hayFiltrosActivos = selectedCliente || selectedMes || selectedAño || selectedMaquina || selectedArea;
     const consolidadoListo = selectedCliente && selectedMes && selectedAño;
+    // Máquina que muestra el buscador: la elegida en él o, si no, la que llega en selectedMaquina
+    const maquinaInicial = selectedMaquinaObj
+        ?? (selectedMaquina ? maquinasUnicas.find(m => (m.id_maquina ?? m.idMaquina) === selectedMaquina) : undefined);
 
     return (
         <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl mb-6 border border-gray-200 shadow-sm">
@@ -152,7 +155,7 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
                 <div className="flex items-center gap-3">
                     {hayFiltrosActivos && (
                         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-edit text-white">
-                            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <svg aria-hidden="true" className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                             </svg>
                             Filtros activos
@@ -163,8 +166,9 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700">Cliente <span className="text-red-600">*</span></label>
+                    <label htmlFor="informe-cliente" className="block text-sm font-semibold text-gray-700">Cliente <span className="text-red-600">*</span></label>
                     <BuscadorInteligente<Cliente>
+                        inputId="informe-cliente"
                         placeholder="Buscar cliente..."
                         buscarFn={async (term) => {
                             if (!term) return clientesUnicos;
@@ -172,7 +176,7 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
                             return clientesUnicos.filter(c =>
                                 c.nombre.toLowerCase().includes(lower) ||
                                 c.ruc?.toLowerCase().includes(lower) ||
-                                (c.razon_social && c.razon_social.toLowerCase().includes(lower))
+                                c.razon_social?.toLowerCase().includes(lower)
                             );
                         }}
                         onSeleccionar={handleSeleccionarCliente}
@@ -231,7 +235,7 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
                     <label htmlFor="informe-area" className="block text-sm font-semibold text-gray-700">Área <span className="font-normal text-gray-500">(opcional)</span></label>
                     <select
                         id="informe-area"
-                        value={selectedArea || ''}
+                        value={selectedArea ?? ''}
                         onChange={(e) => onAreaChange?.(e.target.value === '' ? null : Number(e.target.value))}
                         disabled={!selectedCliente || loadingAreas}
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg disabled:bg-gray-100"
@@ -244,8 +248,9 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700">Máquina <span className="font-normal text-gray-500">(opcional)</span></label>
+                    <label htmlFor="informe-maquina" className="block text-sm font-semibold text-gray-700">Máquina <span className="font-normal text-gray-500">(opcional)</span></label>
                     <BuscadorInteligente<Maquina>
+                        inputId="informe-maquina"
                         disabled={!selectedCliente}
                         placeholder={selectedCliente ? "Todas las máquinas (buscar por serie, modelo o IP)" : "Seleccione primero un cliente"}
                         buscarFn={async (term) => {
@@ -275,13 +280,7 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
                               )
                             : []
                         }
-                        initialValue={selectedMaquinaObj
-                            ? `${selectedMaquinaObj.modelo} - ${selectedMaquinaObj.serie}`
-                            : selectedMaquina
-                                ? (maquinasUnicas.find(m => (m.id_maquina ?? m.idMaquina) === selectedMaquina)
-                                    ? `${maquinasUnicas.find(m => (m.id_maquina ?? m.idMaquina) === selectedMaquina)!.modelo} - ${maquinasUnicas.find(m => (m.id_maquina ?? m.idMaquina) === selectedMaquina)!.serie}`
-                                    : '')
-                                : ''}
+                        initialValue={maquinaInicial ? `${maquinaInicial.modelo} - ${maquinaInicial.serie}` : ''}
                         renderItem={(maquina) => (
                             <div className="flex flex-col py-1">
                                 <span className="font-semibold text-gray-900 text-sm">{maquina.modelo}</span>
@@ -297,7 +296,7 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
                     onClick={onLimpiarFiltros}
                     className="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 bg-white font-medium rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-100 transition-colors"
                 >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg aria-hidden="true" className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                     Limpiar filtros

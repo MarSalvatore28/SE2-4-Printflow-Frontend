@@ -13,6 +13,7 @@ export const AreasFormAction: React.FC<AreasFormActionProps> = ({
     isSubmitting = false,
     isEditing = false
 }) => {
+    const textoGuardar = isEditing ? 'Actualizar área' : 'Guardar área';
     return (
         <div className="mt-12 flex justify-end gap-4">
             <button
@@ -35,7 +36,7 @@ export const AreasFormAction: React.FC<AreasFormActionProps> = ({
                         Guardando...
                     </>
                 ) : (
-                    isEditing ? 'Actualizar área' : 'Guardar área'
+                    textoGuardar
                 )}
             </button>
         </div>

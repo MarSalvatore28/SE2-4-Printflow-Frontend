@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, type ReactNode } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import { isTokenExpired } from '@utils/jwtUtils';
 import type { User, LoginCredentials } from '@models/auth.types';
 import * as authService from '@services/Auth/auth.service';
@@ -56,7 +56,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return () => clearInterval(interval);
     }, [token, logout]);
 
-    const login = async (credentials: LoginCredentials) => {
+    const login = useCallback(async (credentials: LoginCredentials) => {
         // Si falla, el error llega tal cual a la pantalla de login
         const response = await authService.login(credentials);
         const { token: newToken, usuario: newUser } = response;
@@ -66,17 +66,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         setToken(newToken);
         setUser(newUser);
-    };
+    }, []);
+
+    const value = useMemo(() => ({
+        user,
+        token,
+        isAuthenticated: !!token,
+        isLoading: false,
+        login,
+        logout
+    }), [user, token, login, logout]);
 
     return (
-        <AuthContext.Provider value={{
-            user,
-            token,
-            isAuthenticated: !!token,
-            isLoading: false,
-            login,
-            logout
-        }}>
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
     );

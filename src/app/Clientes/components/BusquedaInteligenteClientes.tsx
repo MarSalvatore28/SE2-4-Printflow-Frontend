@@ -12,6 +12,7 @@ interface BusquedaInteligenteClientesProps {
     onSearchClick?: (termino: string) => void;
     defaultValue?: string;
     disabled?: boolean;
+    inputId?: string;
 }
 
 export const BusquedaInteligenteClientes: React.FC<BusquedaInteligenteClientesProps> = ({
@@ -24,7 +25,8 @@ export const BusquedaInteligenteClientes: React.FC<BusquedaInteligenteClientesPr
     onInputChange,
     onSearchClick,
     defaultValue,
-    disabled = false
+    disabled = false,
+    inputId
 }) => {
     const itemsUnicos = useMemo(() => {
         const mapa = new Map();
@@ -38,14 +40,14 @@ export const BusquedaInteligenteClientes: React.FC<BusquedaInteligenteClientesPr
         return Array.from(mapa.values());
     }, [itemsCompletos]);
 
-    const buscarLocalmente = useCallback(async (term: string): Promise<ClienteParaTabla[]> => {
-        if (!term) return itemsUnicos;
+    const buscarLocalmente = useCallback((term: string): Promise<ClienteParaTabla[]> => {
+        if (!term) return Promise.resolve(itemsUnicos);
         const termLower = term.toLowerCase();
-        return itemsUnicos.filter(c =>
+        return Promise.resolve(itemsUnicos.filter(c =>
             c.nombre.toLowerCase().includes(termLower) ||
-            (c.ruc && c.ruc.toLowerCase().includes(termLower)) ||
-            (c.razon_social && c.razon_social.toLowerCase().includes(termLower))
-        );
+            c.ruc?.toLowerCase().includes(termLower) ||
+            c.razon_social?.toLowerCase().includes(termLower)
+        ));
     }, [itemsUnicos]);
 
     return (
@@ -58,6 +60,7 @@ export const BusquedaInteligenteClientes: React.FC<BusquedaInteligenteClientesPr
             onInputChange={onInputChange}
             onSearchClick={onSearchClick}
             initialValue={defaultValue}
+            inputId={inputId}
 
             getItemKey={(c) => c.id_cliente}
             getItemLabel={(c) => c.nombre}

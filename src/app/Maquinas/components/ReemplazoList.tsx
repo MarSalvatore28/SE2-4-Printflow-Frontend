@@ -96,7 +96,7 @@ export const ReemplazoList: FC<ReemplazoListProps> = ({ reemplazos, onAnular, an
         getItemId={(r) => r.id_maquina_cambio}
         emptyMessage="No hay reemplazos registrados"
         showActions={Boolean(onAnular)}
-        additionalActions={onAnular ? (r) => {
+        renderAdditionalActions={onAnular ? (r) => {
             const enCurso = anulandoId === r.id_maquina_cambio;
             // Un período aprobado no se recalcula: no se ofrece anular
             const bloqueado = r.periodo_aprobado || anulandoId !== null;

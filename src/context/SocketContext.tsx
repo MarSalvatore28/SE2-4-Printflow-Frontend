@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import { useAuth } from '@context/AuthContext';
 import { getToken } from '@services/Auth/auth.service';
@@ -56,8 +56,13 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         };
     }, [isAuthenticated]);
 
+    const value = useMemo(
+        () => ({ socket: isAuthenticated ? socket : null, conectado: isAuthenticated && conectado }),
+        [isAuthenticated, socket, conectado],
+    );
+
     return (
-        <SocketContext.Provider value={{ socket: isAuthenticated ? socket : null, conectado: isAuthenticated && conectado }}>
+        <SocketContext.Provider value={value}>
             {children}
         </SocketContext.Provider>
     );

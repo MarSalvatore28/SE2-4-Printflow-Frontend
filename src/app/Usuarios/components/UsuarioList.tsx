@@ -84,7 +84,7 @@ export const UsuarioList: FC<UsuarioListProps> = ({ usuarios, idSesion, onEdit, 
                 getItemId={(u) => u.id_usuario}
                 emptyMessage="No se encontraron usuarios"
                 onEdit={onEdit}
-                additionalActions={(u) => {
+                renderAdditionalActions={(u) => {
                     const esUsted = u.id_usuario === idSesion;
                     if (!u.activo) {
                         return (

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { X, Bell, CheckCircle, Clock, AlertCircle } from "lucide-react";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -24,7 +24,6 @@ import { DetalleLoteModal } from "@app/Notificaciones/components/DetalleLoteModa
 import { ListadoLotes } from "@app/Notificaciones/components/ListadoLotes";
 import { useNotification } from "@context/NotificationContext";
 import { usePermisos } from "@hooks/usePermisos";
-import React from "react";
 import { filtrarNotificaciones, loteAccionable } from "@app/Notificaciones/utils/notificacionesFiltro";
 
 type Pestana = "todas" | "no-leidas" | "lotes";
@@ -187,7 +186,7 @@ const NotificacionesPage = () => {
     }
   };
 
-  const handleAprobarLote = async (notif: Notificacion) => {
+  const handleAprobarLote = (notif: Notificacion) => {
     if (!notif.id_notificacion) {
       setError("Error: La notificación no tiene un ID válido.");
       return;
@@ -207,7 +206,7 @@ const NotificacionesPage = () => {
         try {
           // Sin período, la API usa el del lote; la fecha de corte solo si es de este lote
           await aprobarNotificacion(notif.id_notificacion, {
-            fecha_corte: fechaCorte && fechaCorte.loteId === notif.lote_id ? fechaCorte.fecha : undefined,
+            fecha_corte: fechaCorte?.loteId === notif.lote_id ? fechaCorte.fecha : undefined,
           });
           await fetchNotificaciones();
           void refrescarCampana();
@@ -264,7 +263,7 @@ const NotificacionesPage = () => {
     setModalOpen(true);
   };
 
-  const handleRechazarLote = async (notif: Notificacion) => {
+  const handleRechazarLote = (notif: Notificacion) => {
     if (!notif.id_notificacion) {
       setError("Error: La notificación no tiene un ID válido.");
       return;
@@ -314,7 +313,7 @@ const NotificacionesPage = () => {
     setModalOpen(true);
   };
 
-  const handleEliminarNotificacion = async (notificacion: Notificacion) => {
+  const handleEliminarNotificacion = (notificacion: Notificacion) => {
     setModalConfig({
       title: "Eliminar Notificación",
       message:
@@ -505,7 +504,7 @@ const NotificacionesPage = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  void handleAprobarLote(notif);
+                  handleAprobarLote(notif);
                 }}
                 className="inline-flex items-center p-1.5 border border-green-300 shadow-sm rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
                 title="Aprobar Lote"
@@ -515,7 +514,7 @@ const NotificacionesPage = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  void handleRechazarLote(notif);
+                  handleRechazarLote(notif);
                 }}
                 className="inline-flex items-center p-1.5 border border-red-300 shadow-sm rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
                 title="Rechazar Lote"
@@ -543,7 +542,7 @@ const NotificacionesPage = () => {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                void handleEliminarNotificacion(notif);
+                handleEliminarNotificacion(notif);
               }}
               className="inline-flex items-center p-1.5 border border-red-300 shadow-sm rounded text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
               title="Eliminar notificación"
@@ -555,6 +554,36 @@ const NotificacionesPage = () => {
       ),
     },
   ];
+
+  // Contenido: cargando, el error o la pestaña elegida
+  const renderContenido = () => {
+    if (loading) {
+      return (
+        <div className="flex justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
+      );
+    }
+    if (error) {
+      return (
+        <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 flex items-center gap-2">
+          <AlertCircle size={20} />
+          {error}
+        </div>
+      );
+    }
+    return (
+      <DataTable<Notificacion>
+        title={TEXTOS_TABLA[activeTab].titulo}
+        columns={columns}
+        data={filteredNotificaciones}
+        getItemId={(notif) => notif.id_notificacion}
+        emptyMessage={TEXTOS_TABLA[activeTab].vacia}
+        rowsPerPage={10}
+        showActions={false}
+      />
+    );
+  };
 
   return (
     <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
@@ -623,10 +652,11 @@ const NotificacionesPage = () => {
       <div className="mb-6">
         <div className="flex flex-col md:flex-row gap-4 items-end bg-gray-50 p-4 rounded-lg border border-gray-200">
           <div className="flex-1 w-full">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="buscar-notificacion" className="block text-sm font-medium text-gray-700 mb-2">
               Buscar Notificación
             </label>
             <BuscadorInteligente<Notificacion>
+              inputId="buscar-notificacion"
               placeholder="Buscar por título, mensaje, lote..."
               buscarFn={async (termino: string) => filtrarNotificaciones(allNotificaciones, termino)}
               onSeleccionar={(notif: Notificacion) => {
@@ -682,26 +712,7 @@ const NotificacionesPage = () => {
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-        </div>
-      ) : error ? (
-        <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 flex items-center gap-2">
-          <AlertCircle size={20} />
-          {error}
-        </div>
-      ) : (
-        <DataTable<Notificacion>
-          title={TEXTOS_TABLA[activeTab].titulo}
-          columns={columns}
-          data={filteredNotificaciones}
-          getItemId={(notif) => notif.id_notificacion}
-          emptyMessage={TEXTOS_TABLA[activeTab].vacia}
-          rowsPerPage={10}
-          showActions={false}
-        />
-      )}
+      {renderContenido()}
       </>
       )}
 

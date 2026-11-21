@@ -1,4 +1,4 @@
-import { useState, type FC } from 'react';
+import { useEffect, useRef, useState, type FC, type ReactNode } from 'react';
 import { Plus, X } from 'lucide-react';
 import type {
     Maquina,
@@ -57,6 +57,11 @@ export const MaquinaForm: FC<MaquinaFormProps> = ({
     const [errores, setErrores] = useState<ErroresCampo>({});
 
     const [creandoModelo, setCreandoModelo] = useState(false);
+    const nuevoModeloRef = useRef<HTMLInputElement>(null);
+    // Al pulsar «nuevo modelo» el foco pasa a su campo (lo pidió el usuario con el botón)
+    useEffect(() => {
+        if (creandoModelo) nuevoModeloRef.current?.focus();
+    }, [creandoModelo]);
     const [nombreModelo, setNombreModelo] = useState('');
     const [errorModelo, setErrorModelo] = useState<string | null>(null);
     const [guardandoModelo, setGuardandoModelo] = useState(false);
@@ -109,6 +114,14 @@ export const MaquinaForm: FC<MaquinaFormProps> = ({
 
     const serieNormalizada = normalizarSerie(valores.serie);
     const modelosVisibles = modelos.filter(m => m.activo || String(m.id_modelo) === valores.modelo_id);
+    const textoGuardar = maquina ? 'Actualizar máquina' : 'Guardar máquina';
+    // Bajo la serie: el error, o cómo se guardará si se normaliza
+    let avisoSerie: ReactNode = null;
+    if (errores.serie) {
+        avisoSerie = <p className="mt-1 text-sm text-red-600">{errores.serie}</p>;
+    } else if (serieNormalizada && serieNormalizada !== valores.serie) {
+        avisoSerie = <p className="mt-1 text-xs text-gray-500">Se guardará como <span className="font-mono font-semibold">{serieNormalizada}</span></p>;
+    }
 
     return (
         <div className="flex flex-col gap-8">
@@ -142,11 +155,7 @@ export const MaquinaForm: FC<MaquinaFormProps> = ({
                         onChange={(e) => cambiar('serie', e.target.value)}
                         maxLength={60}
                     />
-                    {errores.serie ? (
-                        <p className="mt-1 text-sm text-red-600">{errores.serie}</p>
-                    ) : serieNormalizada && serieNormalizada !== valores.serie ? (
-                        <p className="mt-1 text-xs text-gray-500">Se guardará como <span className="font-mono font-semibold">{serieNormalizada}</span></p>
-                    ) : null}
+                    {avisoSerie}
                 </div>
 
                 <div>
@@ -200,6 +209,7 @@ export const MaquinaForm: FC<MaquinaFormProps> = ({
                             <label htmlFor="nuevo-modelo" className="block text-xs font-semibold text-gray-600 mb-1">Nombre del nuevo modelo</label>
                             <div className="flex gap-2">
                                 <input
+                                    ref={nuevoModeloRef}
                                     id="nuevo-modelo"
                                     type="text"
                                     className={inputClass(!!errorModelo)}
@@ -208,7 +218,6 @@ export const MaquinaForm: FC<MaquinaFormProps> = ({
                                     onChange={(e) => { setNombreModelo(e.target.value); setErrorModelo(null); }}
                                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void handleCrearModelo(); } }}
                                     maxLength={100}
-                                    autoFocus
                                 />
                                 <button
                                     type="button"
@@ -271,7 +280,7 @@ export const MaquinaForm: FC<MaquinaFormProps> = ({
                             Guardando...
                         </>
                     ) : (
-                        maquina ? 'Actualizar máquina' : 'Guardar máquina'
+                        textoGuardar
                     )}
                 </button>
             </div>

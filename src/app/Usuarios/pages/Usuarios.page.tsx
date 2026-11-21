@@ -190,6 +190,33 @@ const UsuariosPage = () => {
 
     const textosEstado = textosCambioEstado(confirmar.usuario);
 
+    // Lista: cargando, el error o los usuarios
+    const renderLista = () => {
+        if (loading) {
+            return (
+                <div className="flex justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                </div>
+            );
+        }
+        if (errorCarga) {
+            return (
+                <div role="alert" className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100">
+                    {errorCarga}
+                </div>
+            );
+        }
+        return (
+            <UsuarioList
+                key={`${filtroId ?? ''}|${filtroTermino}|${mostrarInactivos}`}
+                usuarios={usuariosVisibles}
+                idSesion={idSesion}
+                onEdit={abrirEdicion}
+                onToggleActive={(u) => setConfirmar({ abierto: true, usuario: u })}
+            />
+        );
+    };
+
     return (
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
             <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Usuarios</h1>
@@ -225,10 +252,11 @@ const UsuariosPage = () => {
                     <div className="flex flex-col gap-6">
                         <div className="flex flex-col md:flex-row gap-4 items-end bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <div className="flex-1 w-full">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label htmlFor="buscar-usuario" className="block text-sm font-medium text-gray-700 mb-2">
                                     Buscar usuario (nombre, correo o rol)
                                 </label>
                                 <BuscadorInteligente<Usuario>
+                                    inputId="buscar-usuario"
                                     key={buscadorKey}
                                     placeholder="Ej: María, operador@printflow.local, auditor..."
                                     buscarFn={async (t) => usuarios.filter(u => coincide(u, t))}
@@ -291,29 +319,13 @@ const UsuariosPage = () => {
                         </div>
 
                         {aviso && (
-                            <div role="status" className="p-3 bg-green-50 text-green-800 rounded-lg border border-green-200 flex justify-between items-center">
+                            <output className="p-3 bg-green-50 text-green-800 rounded-lg border border-green-200 flex justify-between items-center">
                                 <span>{aviso}</span>
                                 <button onClick={() => setAviso(null)} className="text-green-700 hover:text-green-900 text-sm" aria-label="Cerrar aviso">✕</button>
-                            </div>
+                            </output>
                         )}
 
-                        {loading ? (
-                            <div className="flex justify-center py-12">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                            </div>
-                        ) : errorCarga ? (
-                            <div role="alert" className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100">
-                                {errorCarga}
-                            </div>
-                        ) : (
-                            <UsuarioList
-                                key={`${filtroId ?? ''}|${filtroTermino}|${mostrarInactivos}`}
-                                usuarios={usuariosVisibles}
-                                idSesion={idSesion}
-                                onEdit={abrirEdicion}
-                                onToggleActive={(u) => setConfirmar({ abierto: true, usuario: u })}
-                            />
-                        )}
+                        {renderLista()}
                     </div>
                 )}
             </div>

@@ -15,6 +15,7 @@ export const ClientesFormAction: React.FC<ClientesFormActionProps> = ({
     isEditing = false,
     saveLabel
 }) => {
+    const textoGuardar = saveLabel || (isEditing ? 'Actualizar cliente' : 'Guardar cliente');
     return (
         <div className="mt-12 flex justify-end gap-4">
             <button
@@ -37,7 +38,7 @@ export const ClientesFormAction: React.FC<ClientesFormActionProps> = ({
                         Guardando...
                     </>
                 ) : (
-                    saveLabel || (isEditing ? 'Actualizar cliente' : 'Guardar cliente')
+                    textoGuardar
                 )}
             </button>
         </div>

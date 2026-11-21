@@ -174,7 +174,7 @@ const InformesPage = () => {
                                     Exportar en XLSX
                                 </button>
                                 <button
-                                    onClick={() => exportToPDF(reportes, clienteActual, `${selectedAño}-${selectedMes}`, transacciones, exportParams)}
+                                    onClick={() => exportToPDF(reportes, clienteActual, `${selectedAño}-${selectedMes}`, { resumen, transacciones, fechaInicio: exportParams.fechaInicio, fechaFin: exportParams.fechaFin })}
                                     className="px-4 py-2 bg-red-500 hover:bg-red-400 text-white font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-2 text-sm"
                                     title="Exportar en PDF"
                                 >

@@ -2,7 +2,8 @@
 FROM node:22-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+# Sin scripts de instalación: ninguna dependencia los necesita para compilar
+RUN npm ci --ignore-scripts
 COPY . .
 # Vacío = la API está en la misma URL que la página (nginx la reenvía).
 ARG VITE_API_BASE_URL=""

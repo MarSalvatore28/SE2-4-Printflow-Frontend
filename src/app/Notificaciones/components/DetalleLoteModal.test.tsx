@@ -108,3 +108,23 @@ describe('DetalleLoteModal · aprobar', () => {
     expect(desplazar).toHaveBeenCalled();
   });
 });
+
+describe('DetalleLoteModal · lote rechazado', () => {
+  it('muestra el motivo y quién lo rechazó, guardados en el lote', async () => {
+    servicio.getLote.mockResolvedValue(lote({
+      estado: 'DESCARTADO',
+      reportes_staging: 0,
+      fecha_procesamiento: '2026-11-21T17:32:55.101Z',
+      fecha_rechazo: '2026-11-21T17:32:55.101Z',
+      motivo: 'Contadores «dudosos»',
+      motivo_rechazo: 'Contadores «dudosos»',
+      usuario_rechazo_id: 2,
+      usuario_rechazo_nombre: 'Operador Prueba',
+    }));
+    await montar();
+    expect(document.body.textContent).toContain('Rechazado por');
+    expect(document.body.textContent).toContain('Operador Prueba');
+    expect(document.body.textContent).toContain('Contadores «dudosos»');
+    expect(boton(/^\s*Aprobar$/)).toBeUndefined();
+  });
+});

@@ -28,7 +28,7 @@ export default function ModalConfirmacion({
   showInput = false,
   inputPlaceholder = '',
   showCancel = true,
-}: ModalConfirmacionProps) {
+}: Readonly<ModalConfirmacionProps>) {
   const [inputValue, setInputValue] = useState('');
 
   const [isRendered, setIsRendered] = useState(false);

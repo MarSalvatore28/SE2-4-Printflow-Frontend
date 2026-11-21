@@ -39,7 +39,7 @@ export function BuscadorInteligente<T>({
     onSearchClick,
     initialValue = "",
     isInModal = false
-}: BuscadorInteligenteProps<T>) {
+}: Readonly<BuscadorInteligenteProps<T>>) {
 
     const [termino, setTermino] = useState(initialValue);
     const [resultados, setResultados] = useState<T[]>([]);

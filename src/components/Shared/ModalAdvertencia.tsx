@@ -16,7 +16,7 @@ export default function ModalAdvertencia({
     title = 'Datos incompletos',
     message,
     buttonText = 'Entendido'
-}: ModalAdvertenciaProps) {
+}: Readonly<ModalAdvertenciaProps>) {
     const [isRendered, setIsRendered] = useState(false);
     const dialogoRef = useRef<HTMLDivElement>(null);
     const idTitulo = useId();

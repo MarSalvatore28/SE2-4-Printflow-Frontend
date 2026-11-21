@@ -2,7 +2,7 @@ import { useId, useRef } from 'react';
 import { X } from 'lucide-react';
 import { type InstalacionActivaCliente } from '@models/Instalacion/Instalacion.types';
 import { useDialogoAccesible } from '@hooks/useDialogoAccesible';
-import type { DatosEdicionInstalacion } from '@app/maquina_asignacion/utils/instalaciones';
+import { hoyIso, type DatosEdicionInstalacion } from '@app/maquina_asignacion/utils/instalaciones';
 
 interface ModalEditarInstalacionProps {
     instalacion: InstalacionActivaCliente;
@@ -11,6 +11,8 @@ interface ModalEditarInstalacionProps {
     onCerrar: () => void;
     onGuardar: () => void;
     guardando: boolean;
+    /** Motivo de la API si no se pudo guardar: se muestra dentro del modal */
+    error?: string | null;
 }
 
 // Editar IP, fecha, renta y forma de contar de una instalación activa
@@ -21,6 +23,7 @@ export const ModalEditarInstalacion = ({
     onCerrar,
     onGuardar,
     guardando,
+    error = null,
 }: ModalEditarInstalacionProps) => {
     const dialogoRef = useRef<HTMLDivElement>(null);
     const idTitulo = useId();
@@ -50,6 +53,11 @@ export const ModalEditarInstalacion = ({
                 </div>
 
                 <div className="mb-6 space-y-5">
+                    {error && (
+                        <div role="alert" className="p-3 bg-red-50 text-red-700 rounded-lg border border-red-200 text-sm">
+                            {error}
+                        </div>
+                    )}
                     {/* Información estática de la máquina */}
                     <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-100 text-sm text-gray-700">
                         <p>
@@ -89,6 +97,7 @@ export const ModalEditarInstalacion = ({
                             id="editar-instalacion-fecha"
                             type="date"
                             value={datos.fecha_instalacion}
+                            max={hoyIso()}
                             onChange={(e) => cambiar({ fecha_instalacion: e.target.value })}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all"
                         />
@@ -124,21 +133,27 @@ export const ModalEditarInstalacion = ({
                         <label className="flex items-center cursor-pointer">
                             <input
                                 type="checkbox"
-                                checked={datos.contador_acumulativo}
-                                onChange={(e) => cambiar({ contador_acumulativo: e.target.checked })}
+                                checked={datos.contabilidad_por_usuario}
+                                onChange={(e) => cambiar(e.target.checked
+                                    ? { contabilidad_por_usuario: true }
+                                    // Sin contabilidad por usuario el contador es acumulativo, igual que al crear
+                                    : { contabilidad_por_usuario: false, contador_acumulativo: true })}
                                 className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
                             />
-                            <span className="ml-3 text-sm font-medium text-gray-700">Contador acumulativo</span>
+                            <span className="ml-3 text-sm font-medium text-gray-700">Contabilidad por usuario</span>
                         </label>
 
-                        <label className="flex items-center cursor-pointer">
+                        <label className={`flex items-center ${datos.contabilidad_por_usuario ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}>
                             <input
                                 type="checkbox"
-                                checked={datos.contabilidad_por_usuario}
-                                onChange={(e) => cambiar({ contabilidad_por_usuario: e.target.checked })}
-                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                                checked={datos.contador_acumulativo}
+                                disabled={!datos.contabilidad_por_usuario}
+                                onChange={(e) => cambiar({ contador_acumulativo: e.target.checked })}
+                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer disabled:cursor-not-allowed"
                             />
-                            <span className="ml-3 text-sm font-medium text-gray-700">Requiere detalle por usuario</span>
+                            <span className="ml-3 text-sm font-medium text-gray-700">
+                                Contador acumulativo{!datos.contabilidad_por_usuario && ' (obligatorio sin contabilidad por usuario)'}
+                            </span>
                         </label>
                     </div>
                 </div>

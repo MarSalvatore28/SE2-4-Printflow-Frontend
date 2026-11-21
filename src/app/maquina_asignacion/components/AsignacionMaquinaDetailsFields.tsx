@@ -14,16 +14,7 @@ import {
 } from '@models/Instalacion/Instalacion.types';
 import { type Client } from '@models/Cliente/cliente.types';
 import { Plus } from 'lucide-react';
-
-// Formatea fecha sin ajuste de zona horaria (evita restar un día en UTC-5)
-const formatFechaLocal = (fechaStr: string | null | undefined): string => {
-    if (!fechaStr) return '';
-    // Tomar los primeros 10 caracteres (YYYY-MM-DD) y parsear sin conversión UTC
-    const parte = fechaStr.substring(0, 10);
-    const [anio, mes, dia] = parte.split('-');
-    if (!anio || !mes || !dia) return parte;
-    return `${Number.parseInt(dia)}/${Number.parseInt(mes)}/${anio}`;
-};
+import { etiquetaContrato, hoyIso } from '@app/maquina_asignacion/utils/instalaciones';
 import InfoIcon from '@mui/icons-material/Info';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AssignmentIcon from '@mui/icons-material/Assignment';
@@ -69,6 +60,8 @@ interface InstalacionFormFieldsProps {
     onUpdateMaquinaContador?: (maquinaId: number, val: boolean) => void;
     onUpdateMaquinaContabilidad?: (maquinaId: number, val: boolean) => void;
     onUpdateMaquinaArea?: (maquinaId: number, areaId: number) => void;
+    /** Máquinas que ya se instalaron en este formulario: no se ofrecen otra vez */
+    excluirMaquinas?: number[];
 }
 
 // id: va en el primer octeto, para asociarle un <label htmlFor>
@@ -151,8 +144,7 @@ const SeccionContrato = ({ loadingContratos, contratos, formData, handleSelectCo
                     <option value="">-- Seleccione un contrato --</option>
                     {contratos.map((contrato) => (
                         <option key={contrato.id_contrato} value={contrato.id_contrato}>
-                            Contrato {contrato.id_contrato} - Desde {formatFechaLocal(contrato.fecha_inicio)}
-                            {contrato.fecha_fin ? ` hasta ${formatFechaLocal(contrato.fecha_fin)}` : ' (Vigente)'}
+                            {etiquetaContrato(contrato)}
                         </option>
                     ))}
                 </select>
@@ -182,7 +174,7 @@ const SeccionContrato = ({ loadingContratos, contratos, formData, handleSelectCo
                 {selectedContrato && (
                     <div className="mt-3 p-3 bg-edit/10 border border-edit-hover rounded-md space-y-1">
                         <p className="text-sm font-semibold text-text">
-                            Contrato #{selectedContrato.id_contrato}
+                            {etiquetaContrato(selectedContrato)}
                             {tieneRenta && (
                                 <span className="ml-2 px-2 py-0.5 bg-secondary text-white text-xs rounded-full font-normal">
                                     Incluye renta
@@ -383,7 +375,8 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
     onUpdateMaquinaRenta,
     onUpdateMaquinaContador,
     onUpdateMaquinaContabilidad,
-    onUpdateMaquinaArea
+    onUpdateMaquinaArea,
+    excluirMaquinas = []
 }) => {
     const [areas, setAreas] = useState<Area[]>([]);
     const [contratos, setContratos] = useState<Contrato[]>([]);
@@ -447,7 +440,7 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
     const handleSelectContrato = (contratoId: number) => {
         const contrato = contratos.find(c => c.id_contrato === contratoId);
         setSelectedContrato(contrato || null);
-        onSelectContrato(contratoId, contrato ? `Contrato ${contrato.id_contrato}` : undefined);
+        onSelectContrato(contratoId, contrato ? etiquetaContrato(contrato) : undefined);
     };
 
     const handleSelectSingleMaquina = (maquina: MaquinaSinInstalacion) => {
@@ -464,7 +457,7 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
     };
 
     const maquinasNoAgregadas = maquinasDisponibles.filter(
-        m => !maquinasConIP.some(mc => mc.maquina.id_maquina === m.id_maquina)
+        m => !maquinasConIP.some(mc => mc.maquina.id_maquina === m.id_maquina) && !excluirMaquinas.includes(m.id_maquina)
     );
 
     const tieneRenta = selectedContrato?.renta_equipo === true;
@@ -523,6 +516,7 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                                 type="date"
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm bg-white"
                                 value={formData.fecha_instalacion || ''}
+                                max={hoyIso()}
                                 onChange={(e) => onChangeFecha?.(e.target.value)}
                                 required
                             />
@@ -619,6 +613,8 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                                                     <button
                                                         type="button"
                                                         onClick={() => onRemoveMaquina?.(item.maquina.id_maquina)}
+                                                        aria-label={`Quitar ${item.maquina.serie} de la lista`}
+                                                        title="Quitar de la lista"
                                                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                                     >
                                                         <DeleteIcon className="w-5 h-5" />

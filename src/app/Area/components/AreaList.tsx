@@ -117,7 +117,7 @@ export const AreaList: React.FC<AreaListProps> = ({
                         <div key={cliente.cliente_id} className="border-2 border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
                             <div
                                 onClick={() => toggleCliente(cliente.cliente_id)}
-                                className="flex items-center justify-between p-4 bg-white hover:bg-gray-50 cursor-pointer transition-all border-b border-transparent data-[expanded=true]:border-gray-100"
+                                className="flex flex-wrap items-center justify-between gap-3 p-4 bg-white hover:bg-gray-50 cursor-pointer transition-all border-b border-transparent data-[expanded=true]:border-gray-100"
                                 data-expanded={isExpanded}
                             >
                                 <div className="flex items-center gap-3">
@@ -143,7 +143,7 @@ export const AreaList: React.FC<AreaListProps> = ({
                                 </div>
 
                                 <div className="flex items-center gap-3">
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex flex-wrap items-center gap-2">
                                         <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-700 border border-gray-200">
                                             {cliente.areas.length} área{cliente.areas.length !== 1 ? 's' : ''}
                                         </span>

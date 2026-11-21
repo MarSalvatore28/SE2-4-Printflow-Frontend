@@ -266,6 +266,9 @@ export const DetalleLoteModal = ({ loteId, onClose, onFechaCorteChange, onLoteAc
                 {lote.usuario_aprobacion_nombre && (
                   <Dato etiqueta="Aprobado por">{lote.usuario_aprobacion_nombre}</Dato>
                 )}
+                {lote.estado === 'DESCARTADO' && lote.usuario_rechazo_nombre && (
+                  <Dato etiqueta="Rechazado por">{lote.usuario_rechazo_nombre}</Dato>
+                )}
               </dl>
 
               {lote.motivo && lote.estado !== 'PENDIENTE' && (

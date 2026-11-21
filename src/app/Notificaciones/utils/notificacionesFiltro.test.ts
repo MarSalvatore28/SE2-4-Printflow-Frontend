@@ -66,10 +66,12 @@ describe('loteAccionable', () => {
 });
 
 describe('notificacionEliminable', () => {
-  it('solo leídas, y de un lote solo si ya está aprobado', () => {
+  it('solo leídas, y de un lote solo si ya está aprobado o rechazado', () => {
     expect(notificacionEliminable(notificacion({ leida: false }))).toBe(false);
     expect(notificacionEliminable(notificacion({ leida: true }))).toBe(true);
-    expect(notificacionEliminable(notificacion({ leida: true, lote_id: 9, fecha_aprobacion: null }))).toBe(false);
+    expect(notificacionEliminable(notificacion({ leida: true, lote_id: 9, fecha_aprobacion: null, fecha_rechazo: null }))).toBe(false);
     expect(notificacionEliminable(notificacion({ leida: true, lote_id: 7, fecha_aprobacion: '2026-11-21T16:00:00Z' }))).toBe(true);
+    expect(notificacionEliminable(notificacion({ leida: true, lote_id: 8, fecha_rechazo: '2026-11-21T17:00:00Z' }))).toBe(true);
+    expect(notificacionEliminable(notificacion({ leida: false, lote_id: 8, fecha_rechazo: '2026-11-21T17:00:00Z' }))).toBe(false);
   });
 });

@@ -33,7 +33,7 @@ const ESTILOS_EXCEL: Record<EstiloFila, EstiloCelda> = {
 };
 
 /** Filas que ocupan todo el ancho de la hoja. */
-const FILAS_ANCHAS: EstiloFila[] = ["titulo", "seccion", "subseccion", "nota"];
+const FILAS_ANCHAS = new Set<EstiloFila>(["titulo", "seccion", "subseccion", "nota"]);
 
 /** Celda de xlsx: los contadores y las páginas como número entero, los importes como número con 2 decimales. */
 const celdaXlsx = (c: Celda, estilo: EstiloFila): XLSX.CellObject => {
@@ -74,7 +74,7 @@ const hojaXlsx = (hoja: HojaExcel): XLSX.WorkSheet => {
   let ultimaColumna = hoja.columnas - 1;
 
   hoja.filas.forEach((f, r) => {
-    const ancha = FILAS_ANCHAS.includes(f.estilo);
+    const ancha = FILAS_ANCHAS.has(f.estilo);
     const columnas = ancha ? hoja.columnas : f.celdas.length;
     for (let c = 0; c < columnas; c++) {
       const celda = celdaDeFila(f, c);

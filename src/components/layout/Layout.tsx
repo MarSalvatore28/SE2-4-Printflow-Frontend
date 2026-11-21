@@ -3,6 +3,7 @@ import { Menu } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Outlet } from 'react-router-dom';
 import { PermisoRuta } from '@components/auth/PermisoRuta';
+import { NotificationBell } from './NotificationBell';
 
 export const Layout = () => {
     // Solo en celular (menos de 768 px): el menú lateral se abre encima del contenido
@@ -45,6 +46,10 @@ export const Layout = () => {
                         <Menu aria-hidden="true" className="w-6 h-6" />
                     </button>
                     <span className="text-lg font-bold tracking-wider">PrintFlow</span>
+                    {/* La campana también en la barra del celular, sin abrir el menú; el panel se abre hacia la izquierda */}
+                    <div className="ml-auto" data-testid="campana-movil">
+                        <NotificationBell alinear="derecha" />
+                    </div>
                 </header>
                 <main className="flex-1 min-w-0 p-4 md:p-8 overflow-y-auto">
                     <PermisoRuta>

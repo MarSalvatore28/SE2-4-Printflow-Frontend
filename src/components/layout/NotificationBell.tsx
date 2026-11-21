@@ -16,8 +16,14 @@ const haceCuanto = (fecha: string) => {
     return new Date(fecha).toLocaleDateString('es-EC', { day: 'numeric', month: 'short' });
 };
 
-// Campana del menú lateral: contador de no leídas y las últimas notificaciones
-export const NotificationBell = () => {
+interface NotificationBellProps {
+    /** Borde del panel alineado con la campana: 'izquierda' lo abre hacia la derecha (menú lateral), 'derecha' hacia la izquierda (barra del celular) */
+    alinear?: 'izquierda' | 'derecha';
+}
+
+// Campana de notificaciones (menú lateral y barra superior del celular):
+// contador de no leídas y las últimas notificaciones
+export const NotificationBell = ({ alinear = 'izquierda' }: Readonly<NotificationBellProps>) => {
     const { notifications, unreadCount, loading, error, markAsRead, markAllAsRead } = useNotification();
     const [abierta, setAbierta] = useState(false);
     const contenedor = useRef<HTMLDivElement>(null);
@@ -78,7 +84,7 @@ export const NotificationBell = () => {
 
             {abierta && (
                 <div
-                    className="absolute left-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white text-text rounded-lg shadow-2xl border border-gray-200 z-50 overflow-hidden"
+                    className={`absolute ${alinear === 'derecha' ? 'right-0' : 'left-0'} mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white text-text rounded-lg shadow-2xl border border-gray-200 z-50 overflow-hidden`}
                     role="menu"
                     data-testid="desplegable-notificaciones"
                 >

@@ -21,7 +21,8 @@ interface DataTableProps<T> {
   emptyMessage?: string;
   showActions?: boolean;
   onRowClick?: (item: T) => void;
-  additionalActions?: (item: T) => React.ReactNode;
+  // Función que dibuja botones extra de la fila (render prop)
+  renderAdditionalActions?: (item: T) => React.ReactNode;
   rowsPerPage?: number;
 }
 
@@ -37,7 +38,7 @@ function DataTable<T>({
   emptyMessage = 'No se encontraron registros',
   showActions = true,
   onRowClick,
-  additionalActions,
+  renderAdditionalActions,
   rowsPerPage = 10,
 }: Readonly<DataTableProps<T>>) {
   const [paginaActual, setPaginaActual] = React.useState(1);
@@ -121,7 +122,7 @@ function DataTable<T>({
                     {showActions && (
                       <td className="px-3 md:px-6 py-4 text-sm text-center">
                         <div className="flex justify-center gap-2">
-                          {additionalActions?.(item)}
+                          {renderAdditionalActions?.(item)}
 
                           {onEdit && (
                             <button

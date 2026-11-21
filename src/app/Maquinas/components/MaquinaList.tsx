@@ -92,7 +92,7 @@ export const MaquinaList: FC<MaquinaListProps> = ({ maquinas, onEdit, onToggleAc
                 emptyMessage="No se encontraron máquinas"
                 onEdit={onEdit}
                 showActions={Boolean(onEdit || onToggleActive)}
-                additionalActions={onToggleActive && ((m) => (
+                renderAdditionalActions={onToggleActive && ((m) => (
                     m.activo ? (
                         <button
                             onClick={(e) => { e.stopPropagation(); onToggleActive(m); }}

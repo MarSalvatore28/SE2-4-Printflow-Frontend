@@ -12,7 +12,7 @@ export interface Area {
     total_instalaciones_activas?: number;
     total_instalaciones_historicas?: number;
 
-    instalaciones_activas?: any[];
+    instalaciones_activas?: Record<string, unknown>[];
 }
 
 export interface AreaFormData {

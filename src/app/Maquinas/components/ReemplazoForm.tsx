@@ -5,6 +5,11 @@ import { fetchUltimaLectura } from '@services/Maquinas/reemplazos.service';
 import type { Maquina } from '@models/Maquina/maquina.types';
 import type { LecturaAprobada, ReemplazoFormData } from '@models/Maquina/reemplazo.types';
 import { formatNumber, formatFechaISO } from '@utils/formatUtils';
+import {
+    validarReemplazo,
+    type ErroresReemplazo,
+    type ValoresReemplazo,
+} from '@app/Maquinas/utils/validarReemplazo';
 
 interface ReemplazoFormProps {
     /** Máquinas recién leídas de la API: las asignadas pueden salir, las libres pueden entrar. */
@@ -16,21 +21,8 @@ interface ReemplazoFormProps {
     onCancel: () => void;
 }
 
-interface Valores {
-    fecha_danio: string;
-    fecha_instalacion_entrante: string;
-    periodo_afectado: string;
-    tipo_cambio: string;
-    razon_cambio: string;
-    contador_final_saliente_bn: string;
-    contador_final_saliente_color: string;
-    contador_inicial_entrante_bn: string;
-    contador_inicial_entrante_color: string;
-    ip_address: string;
-}
-
-type CampoForm = keyof Valores | 'saliente' | 'entrante';
-type Errores = Partial<Record<CampoForm, string>>;
+type Valores = ValoresReemplazo;
+type Errores = ErroresReemplazo;
 
 const VACIO: Valores = {
     fecha_danio: '',
@@ -49,13 +41,6 @@ const hoyLocal = () => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
-
-const periodoSiguiente = (periodo: string) => {
-    const [anio, mes] = periodo.split('-').map(Number);
-    return mes === 12 ? `${anio + 1}-01` : `${anio}-${String(mes + 1).padStart(2, '0')}`;
-};
-
-const esEntero = (v: string) => /^\d+$/.test(v.trim());
 
 const inputClass = (conError: boolean) =>
     `w-full rounded-md border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${conError ? 'border-red-500' : 'border-gray-300'}`;
@@ -137,36 +122,7 @@ export const ReemplazoForm: FC<ReemplazoFormProps> = ({ maquinas, tipos, isSubmi
         return () => { cancelado = true; };
     }, [entrante, valores.periodo_afectado]);
 
-    const validar = (): Errores => {
-        const e: Errores = {};
-        if (!saliente) e.saliente = 'Seleccione la máquina que sale (debe estar asignada)';
-        if (!entrante) e.entrante = 'Seleccione la máquina que entra (debe estar libre)';
-        if (!valores.fecha_danio) e.fecha_danio = 'Indique la fecha del daño';
-        else if (valores.fecha_danio > hoy) e.fecha_danio = 'La fecha del daño no puede ser futura';
-        else if (saliente?.fecha_instalacion && valores.fecha_danio < saliente.fecha_instalacion) {
-            e.fecha_danio = `No puede ser anterior a la instalación de ${saliente.serie} (${formatFechaISO(saliente.fecha_instalacion)})`;
-        }
-        if (!valores.fecha_instalacion_entrante) e.fecha_instalacion_entrante = 'Indique la fecha de instalación de la entrante';
-        else if (valores.fecha_instalacion_entrante > hoy) e.fecha_instalacion_entrante = 'La fecha de instalación no puede ser futura';
-        else if (valores.fecha_danio && valores.fecha_instalacion_entrante < valores.fecha_danio) {
-            e.fecha_instalacion_entrante = 'No puede ser anterior a la fecha del daño';
-        }
-        if (!/^\d{4}-\d{2}$/.test(valores.periodo_afectado)) e.periodo_afectado = 'Indique el período afectado';
-        else if (valores.fecha_danio) {
-            const mes = valores.fecha_danio.slice(0, 7);
-            if (valores.periodo_afectado !== mes && valores.periodo_afectado !== periodoSiguiente(mes)) {
-                e.periodo_afectado = `Debe ser el mes del daño (${mes}) o el siguiente (${periodoSiguiente(mes)})`;
-            }
-        }
-        if (!valores.tipo_cambio) e.tipo_cambio = 'Seleccione el tipo de cambio';
-        if (valores.razon_cambio.trim().length < 5) e.razon_cambio = 'Describa la razón del cambio (mínimo 5 caracteres)';
-        (['contador_final_saliente_bn', 'contador_final_saliente_color', 'contador_inicial_entrante_bn', 'contador_inicial_entrante_color'] as const)
-            .forEach(c => { if (!esEntero(valores[c])) e[c] = 'Número entero mayor o igual a 0'; });
-        if (valores.ip_address.trim() && !/^(\d{1,3}\.){3}\d{1,3}$/.test(valores.ip_address.trim())) {
-            e.ip_address = 'IPv4 válida, p. ej. 10.20.1.12';
-        }
-        return e;
-    };
+    const validar = (): Errores => validarReemplazo(valores, saliente, entrante, hoy);
 
     const handleGuardar = () => {
         const e = validar();

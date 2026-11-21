@@ -58,9 +58,31 @@ export const faltanteContrato = (datos: FormularioCliente): string | null => {
     return null;
 };
 
+// RUC de Ecuador, la misma regla del backend: 13 dígitos, provincia 01 a 24 (o 30, extranjeros)
+// y establecimiento 001. Devuelve el motivo o null si es válido (vacío también es «válido» aquí:
+// lo marca faltanteCliente).
+export const errorRuc = (ruc: string): string | null => {
+    if (!ruc) return null;
+    if (!/^\d{13}$/.test(ruc)) return 'El RUC debe tener exactamente 13 dígitos';
+    const provincia = Number(ruc.slice(0, 2));
+    if (!((provincia >= 1 && provincia <= 24) || provincia === 30)) {
+        return 'Los primeros 2 dígitos deben estar entre 01 y 24 (o ser 30)';
+    }
+    if (!ruc.endsWith('001')) return 'El RUC debe terminar en 001';
+    return null;
+};
+
+// Nombre y razón social: cualquier letra, número, espacio o signo (tildes, comillas, paréntesis,
+// «&»...); solo se rechazan los caracteres de control. Antes no se podían escribir ni editar
+// nombres como «Colegio Horizonte (demo)» o «O'Brien & Hijos».
+export const textoPermitido = (valor: string) =>
+    !Array.from(valor).some((c) => c.charCodeAt(0) < 32 || c.charCodeAt(0) === 127);
+
 export const faltanteCliente = (datos: FormularioCliente): string | null => {
-    if (!datos.nombre) return 'El nombre del cliente es un campo obligatorio.';
+    if (!datos.nombre?.trim()) return 'El nombre del cliente es un campo obligatorio.';
     if (!datos.ruc) return 'El RUC del cliente es un campo obligatorio.';
+    const rucInvalido = errorRuc(datos.ruc);
+    if (rucInvalido) return `${rucInvalido}.`;
     return null;
 };
 
@@ -86,46 +108,16 @@ export const datosContrato = (datos: FormularioCliente) => ({
     printer_bill: datos.printer_bill,
 });
 
-// Contrato vigente al editar un cliente (mismos campos que se mandaban antes)
-export const datosContratoDeCliente = (datos: FormularioCliente) => ({
-    cliente_id: datos.id_cliente,
-    fecha_inicio: datos.fecha_inicio,
-    fecha_fin: datos.fecha_fin,
-    copias_bn_incluidas: Number(datos.impresiones_bn_incluidas),
-    copias_color_incluidas: Number(datos.impresiones_color_incluidas),
-    impresiones_bn_incluidas: Number(datos.impresiones_bn_incluidas),
-    impresiones_color_incluidas: Number(datos.impresiones_color_incluidas),
-    costo_copia_bn: Number(datos.costo_impresion_bn),
-    costo_copia_color: Number(datos.costo_impresion_color),
-    costo_impresion_bn: Number(datos.costo_impresion_bn),
-    costo_impresion_color: Number(datos.costo_impresion_color),
-    costo_excedente_copia_bn: Number(datos.costo_excedente_impresion_bn || 0),
-    costo_excedente_copia_color: Number(datos.costo_excedente_impresion_color || 0),
-    costo_excedente_impresion_bn: Number(datos.costo_excedente_impresion_bn || 0),
-    costo_excedente_impresion_color: Number(datos.costo_excedente_impresion_color || 0),
-    tiene_renta: Boolean(datos.tiene_renta),
-    tiene_software_control: Boolean(datos.tiene_software_control),
-    printer_bill: datos.printer_bill,
+// Datos del cliente que se guardan (nuevo o editado). El contrato se edita en su pestaña y el
+// estado con Activar/Desactivar, que hacen la cascada: aquí no van.
+const datosCliente = (datos: FormularioCliente) => ({
+    nombre: datos.nombre.trim(),
+    ruc: datos.ruc,
+    razon_social: datos.razon_social?.trim() || null,
 });
 
-export const datosClienteNuevo = (datos: FormularioCliente) => ({
-    nombre: datos.nombre,
-    ruc: datos.ruc,
-    razon_social: datos.razon_social,
-    tiene_renta: Boolean(datos.tiene_renta),
-    tiene_software_control: Boolean(datos.tiene_software_control),
-    printer_bill: datos.printer_bill,
-});
-
-export const datosClienteEditado = (datos: FormularioCliente) => ({
-    nombre: datos.nombre,
-    ruc: datos.ruc,
-    razon_social: datos.razon_social,
-    activo: datos.activo,
-    tiene_renta: Boolean(datos.tiene_renta),
-    tiene_software_control: Boolean(datos.tiene_software_control),
-    printer_bill: datos.printer_bill,
-});
+export const datosClienteNuevo = datosCliente;
+export const datosClienteEditado = datosCliente;
 
 // Textos del modal de confirmación: los propios del aviso, o los de activar o desactivar el cliente
 export const textosModalCliente = (modal: {

@@ -25,7 +25,6 @@ import {
     datosClienteEditado,
     datosClienteNuevo,
     datosContrato,
-    datosContratoDeCliente,
     esPestanaContrato,
     faltanteCliente,
     faltanteContrato,
@@ -290,15 +289,6 @@ const ClientesPage = () => {
         }
     };
 
-    // Al editar un cliente se guarda también su contrato vigente
-    const actualizarClienteYContrato = async (idCliente: number) => {
-        await updateCliente(idCliente, datosClienteEditado(formData));
-        if (formData.id_contrato) {
-            const resultado = await updateContrato(formData.id_contrato, datosContratoDeCliente(formData));
-            avisarSuperposicion(resultado.advertencia);
-        }
-    };
-
     const guardarCliente = async () => {
         const faltante = faltanteCliente(formData);
         if (faltante) {
@@ -313,7 +303,8 @@ const ClientesPage = () => {
 
         try {
             if (wasEditing && formData.id_cliente) {
-                await actualizarClienteYContrato(formData.id_cliente);
+                // Solo los datos del cliente: el contrato se edita en «Editar contrato»
+                await updateCliente(formData.id_cliente, datosClienteEditado(formData));
             } else {
                 await createCliente(datosClienteNuevo(formData));
             }

@@ -136,7 +136,7 @@ export function BuscadorInteligente<T>({
         }
 
         timeoutRef.current = window.setTimeout(() => {
-            realizarBusqueda(termino);
+            void realizarBusqueda(termino);
         }, debounceTime);
 
         return () => {

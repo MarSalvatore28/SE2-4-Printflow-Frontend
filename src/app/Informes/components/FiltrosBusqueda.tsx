@@ -105,7 +105,7 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
             }
         };
 
-        loadAreas();
+        void loadAreas();
     }, [selectedCliente]);
 
     const handleSeleccionarMaquina = (maquina: Maquina) => {

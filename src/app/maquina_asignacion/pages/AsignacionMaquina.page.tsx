@@ -109,7 +109,7 @@ const InstalacionesPage = () => {
     };
 
     useEffect(() => {
-        fetchAllData();
+        void fetchAllData();
     }, []);
 
     useEffect(() => {
@@ -117,9 +117,9 @@ const InstalacionesPage = () => {
             setInstalacionEnEdicion(null);
 
             if (filterClientId) {
-                fetchInstalaciones(filterClientId);
+                void fetchInstalaciones(filterClientId);
             } else {
-                fetchInstalaciones();
+                void fetchInstalaciones();
             }
         }
     }, [activeTab]);
@@ -276,13 +276,13 @@ const InstalacionesPage = () => {
     const handleSelectCliente = (cliente: Client) => {
         setFilterClientId(cliente.id_cliente);
         setFilterTerm('');
-        fetchInstalaciones(cliente.id_cliente);
+        void fetchInstalaciones(cliente.id_cliente);
     };
 
     const handleRefresh = () => {
         setFilterClientId(null);
         setFilterTerm('');
-        fetchInstalaciones();
+        void fetchInstalaciones();
     };
 
     const displayedInstalaciones = instalaciones.filter(instalacion => {
@@ -373,7 +373,7 @@ const InstalacionesPage = () => {
                                     itemsCompletos={clientsList}
                                     onClear={() => {
                                         setFilterClientId(null);
-                                        fetchInstalaciones();
+                                        void fetchInstalaciones();
                                     }}
                                 />
                             </div>

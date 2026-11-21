@@ -128,7 +128,7 @@ const NotificacionesPage = () => {
       }
 
       setTotalNoLeidas((prev) => Math.max(0, prev - 1));
-      refrescarCampana();
+      void refrescarCampana();
     } catch (err) {
       console.error("Error marcando notificación como leída:", err);
       setError("No se pudo marcar la notificación como leída.");
@@ -139,7 +139,7 @@ const NotificacionesPage = () => {
     try {
       await marcarTodasComoLeidas();
       await fetchNotificaciones();
-      refrescarCampana();
+      void refrescarCampana();
     } catch (err) {
       console.error("Error marcando todas como leídas:", err);
       setError("No se pudieron marcar todas las notificaciones como leídas.");
@@ -169,7 +169,7 @@ const NotificacionesPage = () => {
             fecha_corte: fechaCorte && fechaCorte.loteId === notif.lote_id ? fechaCorte.fecha : undefined,
           });
           await fetchNotificaciones();
-          refrescarCampana();
+          void refrescarCampana();
 
           setModalConfig({
             title: 'Lote Aprobado',
@@ -252,7 +252,7 @@ const NotificacionesPage = () => {
         try {
           await rechazarNotificacion(notif.id_notificacion, motivoInput || undefined);
           await fetchNotificaciones();
-          refrescarCampana();
+          void refrescarCampana();
 
           setModalConfig({
             title: "Lote Rechazado",
@@ -334,11 +334,11 @@ const NotificacionesPage = () => {
 
   const handleRefresh = () => {
     setFilterTerm("");
-    fetchNotificaciones();
+    void fetchNotificaciones();
   };
 
   useEffect(() => {
-    fetchNotificaciones();
+    void fetchNotificaciones();
   }, [activeTab]);
 
   // Llegó una notificación o cambió un lote (socket): recargar la lista
@@ -346,7 +346,7 @@ const NotificacionesPage = () => {
   useEffect(() => {
     if (version !== versionAnterior.current) {
       versionAnterior.current = version;
-      fetchNotificaciones();
+      void fetchNotificaciones();
     }
   }, [version]);
 
@@ -510,7 +510,7 @@ const NotificacionesPage = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleAprobarLote(notif);
+                  void handleAprobarLote(notif);
                 }}
                 className="inline-flex items-center p-1.5 border border-green-300 shadow-sm rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
                 title="Aprobar Lote"
@@ -520,7 +520,7 @@ const NotificacionesPage = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleRechazarLote(notif);
+                  void handleRechazarLote(notif);
                 }}
                 className="inline-flex items-center p-1.5 border border-red-300 shadow-sm rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
                 title="Rechazar Lote"
@@ -533,7 +533,7 @@ const NotificacionesPage = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleMarcarLeida(notif);
+                  void handleMarcarLeida(notif);
                 }}
                 className="inline-flex items-center px-2 py-1.5 border border-green-300 shadow-sm text-xs font-medium rounded text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
                 title="Marcar como leída"
@@ -548,7 +548,7 @@ const NotificacionesPage = () => {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                handleEliminarNotificacion(notif);
+                void handleEliminarNotificacion(notif);
               }}
               className="inline-flex items-center p-1.5 border border-red-300 shadow-sm rounded text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
               title="Eliminar notificación"
@@ -747,7 +747,7 @@ const NotificacionesPage = () => {
           onClose={() => setSelectedLote(null)}
           onFechaCorteChange={(fecha) => setFechaCorte({ loteId: selectedLote, fecha })}
           onLoteActualizado={() => {
-            fetchNotificaciones();
+            void fetchNotificaciones();
             setRecargaLotes((n) => n + 1);
           }}
         />

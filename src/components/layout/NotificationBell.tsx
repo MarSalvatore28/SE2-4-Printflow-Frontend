@@ -42,7 +42,7 @@ export const NotificationBell = () => {
 
     const irANotificaciones = () => {
         setAbierta(false);
-        navigate('/notificaciones');
+        void navigate('/notificaciones');
     };
 
     const abrirNotificacion = (n: Notificacion) => {

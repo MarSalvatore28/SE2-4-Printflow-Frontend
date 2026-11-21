@@ -180,7 +180,7 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                 setLoadingContratos(false);
             }
         };
-        loadClienteData();
+        void loadClienteData();
     }, [selectedCliente]);
 
     useEffect(() => {
@@ -195,7 +195,7 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                 setLoadingMaquinas(false);
             }
         };
-        loadMaquinas();
+        void loadMaquinas();
     }, []);
 
     const handleSelectCliente = (cliente: Client) => {

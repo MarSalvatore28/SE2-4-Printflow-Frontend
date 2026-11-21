@@ -20,7 +20,7 @@ export const AlertaHistorialCliente: React.FC<AlertaHistorialClienteProps> = ({
 
     useEffect(() => {
         if (clienteId && mostrar) {
-            cargarHistorial();
+            void cargarHistorial();
         }
     }, [clienteId]);
 

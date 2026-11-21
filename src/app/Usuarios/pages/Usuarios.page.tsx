@@ -64,7 +64,7 @@ const UsuariosPage = () => {
 
     useEffect(() => {
         let cancelado = false;
-        (async () => {
+        void (async () => {
             try {
                 const [listaUsuarios, listaRoles] = await Promise.all([fetchUsuarios(), fetchRoles()]);
                 if (cancelado) return;
@@ -279,7 +279,7 @@ const UsuariosPage = () => {
                             </div>
 
                             <button
-                                onClick={() => { limpiarFiltros(); recargarUsuarios(); }}
+                                onClick={() => { limpiarFiltros(); void recargarUsuarios(); }}
                                 className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium h-[42px]"
                             >
                                 Ver todos

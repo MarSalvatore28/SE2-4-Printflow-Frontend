@@ -71,7 +71,7 @@ const MaquinasPage = () => {
 
     useEffect(() => {
         let cancelado = false;
-        (async () => {
+        void (async () => {
             try {
                 const [listaMaquinas, listaModelos, listaTipos, listaFormatos] = await Promise.all([
                     fetchAllMaquinas(),
@@ -307,7 +307,7 @@ const MaquinasPage = () => {
                             </div>
 
                             <button
-                                onClick={() => { limpiarFiltros(); recargarMaquinas(); }}
+                                onClick={() => { limpiarFiltros(); void recargarMaquinas(); }}
                                 className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium h-[42px]"
                             >
                                 Ver todas

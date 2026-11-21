@@ -219,7 +219,7 @@ const ClientesPage = () => {
                             setModalConfig(prev => ({ ...prev, isOpen: false }));
                             setActiveTab('listar');
                             setFormData(INITIAL_FORM_STATE);
-                            fetchClients();
+                            void fetchClients();
                         }
                     });
                 } else {
@@ -238,7 +238,7 @@ const ClientesPage = () => {
                             setModalConfig(prev => ({ ...prev, isOpen: false }));
                             // NO redirigimos, limpiamos para poder crear otro si lo desea
                             setFormData(INITIAL_FORM_STATE);
-                            fetchClients();
+                            void fetchClients();
                         }
                     });
                 }
@@ -324,7 +324,7 @@ const ClientesPage = () => {
 
             setFilterClientId(null);
             setFilterTerm('');
-            fetchClients();
+            void fetchClients();
 
             setModalConfig({
                 isOpen: true,
@@ -434,7 +434,7 @@ const ClientesPage = () => {
             handleCloseModalConfirm();
         } catch (err) {
             console.error('Error toggling client status:', err);
-            fetchClients();
+            void fetchClients();
         }
     };
 
@@ -480,12 +480,12 @@ const ClientesPage = () => {
     const handleRefresh = () => {
         setFilterClientId(null);
         setFilterTerm('');
-        fetchClients();
+        void fetchClients();
     };
 
     useEffect(() => {
         if (activeTab === 'listar' || activeTab === 'Crear Contrato' || activeTab === 'Editar Contrato') {
-            fetchClients();
+            void fetchClients();
         }
     }, [activeTab]);
 

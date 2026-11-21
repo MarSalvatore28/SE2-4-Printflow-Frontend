@@ -18,7 +18,7 @@ export const ModalHistorialCliente: React.FC<ModalHistorialClienteProps> = ({
 
     useEffect(() => {
         if (isOpen && clienteId) {
-            cargarHistorialCompleto();
+            void cargarHistorialCompleto();
         }
     }, [isOpen, clienteId]);
 

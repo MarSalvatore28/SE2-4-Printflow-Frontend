@@ -91,12 +91,12 @@ const AreaPage = () => {
     };
 
     useEffect(() => {
-        fetchAreasAndClients();
+        void fetchAreasAndClients();
     }, []);
 
     useEffect(() => {
         if (activeTab === 'listar') {
-            fetchAreas();
+            void fetchAreas();
         }
     }, [activeTab]);
 
@@ -228,7 +228,7 @@ const AreaPage = () => {
             } else {
                 await activarArea(area.id_area);
             }
-            fetchAreas();
+            void fetchAreas();
         } catch (err) {
             console.error('Error toggling area status:', err);
             setError('No se pudo cambiar el estado del área.');
@@ -249,7 +249,7 @@ const AreaPage = () => {
         setFilterClientId(null);
         setFilterAreaId(null);
         setFilterTerm('');
-        fetchAreas();
+        void fetchAreas();
     };
 
     const handleEnterSearch = (termino: string) => {

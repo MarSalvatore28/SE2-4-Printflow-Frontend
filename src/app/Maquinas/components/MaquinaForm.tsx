@@ -206,7 +206,7 @@ export const MaquinaForm: FC<MaquinaFormProps> = ({
                                     placeholder="Ej: Ricoh IM C3000"
                                     value={nombreModelo}
                                     onChange={(e) => { setNombreModelo(e.target.value); setErrorModelo(null); }}
-                                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleCrearModelo(); } }}
+                                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void handleCrearModelo(); } }}
                                     maxLength={100}
                                     autoFocus
                                 />

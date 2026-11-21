@@ -56,7 +56,7 @@ export const DetalleClienteModal: React.FC<DetalleClienteModalProps> = ({ client
                 if (isMounted) setLoading(false);
             }
         };
-        fetchData();
+        void fetchData();
         return () => { isMounted = false; };
     }, [cliente.id_cliente]);
 

@@ -46,7 +46,7 @@ const fechaCorteDe = (reportes: ReporteStaging[], lote: Lote): string | null => 
     .map((r) => r.consolidado_fecha_corte)
     .filter((f): f is string => Boolean(f))
     .sort((a, b) => a.localeCompare(b));
-  return fechas.length ? fechas[fechas.length - 1] : lote.fecha_corte;
+  return fechas.at(-1) ?? lote.fecha_corte;
 };
 
 const Dato = ({ etiqueta, children }: { etiqueta: string; children: ReactNode }) => (

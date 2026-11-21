@@ -190,7 +190,7 @@ const LecturaManualPage = () => {
         ultima && referencia !== undefined && esEntero(valores[campo]) && Number(valores[campo]) < referencia;
 
     return (
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mt-4" data-testid="pantalla-lectura-manual">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4" data-testid="pantalla-lectura-manual">
             <div className="flex items-center gap-3 mb-2">
                 <ClipboardPen className="w-6 h-6 text-primary" />
                 <h1 className="text-2xl font-bold text-gray-900">Lectura manual</h1>

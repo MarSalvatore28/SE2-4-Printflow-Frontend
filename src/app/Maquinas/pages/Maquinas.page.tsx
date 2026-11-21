@@ -203,16 +203,16 @@ const MaquinasPage = () => {
     };
 
     const tabClass = (activa: boolean) =>
-        `px-6 py-2 rounded-md transition-all ${activa
+        `px-3 md:px-6 py-2 rounded-md transition-all ${activa
             ? 'bg-gray-50 text-gray-900 border border-gray-200 shadow-sm font-medium'
             : 'text-gray-500 hover:text-gray-800'}`;
 
     return (
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
             <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Máquinas</h1>
             {!puedeEditarCatalogos && <AvisoSoloLectura acciones="crear, editar o desactivar máquinas" />}
 
-            <div className="flex border-b border-gray-100 p-2 gap-4">
+            <div className="flex flex-wrap border-b border-gray-100 p-2 gap-2 md:gap-4">
                 <button onClick={() => setActiveTab('listar')} className={tabClass(activeTab === 'listar')}>
                     Listar
                 </button>
@@ -226,11 +226,11 @@ const MaquinasPage = () => {
                 </button>
             </div>
 
-            <div className="p-8 min-h-[400px]">
+            <div className="py-4 md:p-8 min-h-[400px]">
                 {activeTab === 'reemplazos' ? (
                     <ReemplazosSeccion puedeRegistrar={puedeEditarCatalogos} onRegistrado={recargarMaquinas} />
                 ) : activeTab === 'formulario' ? (
-                    <div className="bg-white border border-gray-200 rounded-lg p-6 sm:p-8">
+                    <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-8">
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-800">
                                 {editando ? `Editar máquina ${editando.serie}` : 'Nueva máquina'}

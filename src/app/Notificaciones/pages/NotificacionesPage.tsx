@@ -562,7 +562,7 @@ const NotificacionesPage = () => {
   ];
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
+    <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <Bell className="w-8 h-8 text-primary" />

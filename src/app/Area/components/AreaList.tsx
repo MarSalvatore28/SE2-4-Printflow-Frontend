@@ -115,9 +115,11 @@ export const AreaList: React.FC<AreaListProps> = ({
 
                     return (
                         <div key={cliente.cliente_id} className="border-2 border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
-                            <div
+                            <button
+                                type="button"
                                 onClick={() => toggleCliente(cliente.cliente_id)}
-                                className="flex flex-wrap items-center justify-between gap-3 p-4 bg-white hover:bg-gray-50 cursor-pointer transition-all border-b border-transparent data-[expanded=true]:border-gray-100"
+                                aria-expanded={isExpanded}
+                                className="w-full text-left flex flex-wrap items-center justify-between gap-3 p-4 bg-white hover:bg-gray-50 cursor-pointer transition-all border-b border-transparent data-[expanded=true]:border-gray-100"
                                 data-expanded={isExpanded}
                             >
                                 <div className="flex items-center gap-3">
@@ -160,7 +162,7 @@ export const AreaList: React.FC<AreaListProps> = ({
                                         )}
                                     </div>
                                 </div>
-                            </div>
+                            </button>
 
                             {isExpanded && (
                                 <div className="bg-white border-t border-gray-200">

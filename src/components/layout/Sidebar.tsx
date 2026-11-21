@@ -33,7 +33,7 @@ export const Sidebar = ({ abierto = false, onCerrar }: Readonly<SidebarProps>) =
     return (
         <aside
             id="menu-lateral"
-            className={`fixed inset-y-0 left-0 z-40 md:static md:z-auto md:translate-x-0 md:visible ${posicionMovil} w-64 h-full bg-primary text-white shadow-xl flex flex-col flex-shrink-0 transition-[transform,visibility] duration-300`}
+            className={`fixed inset-y-0 left-0 z-40 md:relative md:z-40 md:translate-x-0 md:visible ${posicionMovil} w-64 h-full bg-primary text-white shadow-xl flex flex-col flex-shrink-0 transition-[transform,visibility] duration-300`}
         >
             <div className="p-6 border-b border-secondary/20 flex items-center justify-between gap-2">
                 <h1 className="text-2xl font-bold tracking-wider">PrintFlow</h1>

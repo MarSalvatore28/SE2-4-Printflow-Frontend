@@ -119,6 +119,214 @@ const IpAddressInput = ({ value, onChange, required = false }: { value: string, 
     );
 };
 
+interface SeccionContratoProps {
+    loadingContratos: boolean;
+    contratos: Contrato[];
+    formData: InstalacionFormData;
+    handleSelectContrato: (contratoId: number) => void;
+    selectedContrato: Contrato | null;
+    tieneRenta: boolean;
+}
+
+const SeccionContrato = ({ loadingContratos, contratos, formData, handleSelectContrato, selectedContrato, tieneRenta }: SeccionContratoProps) => (
+    <div className="p-6 border-b border-gray-100 last:border-0 rounded-lg bg-white shadow-sm">
+        <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+            <AssignmentIcon className="text-secondary" />
+            Contrato
+        </h3>
+        <div className="input-container">
+            <label className="input-label">Seleccionar contrato *</label>
+            <div className="input-wrapper">
+                {loadingContratos ? (
+                    <div className="p-3 bg-gray-50 text-gray-600 border border-gray-200 rounded-md text-sm">
+                        Cargando contratos...
+                    </div>
+                ) : contratos.length > 0 ? (
+                    <select
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+                        value={formData.contrato_id || ''}
+                        onChange={(e) => handleSelectContrato(Number(e.target.value))}
+                        required
+                    >
+                        <option value="">-- Seleccione un contrato --</option>
+                        {contratos.map((contrato) => (
+                            <option key={contrato.id_contrato} value={contrato.id_contrato}>
+                                Contrato {contrato.id_contrato} - Desde {formatFechaLocal(contrato.fecha_inicio)}
+                                {contrato.fecha_fin ? ` hasta ${formatFechaLocal(contrato.fecha_fin)}` : ' (Vigente)'}
+                            </option>
+                        ))}
+                    </select>
+                ) : (
+                    <div className="p-3 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-md text-sm font-medium flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        Este cliente no tiene contratos activos.
+                    </div>
+                )}
+            </div>
+            {selectedContrato && (
+                <div className="mt-3 p-3 bg-edit/10 border border-edit-hover rounded-md space-y-1">
+                    <p className="text-sm font-semibold text-text">
+                        Contrato #{selectedContrato.id_contrato}
+                        {tieneRenta && (
+                            <span className="ml-2 px-2 py-0.5 bg-secondary text-white text-xs rounded-full font-normal">
+                                Incluye renta
+                            </span>
+                        )}
+                    </p>
+                </div>
+            )}
+        </div>
+    </div>
+);
+
+interface SeccionAreaProps {
+    loadingAreas: boolean;
+    areas: Area[];
+    formData: InstalacionFormData;
+    handleSelectArea: (areaId: number) => void;
+}
+
+const SeccionArea = ({ loadingAreas, areas, formData, handleSelectArea }: SeccionAreaProps) => (
+    <div className="p-6 border-b border-gray-100 last:border-0 rounded-lg bg-white shadow-sm">
+        <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+            <LocationOnIcon className="text-secondary" />
+            Ubicación
+        </h3>
+        <div className="input-container">
+            <label className="input-label">Seleccionar área *</label>
+            <div className="input-wrapper">
+                {loadingAreas ? (
+                    <div className="p-3 bg-gray-50 text-gray-600 border border-gray-200 rounded-md text-sm">
+                        Cargando áreas...
+                    </div>
+                ) : areas.length > 0 ? (
+                    <select
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+                        value={formData.area_id || ''}
+                        onChange={(e) => handleSelectArea(Number(e.target.value))}
+                        required
+                    >
+                        <option value="">-- Seleccione un área --</option>
+                        {areas.map((area) => (
+                            <option key={area.id_area} value={area.id_area}>
+                                {area.area_nombre} {area.descripcion ? `- ${area.descripcion}` : ''}
+                            </option>
+                        ))}
+                    </select>
+                ) : (
+                    <div className="p-3 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-md text-sm font-medium">
+                        Este cliente no tiene áreas creadas.
+                    </div>
+                )}
+            </div>
+        </div>
+    </div>
+);
+
+interface CamposMaquinaUnicaProps {
+    formData: InstalacionFormData;
+    tieneRenta: boolean;
+    onChangeIP: (ip: string) => void;
+    onChangeObservaciones: (obs: string) => void;
+    onChangeCostoRenta?: (costo: number) => void;
+    onChangeContadorAcumulativo?: (val: boolean) => void;
+    onChangeContabilidadUsuario?: (val: boolean) => void;
+}
+
+// IP, renta, forma de contar y observaciones de la instalación de una sola máquina
+const CamposMaquinaUnica = ({
+    formData,
+    tieneRenta,
+    onChangeIP,
+    onChangeObservaciones,
+    onChangeCostoRenta,
+    onChangeContadorAcumulativo,
+    onChangeContabilidadUsuario,
+}: CamposMaquinaUnicaProps) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <div className="input-container">
+            <label className="input-label">Dirección IP *</label>
+            <div className="input-wrapper">
+                <IpAddressInput value={formData.ip_address} onChange={(val) => onChangeIP(val)} required />
+            </div>
+        </div>
+
+        {tieneRenta && (
+            <div className="input-container">
+                <label className="input-label">Costo de renta mensual *</label>
+                <div className="input-wrapper relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">$</span>
+                    <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg text-sm"
+                        placeholder="0.00"
+                        value={formData.costo_renta_mensual || ''}
+                        onChange={(e) => onChangeCostoRenta?.(parseFloat(e.target.value) || 0)}
+                    />
+                </div>
+            </div>
+        )}
+
+        <div className="input-container">
+            <label className="input-label">Contabilidad por Usuario</label>
+            <div className="input-wrapper">
+                <select
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    value={formData.contabilidad_por_usuario ? 'true' : 'false'}
+                    onChange={(e) => {
+                        const val = e.target.value === 'true';
+                        onChangeContabilidadUsuario?.(val);
+                        // Si desactivan contabilidad por usuario, forzar acumulativo a true
+                        if (!val) {
+                            onChangeContadorAcumulativo?.(true);
+                        }
+                    }}
+                >
+                    <option value="false">No</option>
+                    <option value="true">Sí</option>
+                </select>
+            </div>
+        </div>
+
+        <div className="input-container">
+            <label className="input-label">
+                Contador acumulativo
+                {!formData.contabilidad_por_usuario && (
+                    <span className="ml-1 text-xs text-gray-400 font-normal normal-case">(obligatorio)</span>
+                )}
+            </label>
+            <div className="input-wrapper">
+                <select
+                    className={`w-full px-3 py-2 border rounded-lg text-sm ${!formData.contabilidad_por_usuario ? 'border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed' : 'border-gray-300'}`}
+                    value={formData.contador_acumulativo === false ? 'false' : 'true'}
+                    onChange={(e) => onChangeContadorAcumulativo?.(e.target.value === 'true')}
+                    disabled={!formData.contabilidad_por_usuario}
+                >
+                    <option value="true">Habilitado</option>
+                    <option value="false">Deshabilitado</option>
+                </select>
+            </div>
+        </div>
+
+        <div className="input-container md:col-span-2">
+            <label className="input-label">Observaciones (Opcional)</label>
+            <div className="input-wrapper">
+                <textarea
+                    className="input-field resize-none"
+                    rows={3}
+                    placeholder="Notas adicionales sobre esta instalación..."
+                    value={formData.observaciones || ''}
+                    onChange={(e) => onChangeObservaciones(e.target.value)}
+                />
+            </div>
+        </div>
+    </div>
+);
+
 export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
     formData,
     onSelectCliente,
@@ -180,7 +388,7 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                 setLoadingContratos(false);
             }
         };
-        loadClienteData();
+        void loadClienteData();
     }, [selectedCliente]);
 
     useEffect(() => {
@@ -195,7 +403,7 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                 setLoadingMaquinas(false);
             }
         };
-        loadMaquinas();
+        void loadMaquinas();
     }, []);
 
     const handleSelectCliente = (cliente: Client) => {
@@ -265,56 +473,14 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
             </div>
 
             {selectedCliente && (
-                <div className="p-6 border-b border-gray-100 last:border-0 rounded-lg bg-white shadow-sm">
-                    <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-                        <AssignmentIcon className="text-secondary" />
-                        Contrato
-                    </h3>
-                    <div className="input-container">
-                        <label className="input-label">Seleccionar contrato *</label>
-                        <div className="input-wrapper">
-                            {loadingContratos ? (
-                                <div className="p-3 bg-gray-50 text-gray-600 border border-gray-200 rounded-md text-sm">
-                                    Cargando contratos...
-                                </div>
-                            ) : contratos.length > 0 ? (
-                                <select
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
-                                    value={formData.contrato_id || ''}
-                                    onChange={(e) => handleSelectContrato(Number(e.target.value))}
-                                    required
-                                >
-                                    <option value="">-- Seleccione un contrato --</option>
-                                    {contratos.map((contrato) => (
-                                        <option key={contrato.id_contrato} value={contrato.id_contrato}>
-                                            Contrato {contrato.id_contrato} - Desde {formatFechaLocal(contrato.fecha_inicio)}
-                                            {contrato.fecha_fin ? ` hasta ${formatFechaLocal(contrato.fecha_fin)}` : ' (Vigente)'}
-                                        </option>
-                                    ))}
-                                </select>
-                            ) : (
-                                <div className="p-3 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-md text-sm font-medium flex items-center gap-2">
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                    Este cliente no tiene contratos activos.
-                                </div>
-                            )}
-                        </div>
-                        {selectedContrato && (
-                            <div className="mt-3 p-3 bg-edit/10 border border-edit-hover rounded-md space-y-1">
-                                <p className="text-sm font-semibold text-text">
-                                    Contrato #{selectedContrato.id_contrato}
-                                    {tieneRenta && (
-                                        <span className="ml-2 px-2 py-0.5 bg-secondary text-white text-xs rounded-full font-normal">
-                                            Incluye renta
-                                        </span>
-                                    )}
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                </div>
+                <SeccionContrato
+                    loadingContratos={loadingContratos}
+                    contratos={contratos}
+                    formData={formData}
+                    handleSelectContrato={handleSelectContrato}
+                    selectedContrato={selectedContrato}
+                    tieneRenta={tieneRenta}
+                />
             )}
 
             {selectedCliente && formData.contrato_id > 0 && (
@@ -339,40 +505,12 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
             )}
 
             {selectedCliente && !multipleSelection && formData.contrato_id > 0 && (
-                <div className="p-6 border-b border-gray-100 last:border-0 rounded-lg bg-white shadow-sm">
-                    <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-                        <LocationOnIcon className="text-secondary" />
-                        Ubicación
-                    </h3>
-                    <div className="input-container">
-                        <label className="input-label">Seleccionar área *</label>
-                        <div className="input-wrapper">
-                            {loadingAreas ? (
-                                <div className="p-3 bg-gray-50 text-gray-600 border border-gray-200 rounded-md text-sm">
-                                    Cargando áreas...
-                                </div>
-                            ) : areas.length > 0 ? (
-                                <select
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
-                                    value={formData.area_id || ''}
-                                    onChange={(e) => handleSelectArea(Number(e.target.value))}
-                                    required
-                                >
-                                    <option value="">-- Seleccione un área --</option>
-                                    {areas.map((area) => (
-                                        <option key={area.id_area} value={area.id_area}>
-                                            {area.area_nombre} {area.descripcion ? `- ${area.descripcion}` : ''}
-                                        </option>
-                                    ))}
-                                </select>
-                            ) : (
-                                <div className="p-3 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-md text-sm font-medium">
-                                    Este cliente no tiene áreas creadas.
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
+                <SeccionArea
+                    loadingAreas={loadingAreas}
+                    areas={areas}
+                    formData={formData}
+                    handleSelectArea={handleSelectArea}
+                />
             )}
 
             {formData.contrato_id > 0 && (!multipleSelection ? formData.area_id > 0 : true) && (
@@ -588,86 +726,15 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                             </div>
 
                             {formData.maquina_id > 0 && (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                                    <div className="input-container">
-                                        <label className="input-label">Dirección IP *</label>
-                                        <div className="input-wrapper">
-                                            <IpAddressInput value={formData.ip_address} onChange={(val) => onChangeIP(val)} required />
-                                        </div>
-                                    </div>
-
-                                    {tieneRenta && (
-                                        <div className="input-container">
-                                            <label className="input-label">Costo de renta mensual *</label>
-                                            <div className="input-wrapper relative">
-                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">$</span>
-                                                <input
-                                                    type="number"
-                                                    min="0"
-                                                    step="0.01"
-                                                    className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg text-sm"
-                                                    placeholder="0.00"
-                                                    value={formData.costo_renta_mensual || ''}
-                                                    onChange={(e) => onChangeCostoRenta?.(parseFloat(e.target.value) || 0)}
-                                                />
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <div className="input-container">
-                                        <label className="input-label">Contabilidad por Usuario</label>
-                                        <div className="input-wrapper">
-                                            <select
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                                                value={formData.contabilidad_por_usuario ? 'true' : 'false'}
-                                                onChange={(e) => {
-                                                    const val = e.target.value === 'true';
-                                                    onChangeContabilidadUsuario?.(val);
-                                                    // Si desactivan contabilidad por usuario, forzar acumulativo a true
-                                                    if (!val) {
-                                                        onChangeContadorAcumulativo?.(true);
-                                                    }
-                                                }}
-                                            >
-                                                <option value="false">No</option>
-                                                <option value="true">Sí</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div className="input-container">
-                                        <label className="input-label">
-                                            Contador acumulativo
-                                            {!formData.contabilidad_por_usuario && (
-                                                <span className="ml-1 text-xs text-gray-400 font-normal normal-case">(obligatorio)</span>
-                                            )}
-                                        </label>
-                                        <div className="input-wrapper">
-                                            <select
-                                                className={`w-full px-3 py-2 border rounded-lg text-sm ${!formData.contabilidad_por_usuario ? 'border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed' : 'border-gray-300'}`}
-                                                value={formData.contador_acumulativo === false ? 'false' : 'true'}
-                                                onChange={(e) => onChangeContadorAcumulativo?.(e.target.value === 'true')}
-                                                disabled={!formData.contabilidad_por_usuario}
-                                            >
-                                                <option value="true">Habilitado</option>
-                                                <option value="false">Deshabilitado</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div className="input-container md:col-span-2">
-                                        <label className="input-label">Observaciones (Opcional)</label>
-                                        <div className="input-wrapper">
-                                            <textarea
-                                                className="input-field resize-none"
-                                                rows={3}
-                                                placeholder="Notas adicionales sobre esta instalación..."
-                                                value={formData.observaciones || ''}
-                                                onChange={(e) => onChangeObservaciones(e.target.value)}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
+                                <CamposMaquinaUnica
+                                    formData={formData}
+                                    tieneRenta={tieneRenta}
+                                    onChangeIP={onChangeIP}
+                                    onChangeObservaciones={onChangeObservaciones}
+                                    onChangeCostoRenta={onChangeCostoRenta}
+                                    onChangeContadorAcumulativo={onChangeContadorAcumulativo}
+                                    onChangeContabilidadUsuario={onChangeContabilidadUsuario}
+                                />
                             )}
                         </div>
                     )}

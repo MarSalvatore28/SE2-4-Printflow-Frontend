@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { X, Bell, CheckCircle, Clock, AlertCircle } from "lucide-react";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -25,6 +25,61 @@ import { ListadoLotes } from "@app/Notificaciones/components/ListadoLotes";
 import { useNotification } from "@context/NotificationContext";
 import { usePermisos } from "@hooks/usePermisos";
 import React from "react";
+import { filtrarNotificaciones, loteAccionable } from "@app/Notificaciones/utils/notificacionesFiltro";
+
+type Pestana = "todas" | "no-leidas" | "lotes";
+
+const clasePestana = (activa: boolean) =>
+  `px-6 py-3 font-medium text-sm transition-all relative ${activa
+    ? "text-primary border-b-2 border-primary"
+    : "text-gray-500 hover:text-gray-700"
+  }`;
+
+const TEXTOS_TABLA = {
+  "no-leidas": { titulo: "Notificaciones No Leídas", vacia: "¡Genial! No tienes notificaciones sin leer." },
+  todas: { titulo: "Todas las Notificaciones", vacia: "No hay notificaciones en el sistema." },
+  lotes: { titulo: "Todas las Notificaciones", vacia: "No hay notificaciones en el sistema." },
+};
+
+// Notificaciones de la pestaña, estado de cada lote y total sin leer
+const cargarNotificaciones = async (pestana: Pestana) => {
+  const data = pestana === "no-leidas" ? await getNotificacionesNoLeidas() : await fetchAllNotificaciones();
+  // Si falla, la tabla sigue sin el estado del lote
+  const lotes = await fetchLotes().catch(() => [] as Lote[]);
+  const total = await contarNoLeidas();
+  return { data, lotes, total };
+};
+
+const DetallesNotificacion = ({ notif, lote }: { notif: Notificacion; lote?: Lote }) => (
+  <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-gray-600">
+    {notif.total_registros !== undefined && (
+      <div className="whitespace-nowrap">
+        <span className="font-medium">Registros:</span>{" "}
+        {notif.total_registros}
+      </div>
+    )}
+    {notif.periodo && (
+      <div className="whitespace-nowrap">
+        <span className="font-medium">Período:</span> {notif.periodo}
+      </div>
+    )}
+    {lote && (
+      <div className="whitespace-nowrap flex items-center gap-1">
+        <span className="font-medium">Lote:</span>
+        <EstadoLoteBadge
+          estado={lote.estado}
+          title={lote.motivo ?? undefined}
+        />
+      </div>
+    )}
+    {notif.usuario_nombre && (
+      <div className="whitespace-nowrap">
+        <span className="font-medium">Usuario:</span>{" "}
+        {notif.usuario_nombre}
+      </div>
+    )}
+  </div>
+);
 
 const NotificacionesPage = () => {
   // version sube cada vez que llega un aviso por el socket
@@ -40,9 +95,7 @@ const NotificacionesPage = () => {
   const [filterTerm, setFilterTerm] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"todas" | "no-leidas" | "lotes">(
-    "no-leidas",
-  );
+  const [activeTab, setActiveTab] = useState<Pestana>("no-leidas");
   // Estado actual de cada lote (Pendiente, Procesado, Descartado, Error) por id
   const [lotesPorId, setLotesPorId] = useState<Map<number, Lote>>(new Map());
   // Sube al aprobar o rechazar un lote desde el detalle: recarga el listado de lotes
@@ -71,27 +124,15 @@ const NotificacionesPage = () => {
     action: () => { },
   });
 
-  const fetchNotificaciones = async () => {
+  const fetchNotificaciones = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      let data: Notificacion[];
-
-      if (activeTab === "no-leidas") {
-        data = await getNotificacionesNoLeidas();
-      } else {
-        data = await fetchAllNotificaciones();
-      }
-
+      const { data, lotes, total } = await cargarNotificaciones(activeTab);
       setAllNotificaciones(data);
       setFilteredNotificaciones(data);
-
-      // Si falla, la tabla sigue sin el estado del lote
-      const lotes = await fetchLotes().catch(() => [] as Lote[]);
       setLotesPorId(new Map(lotes.map((l) => [l.id_lote, l])));
-
-      const count = await contarNoLeidas();
-      setTotalNoLeidas(count);
+      setTotalNoLeidas(total);
     } catch (err) {
       console.error("Error fetching notificaciones:", err);
       setError(
@@ -100,7 +141,7 @@ const NotificacionesPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab]);
 
   const handleMarcarLeida = async (notificacion: Notificacion) => {
     try {
@@ -128,7 +169,7 @@ const NotificacionesPage = () => {
       }
 
       setTotalNoLeidas((prev) => Math.max(0, prev - 1));
-      refrescarCampana();
+      void refrescarCampana();
     } catch (err) {
       console.error("Error marcando notificación como leída:", err);
       setError("No se pudo marcar la notificación como leída.");
@@ -139,7 +180,7 @@ const NotificacionesPage = () => {
     try {
       await marcarTodasComoLeidas();
       await fetchNotificaciones();
-      refrescarCampana();
+      void refrescarCampana();
     } catch (err) {
       console.error("Error marcando todas como leídas:", err);
       setError("No se pudieron marcar todas las notificaciones como leídas.");
@@ -169,7 +210,7 @@ const NotificacionesPage = () => {
             fecha_corte: fechaCorte && fechaCorte.loteId === notif.lote_id ? fechaCorte.fecha : undefined,
           });
           await fetchNotificaciones();
-          refrescarCampana();
+          void refrescarCampana();
 
           setModalConfig({
             title: 'Lote Aprobado',
@@ -252,7 +293,7 @@ const NotificacionesPage = () => {
         try {
           await rechazarNotificacion(notif.id_notificacion, motivoInput || undefined);
           await fetchNotificaciones();
-          refrescarCampana();
+          void refrescarCampana();
 
           setModalConfig({
             title: "Lote Rechazado",
@@ -315,48 +356,26 @@ const NotificacionesPage = () => {
       return;
     }
 
-    const searchWords = term
-      .toLowerCase()
-      .split(" ")
-      .filter((w) => w.length > 0);
-    const filtered = allNotificaciones.filter((notif) => {
-      return searchWords.every(
-        (word) =>
-          notif.titulo?.toLowerCase().includes(word) ||
-          notif.mensaje?.toLowerCase().includes(word) ||
-          notif.codigo_lote?.toLowerCase().includes(word) ||
-          notif.tipo_nombre?.toLowerCase().includes(word),
-      );
-    });
-
-    setFilteredNotificaciones(filtered);
+    setFilteredNotificaciones(filtrarNotificaciones(allNotificaciones, term));
   };
 
   const handleRefresh = () => {
     setFilterTerm("");
-    fetchNotificaciones();
+    void fetchNotificaciones();
   };
 
   useEffect(() => {
-    fetchNotificaciones();
-  }, [activeTab]);
+    void fetchNotificaciones();
+  }, [fetchNotificaciones]);
 
   // Llegó una notificación o cambió un lote (socket): recargar la lista
   const versionAnterior = React.useRef(version);
   useEffect(() => {
     if (version !== versionAnterior.current) {
       versionAnterior.current = version;
-      fetchNotificaciones();
+      void fetchNotificaciones();
     }
-  }, [version]);
-
-  // Solo un lote que sigue en staging (Pendiente o Error) se puede aprobar o rechazar.
-  // Si no se conoce su estado, se usa la notificación sin leer como antes.
-  const loteAccionable = (notif: Notificacion) => {
-    if (!notif.lote_id) return false;
-    const lote = lotesPorId.get(notif.lote_id);
-    return lote ? lote.estado === "PENDIENTE" || lote.estado === "ERROR" : !notif.leida;
-  };
+  }, [version, fetchNotificaciones]);
 
   const columns = [
     {
@@ -416,34 +435,10 @@ const NotificacionesPage = () => {
       label: "Detalles",
       align: "center" as const,
       render: (notif: Notificacion) => (
-        <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-gray-600">
-          {notif.total_registros !== undefined && (
-            <div className="whitespace-nowrap">
-              <span className="font-medium">Registros:</span>{" "}
-              {notif.total_registros}
-            </div>
-          )}
-          {notif.periodo && (
-            <div className="whitespace-nowrap">
-              <span className="font-medium">Período:</span> {notif.periodo}
-            </div>
-          )}
-          {notif.lote_id && lotesPorId.get(notif.lote_id) && (
-            <div className="whitespace-nowrap flex items-center gap-1">
-              <span className="font-medium">Lote:</span>
-              <EstadoLoteBadge
-                estado={lotesPorId.get(notif.lote_id)!.estado}
-                title={lotesPorId.get(notif.lote_id)!.motivo ?? undefined}
-              />
-            </div>
-          )}
-          {notif.usuario_nombre && (
-            <div className="whitespace-nowrap">
-              <span className="font-medium">Usuario:</span>{" "}
-              {notif.usuario_nombre}
-            </div>
-          )}
-        </div>
+        <DetallesNotificacion
+          notif={notif}
+          lote={notif.lote_id ? lotesPorId.get(notif.lote_id) : undefined}
+        />
       ),
     },
     {
@@ -505,12 +500,12 @@ const NotificacionesPage = () => {
       align: "center" as const,
       render: (notif: Notificacion) => (
         <div className="flex items-center justify-center gap-2">
-          {puedeAprobarLotes && loteAccionable(notif) ? (
+          {puedeAprobarLotes && loteAccionable(notif, lotesPorId) ? (
             <>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleAprobarLote(notif);
+                  void handleAprobarLote(notif);
                 }}
                 className="inline-flex items-center p-1.5 border border-green-300 shadow-sm rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
                 title="Aprobar Lote"
@@ -520,7 +515,7 @@ const NotificacionesPage = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleRechazarLote(notif);
+                  void handleRechazarLote(notif);
                 }}
                 className="inline-flex items-center p-1.5 border border-red-300 shadow-sm rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
                 title="Rechazar Lote"
@@ -533,7 +528,7 @@ const NotificacionesPage = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleMarcarLeida(notif);
+                  void handleMarcarLeida(notif);
                 }}
                 className="inline-flex items-center px-2 py-1.5 border border-green-300 shadow-sm text-xs font-medium rounded text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
                 title="Marcar como leída"
@@ -548,7 +543,7 @@ const NotificacionesPage = () => {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                handleEliminarNotificacion(notif);
+                void handleEliminarNotificacion(notif);
               }}
               className="inline-flex items-center p-1.5 border border-red-300 shadow-sm rounded text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
               title="Eliminar notificación"
@@ -594,10 +589,7 @@ const NotificacionesPage = () => {
       <div className="flex border-b border-gray-200 mb-6">
         <button
           onClick={() => setActiveTab("no-leidas")}
-          className={`px-6 py-3 font-medium text-sm transition-all relative ${activeTab === "no-leidas"
-            ? "text-primary border-b-2 border-primary"
-            : "text-gray-500 hover:text-gray-700"
-            }`}
+          className={clasePestana(activeTab === "no-leidas")}
         >
           No Leídas
           {totalNoLeidas > 0 && (
@@ -608,19 +600,13 @@ const NotificacionesPage = () => {
         </button>
         <button
           onClick={() => setActiveTab("todas")}
-          className={`px-6 py-3 font-medium text-sm transition-all relative ${activeTab === "todas"
-            ? "text-primary border-b-2 border-primary"
-            : "text-gray-500 hover:text-gray-700"
-            }`}
+          className={clasePestana(activeTab === "todas")}
         >
           Todas
         </button>
         <button
           onClick={() => setActiveTab("lotes")}
-          className={`px-6 py-3 font-medium text-sm transition-all relative ${activeTab === "lotes"
-            ? "text-primary border-b-2 border-primary"
-            : "text-gray-500 hover:text-gray-700"
-            }`}
+          className={clasePestana(activeTab === "lotes")}
         >
           Lotes
         </button>
@@ -642,21 +628,7 @@ const NotificacionesPage = () => {
             </label>
             <BuscadorInteligente<Notificacion>
               placeholder="Buscar por título, mensaje, lote..."
-              buscarFn={async (termino: string) => {
-                const palabrasBusqueda = termino
-                  .toLowerCase()
-                  .split(" ")
-                  .filter((w) => w.length > 0);
-                return allNotificaciones.filter((notificacion) => {
-                  return palabrasBusqueda.every(
-                    (palabra) =>
-                      notificacion.titulo?.toLowerCase().includes(palabra) ||
-                      notificacion.mensaje?.toLowerCase().includes(palabra) ||
-                      notificacion.codigo_lote?.toLowerCase().includes(palabra) ||
-                      notificacion.tipo_nombre?.toLowerCase().includes(palabra),
-                  );
-                });
-              }}
+              buscarFn={async (termino: string) => filtrarNotificaciones(allNotificaciones, termino)}
               onSeleccionar={(notif: Notificacion) => {
                 setFilteredNotificaciones([notif]);
               }}
@@ -721,19 +693,11 @@ const NotificacionesPage = () => {
         </div>
       ) : (
         <DataTable<Notificacion>
-          title={
-            activeTab === "no-leidas"
-              ? "Notificaciones No Leídas"
-              : "Todas las Notificaciones"
-          }
+          title={TEXTOS_TABLA[activeTab].titulo}
           columns={columns}
           data={filteredNotificaciones}
           getItemId={(notif) => notif.id_notificacion}
-          emptyMessage={
-            activeTab === "no-leidas"
-              ? "¡Genial! No tienes notificaciones sin leer."
-              : "No hay notificaciones en el sistema."
-          }
+          emptyMessage={TEXTOS_TABLA[activeTab].vacia}
           rowsPerPage={10}
           showActions={false}
         />
@@ -747,7 +711,7 @@ const NotificacionesPage = () => {
           onClose={() => setSelectedLote(null)}
           onFechaCorteChange={(fecha) => setFechaCorte({ loteId: selectedLote, fecha })}
           onLoteActualizado={() => {
-            fetchNotificaciones();
+            void fetchNotificaciones();
             setRecargaLotes((n) => n + 1);
           }}
         />

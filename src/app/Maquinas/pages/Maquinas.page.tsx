@@ -25,20 +25,33 @@ import type {
     TipoImpresion,
     FormatoImpresion
 } from '@models/Maquina/maquina.types';
+import { detalleMaquina, filtrarMaquinas, textosCambioEstado } from '@app/Maquinas/utils/maquinas';
+import { clasePestana } from '@utils/pestanas';
 
 type Tab = 'listar' | 'formulario' | 'reemplazos';
 
 const mensajeDe = (err: unknown, porDefecto: string) =>
     err instanceof Error && err.message ? err.message : porDefecto;
 
-// Cada palabra del término debe aparecer en la serie, el modelo, la IP, el cliente o el área.
-const coincide = (m: Maquina, termino: string) => {
-    const texto = [m.serie, m.modelo, m.ip, m.cliente_nombre, m.area_nombre]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-    return termino.toLowerCase().split(/\s+/).filter(Boolean).every(p => texto.includes(p));
-};
+const EncabezadoFormulario = ({ editando }: { editando: Maquina | null }) => (
+    <div className="mb-6">
+        <h2 className="text-xl font-bold text-gray-800">
+            {editando ? `Editar máquina ${editando.serie}` : 'Nueva máquina'}
+        </h2>
+        <p className="text-sm text-gray-500 mt-1">
+            {editando
+                ? 'Modifica la serie, el modelo o el tipo de impresión.'
+                : 'La serie se guarda en mayúsculas y sin espacios. Si el modelo no existe, puedes crearlo aquí.'}
+        </p>
+    </div>
+);
+
+const ItemBuscador = ({ maquina }: { maquina: Maquina }) => (
+    <div className="flex flex-col py-1">
+        <span className="font-semibold text-gray-900 text-sm font-mono">{maquina.serie}</span>
+        <span className="text-xs text-gray-500">{detalleMaquina(maquina)}</span>
+    </div>
+);
 
 const MaquinasPage = () => {
     // Crear, editar y desactivar máquinas y modelos: solo admin (el operador y el auditor consultan)
@@ -71,7 +84,7 @@ const MaquinasPage = () => {
 
     useEffect(() => {
         let cancelado = false;
-        (async () => {
+        void (async () => {
             try {
                 const [listaMaquinas, listaModelos, listaTipos, listaFormatos] = await Promise.all([
                     fetchAllMaquinas(),
@@ -109,12 +122,10 @@ const MaquinasPage = () => {
         setMaquinas(prev => prev.map(m => (m.id_maquina === actualizada.id_maquina ? actualizada : m)));
     };
 
-    const maquinasVisibles = useMemo(() => maquinas.filter(m => {
-        if (filtroId) return m.id_maquina === filtroId;
-        if (!mostrarInactivas && !m.activo) return false;
-        if (filtroTermino) return coincide(m, filtroTermino);
-        return true;
-    }), [maquinas, filtroId, filtroTermino, mostrarInactivas]);
+    const maquinasVisibles = useMemo(
+        () => filtrarMaquinas(maquinas, { id: filtroId, termino: filtroTermino, mostrarInactivas }),
+        [maquinas, filtroId, filtroTermino, mostrarInactivas]
+    );
 
     const totales = useMemo(() => ({
         activas: maquinas.filter(m => m.activo).length,
@@ -202,10 +213,11 @@ const MaquinasPage = () => {
         }
     };
 
-    const tabClass = (activa: boolean) =>
-        `px-3 md:px-6 py-2 rounded-md transition-all ${activa
-            ? 'bg-gray-50 text-gray-900 border border-gray-200 shadow-sm font-medium'
-            : 'text-gray-500 hover:text-gray-800'}`;
+    const textosEstado = textosCambioEstado(confirmar.maquina);
+    // Sin permiso de edición la lista no muestra acciones
+    const accionesLista = puedeEditarCatalogos
+        ? { onEdit: abrirEdicion, onToggleActive: (m: Maquina) => setConfirmar({ abierto: true, maquina: m }) }
+        : {};
 
     return (
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
@@ -213,15 +225,15 @@ const MaquinasPage = () => {
             {!puedeEditarCatalogos && <AvisoSoloLectura acciones="crear, editar o desactivar máquinas" />}
 
             <div className="flex flex-wrap border-b border-gray-100 p-2 gap-2 md:gap-4">
-                <button onClick={() => setActiveTab('listar')} className={tabClass(activeTab === 'listar')}>
+                <button onClick={() => setActiveTab('listar')} className={clasePestana(activeTab === 'listar')}>
                     Listar
                 </button>
                 {puedeEditarCatalogos && (
-                <button onClick={abrirNueva} className={tabClass(activeTab === 'formulario')}>
+                <button onClick={abrirNueva} className={clasePestana(activeTab === 'formulario')}>
                     {activeTab === 'formulario' && editando ? 'Editar máquina' : 'Agregar'}
                 </button>
                 )}
-                <button onClick={() => setActiveTab('reemplazos')} className={tabClass(activeTab === 'reemplazos')}>
+                <button onClick={() => setActiveTab('reemplazos')} className={clasePestana(activeTab === 'reemplazos')}>
                     Reemplazos
                 </button>
             </div>
@@ -231,16 +243,7 @@ const MaquinasPage = () => {
                     <ReemplazosSeccion puedeRegistrar={puedeEditarCatalogos} onRegistrado={recargarMaquinas} />
                 ) : activeTab === 'formulario' ? (
                     <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-8">
-                        <div className="mb-6">
-                            <h2 className="text-xl font-bold text-gray-800">
-                                {editando ? `Editar máquina ${editando.serie}` : 'Nueva máquina'}
-                            </h2>
-                            <p className="text-sm text-gray-500 mt-1">
-                                {editando
-                                    ? 'Modifica la serie, el modelo o el tipo de impresión.'
-                                    : 'La serie se guarda en mayúsculas y sin espacios. Si el modelo no existe, puedes crearlo aquí.'}
-                            </p>
-                        </div>
+                        <EncabezadoFormulario editando={editando} />
 
                         <hr className="border-gray-200 mb-8" />
 
@@ -279,17 +282,7 @@ const MaquinasPage = () => {
                                     onSearchClick={(t) => { setFiltroId(null); setFiltroTermino(t.trim()); }}
                                     onClear={() => { setFiltroId(null); setFiltroTermino(''); }}
                                     onInputChange={() => { if (filtroId) setFiltroId(null); }}
-                                    renderItem={(m) => (
-                                        <div className="flex flex-col py-1">
-                                            <span className="font-semibold text-gray-900 text-sm font-mono">{m.serie}</span>
-                                            <span className="text-xs text-gray-500">
-                                                {m.modelo || 'Sin modelo'}
-                                                {m.ip ? ` · ${m.ip}` : ''}
-                                                {m.cliente_nombre ? ` · ${m.cliente_nombre}` : ''}
-                                                {!m.activo ? ' · Inactiva' : ''}
-                                            </span>
-                                        </div>
-                                    )}
+                                    renderItem={(m) => <ItemBuscador maquina={m} />}
                                 />
                             </div>
 
@@ -307,7 +300,7 @@ const MaquinasPage = () => {
                             </div>
 
                             <button
-                                onClick={() => { limpiarFiltros(); recargarMaquinas(); }}
+                                onClick={() => { limpiarFiltros(); void recargarMaquinas(); }}
                                 className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium h-[42px]"
                             >
                                 Ver todas
@@ -347,8 +340,7 @@ const MaquinasPage = () => {
                             <MaquinaList
                                 key={`${filtroId ?? ''}|${filtroTermino}|${mostrarInactivas}`}
                                 maquinas={maquinasVisibles}
-                                onEdit={puedeEditarCatalogos ? abrirEdicion : undefined}
-                                onToggleActive={puedeEditarCatalogos ? (m) => setConfirmar({ abierto: true, maquina: m }) : undefined}
+                                {...accionesLista}
                             />
                         )}
                     </div>
@@ -359,12 +351,10 @@ const MaquinasPage = () => {
                 isOpen={confirmar.abierto}
                 onClose={() => setConfirmar(prev => ({ ...prev, abierto: false }))}
                 onConfirm={confirmarCambioEstado}
-                type={confirmar.maquina?.activo ? 'delete' : 'activate'}
-                title={confirmar.maquina?.activo ? '¿Desactivar máquina?' : '¿Activar máquina?'}
-                message={confirmar.maquina?.activo
-                    ? `¿Deseas desactivar la máquina ${confirmar.maquina?.serie}? Una máquina con asignación vigente no se puede desactivar.`
-                    : `¿Deseas activar la máquina ${confirmar.maquina?.serie ?? ''}?`}
-                confirmText={confirmar.maquina?.activo ? 'Desactivar' : 'Activar'}
+                type={textosEstado.type}
+                title={textosEstado.title}
+                message={textosEstado.message}
+                confirmText={textosEstado.confirmText}
                 cancelText="Cancelar"
             />
 

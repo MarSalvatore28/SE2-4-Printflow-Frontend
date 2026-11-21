@@ -1,12 +1,118 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import type { ClienteParaTabla, ClienteCompleto } from '@models/Cliente/cliente.types';
 import { getClienteCompleto, getContratosByCliente, getInstalacionesByCliente, getClienteById } from '@services/Clientes/clientes.service';
+import { useDialogoAccesible } from '@hooks/useDialogoAccesible';
 
 interface DetalleClienteModalProps {
     cliente: ClienteParaTabla;
     onClose: () => void;
 }
+
+type ContratoCliente = NonNullable<ClienteCompleto['contratos']>[number];
+type InstalacionCliente = NonNullable<ClienteCompleto['instalaciones_activas']>[number];
+
+// El contrato activo, o el primero si ninguno está activo
+const contratoVigente = (contratos?: ContratoCliente[]) =>
+    contratos?.find(c => c.activo) || contratos?.[0] || null;
+
+const formatFecha = (fechaStr?: string) => {
+    if (!fechaStr) return '-';
+    const partes = fechaStr.split('T')[0].split('-');
+    if (partes.length === 3) {
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+    }
+    return fechaStr;
+};
+
+const COLORES_INDICADOR = {
+    indigo: { caja: 'bg-indigo-50 border border-indigo-200', texto: 'text-indigo-600' },
+    blue: { caja: 'bg-blue-50 border border-blue-200', texto: 'text-blue-600' },
+};
+
+// Cuadro «Sí / No» del resumen (software de control y renta)
+const IndicadorSiNo = ({ etiqueta, activo, color }: { etiqueta: string; activo?: boolean; color: keyof typeof COLORES_INDICADOR }) => (
+    <div className={`p-2 rounded text-center ${activo ? COLORES_INDICADOR[color].caja : 'bg-gray-50 border border-gray-200'}`}>
+        <div className="text-xs text-text truncate">{etiqueta}</div>
+        <div className={`text-sm font-bold ${activo ? COLORES_INDICADOR[color].texto : 'text-gray-400'}`}>
+            {activo ? 'Sí' : 'No'}
+        </div>
+    </div>
+);
+
+const TablaContrato = ({ contrato }: { contrato: ContratoCliente }) => (
+    <div className="overflow-hidden border border-gray-200 rounded-lg shadow-sm mb-6">
+        <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-secondary">
+                <tr>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium border-r border-gray-400 text-white uppercase">
+                        Concepto
+                    </th>
+                    <th scope="col" className="px-4 py-3 text-right text-xs font-medium border-r border-gray-400 text-white uppercase">
+                        B/N
+                    </th>
+                    <th scope="col" className="px-4 py-3 text-right text-xs font-medium  text-white uppercase">
+                        Color
+                    </th>
+                </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200 text-sm">
+                <tr>
+                    <td className="px-4 py-3 font-medium text-gray-900 border-r border-gray-200 bg-gray-50/50">
+                        Impresiones incluidas
+                    </td>
+                    <td className="px-4 py-3 text-right border-r border-gray-200 font-mono text-gray-900">
+                        {contrato.impresiones_bn_incluidas?.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-right font-mono text-edit">
+                        {contrato.impresiones_color_incluidas?.toLocaleString()}
+                    </td>
+                </tr>
+                <tr>
+                    <td className="px-4 py-3 font-medium text-gray-900 border-r border-gray-200 bg-gray-50/50">
+                        Costo por impresión
+                    </td>
+                    <td className="px-4 py-3 text-right border-r border-gray-200 font-mono text-gray-900">
+                        ${Number(contrato.costo_impresion_bn || 0).toFixed(4)}
+                    </td>
+                    <td className="px-4 py-3 text-right font-mono text-edit">
+                        ${Number(contrato.costo_impresion_color || 0).toFixed(4)}
+                    </td>
+                </tr>
+                <tr>
+                    <td className="px-4 py-3 font-medium text-gray-900 border-r border-gray-200 bg-gray-50/50">
+                        Costo excedente
+                    </td>
+                    <td className="px-4 py-3 text-right border-r border-gray-200 font-mono text-gray-500">
+                        ${Number(contrato.costo_excedente_impresion_bn || 0).toFixed(4)}
+                    </td>
+                    <td className="px-4 py-3 text-right font-mono text-gray-500">
+                        ${Number(contrato.costo_excedente_impresion_color || 0).toFixed(4)}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+);
+
+const ListaInstalaciones = ({ instalaciones }: { instalaciones?: InstalacionCliente[] }) => {
+    if (!instalaciones || instalaciones.length === 0) {
+        return <p className="text-sm text-gray-500 italic">No hay máquinas instaladas actualmente.</p>;
+    }
+    return (
+        <>
+            {instalaciones.map((inst, idx) => (
+                <div key={idx} className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex justify-between items-center">
+                    <div>
+                        <span className="font-bold text-gray-700 block">{inst.maquina_modelo} (SN: {inst.maquina_serie})</span>
+                        <span className="text-xs text-gray-500">Área: {inst.area_nombre || 'General'} | IP: {inst.ip_address || 'N/A'}</span>
+                    </div>
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Activa</span>
+                </div>
+            ))}
+        </>
+    );
+};
 
 export const DetalleClienteModal: React.FC<DetalleClienteModalProps> = ({ cliente, onClose }) => {
     const [fullData, setFullData] = useState<ClienteCompleto | null>(null);
@@ -56,24 +162,18 @@ export const DetalleClienteModal: React.FC<DetalleClienteModalProps> = ({ client
                 if (isMounted) setLoading(false);
             }
         };
-        fetchData();
+        void fetchData();
         return () => { isMounted = false; };
     }, [cliente.id_cliente]);
 
-    const contrato = fullData?.contratos?.find(c => c.activo)
-        || (fullData?.contratos && fullData.contratos.length > 0 ? fullData.contratos[0] : null);
+    const contrato = contratoVigente(fullData?.contratos);
 
-    const formatFecha = (fechaStr?: string) => {
-        if (!fechaStr) return '-';
-        const partes = fechaStr.split('T')[0].split('-');
-        if (partes.length === 3) {
-            return `${partes[2]}/${partes[1]}/${partes[0]}`;
-        }
-        return fechaStr;
-    };
+    // Escape cierra, el foco queda dentro y vuelve al cerrar
+    const dialogoRef = useRef<HTMLDivElement>(null);
+    useDialogoAccesible(true, onClose, dialogoRef);
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div ref={dialogoRef} tabIndex={-1} className="fixed inset-0 z-50 overflow-y-auto focus:outline-none" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div
                     className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
@@ -97,6 +197,7 @@ export const DetalleClienteModal: React.FC<DetalleClienteModalProps> = ({ client
                         <button
                             onClick={onClose}
                             type="button"
+                            aria-label="Cerrar"
                             className="text-white hover:text-gray-200 focus:outline-none"
                         >
                             <X className="h-6 w-6" />
@@ -163,18 +264,8 @@ export const DetalleClienteModal: React.FC<DetalleClienteModalProps> = ({ client
                                                     {contrato ? formatFecha(contrato.fecha_inicio) : '-'}
                                                 </div>
                                             </div>
-                                            <div className={`p-2 rounded text-center ${cliente.tiene_software_control ? 'bg-indigo-50 border border-indigo-200' : 'bg-gray-50 border border-gray-200'}`}>
-                                                <div className="text-xs text-text truncate">Software</div>
-                                                <div className={`text-sm font-bold ${cliente.tiene_software_control ? 'text-indigo-600' : 'text-gray-400'}`}>
-                                                    {cliente.tiene_software_control ? 'Sí' : 'No'}
-                                                </div>
-                                            </div>
-                                            <div className={`p-2 rounded text-center ${cliente.tiene_renta ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50 border border-gray-200'}`}>
-                                                <div className="text-xs text-text truncate">Renta</div>
-                                                <div className={`text-sm font-bold ${cliente.tiene_renta ? 'text-blue-600' : 'text-gray-400'}`}>
-                                                    {cliente.tiene_renta ? 'Sí' : 'No'}
-                                                </div>
-                                            </div>
+                                            <IndicadorSiNo etiqueta="Software" activo={cliente.tiene_software_control} color="indigo" />
+                                            <IndicadorSiNo etiqueta="Renta" activo={cliente.tiene_renta} color="blue" />
                                         </div>
                                     </div>
                                 </div>
@@ -183,58 +274,7 @@ export const DetalleClienteModal: React.FC<DetalleClienteModalProps> = ({ client
                                     Límites y costos del contrato
                                 </h4>
                                 {contrato ? (
-                                    <div className="overflow-hidden border border-gray-200 rounded-lg shadow-sm mb-6">
-                                        <table className="min-w-full divide-y divide-gray-200">
-                                            <thead className="bg-secondary">
-                                                <tr>
-                                                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium border-r border-gray-400 text-white uppercase">
-                                                        Concepto
-                                                    </th>
-                                                    <th scope="col" className="px-4 py-3 text-right text-xs font-medium border-r border-gray-400 text-white uppercase">
-                                                        B/N
-                                                    </th>
-                                                    <th scope="col" className="px-4 py-3 text-right text-xs font-medium  text-white uppercase">
-                                                        Color
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="bg-white divide-y divide-gray-200 text-sm">
-                                                <tr>
-                                                    <td className="px-4 py-3 font-medium text-gray-900 border-r border-gray-200 bg-gray-50/50">
-                                                        Impresiones incluidas
-                                                    </td>
-                                                    <td className="px-4 py-3 text-right border-r border-gray-200 font-mono text-gray-900">
-                                                        {contrato.impresiones_bn_incluidas?.toLocaleString()}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-right font-mono text-edit">
-                                                        {contrato.impresiones_color_incluidas?.toLocaleString()}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td className="px-4 py-3 font-medium text-gray-900 border-r border-gray-200 bg-gray-50/50">
-                                                        Costo por impresión
-                                                    </td>
-                                                    <td className="px-4 py-3 text-right border-r border-gray-200 font-mono text-gray-900">
-                                                        ${Number(contrato.costo_impresion_bn || 0).toFixed(4)}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-right font-mono text-edit">
-                                                        ${Number(contrato.costo_impresion_color || 0).toFixed(4)}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td className="px-4 py-3 font-medium text-gray-900 border-r border-gray-200 bg-gray-50/50">
-                                                        Costo excedente
-                                                    </td>
-                                                    <td className="px-4 py-3 text-right border-r border-gray-200 font-mono text-gray-500">
-                                                        ${Number(contrato.costo_excedente_impresion_bn || 0).toFixed(4)}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-right font-mono text-gray-500">
-                                                        ${Number(contrato.costo_excedente_impresion_color || 0).toFixed(4)}
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                    <TablaContrato contrato={contrato} />
                                 ) : (
                                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
                                         <p className="text-sm text-yellow-700">Este cliente no tiene un contrato activo registrado.</p>
@@ -245,19 +285,7 @@ export const DetalleClienteModal: React.FC<DetalleClienteModalProps> = ({ client
                                     Instalaciones activas
                                 </h4>
                                 <div className="grid grid-cols-1 gap-3 mb-6">
-                                    {fullData?.instalaciones_activas && fullData.instalaciones_activas.length > 0 ? (
-                                        fullData.instalaciones_activas.map((inst, idx) => (
-                                            <div key={idx} className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex justify-between items-center">
-                                                <div>
-                                                    <span className="font-bold text-gray-700 block">{inst.maquina_modelo} (SN: {inst.maquina_serie})</span>
-                                                    <span className="text-xs text-gray-500">Área: {inst.area_nombre || 'General'} | IP: {inst.ip_address || 'N/A'}</span>
-                                                </div>
-                                                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Activa</span>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p className="text-sm text-gray-500 italic">No hay máquinas instaladas actualmente.</p>
-                                    )}
+                                    <ListaInstalaciones instalaciones={fullData?.instalaciones_activas} />
                                 </div>
                             </>
                         )}

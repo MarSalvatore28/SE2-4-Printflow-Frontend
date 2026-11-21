@@ -6,6 +6,75 @@ import { type Client } from '@models/Cliente/cliente.types';
 import { createInstalacion } from '@services/Instalaciones/instalaciones.service';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import ModalConfirmacion from '@components/Shared/ModalConfirmacion';
+import {
+    datosDeFormulario,
+    datosDeMaquina,
+    detallesDeErrores,
+    mensajeDeError,
+    puedeEnviarInstalacion,
+    validarFormularioInstalacion,
+} from '@app/maquina_asignacion/utils/formularioInstalacion';
+
+type DetalleModal = Array<{ label: string, text: string }>;
+
+// Crea una instalación por máquina, sin detenerse si alguna falla
+const crearInstalaciones = async (
+    maquinas: MaquinaConIP[],
+    datos: InstalacionFormData,
+    onProgreso: (actual: number) => void,
+) => {
+    const errores: Array<{ maquina: string; error: string }> = [];
+    let exitos = 0;
+    for (let i = 0; i < maquinas.length; i++) {
+        const item = maquinas[i];
+        try {
+            await createInstalacion(datosDeMaquina(item, datos));
+            exitos++;
+            onProgreso(i + 1);
+        } catch (err: unknown) {
+            errores.push({ maquina: item.maquina.serie, error: mensajeDeError(err, 'Error desconocido') });
+        }
+    }
+    return { exitos, errores };
+};
+
+const ResumenInstalacion = ({
+    multipleSelection,
+    maquinasConIP,
+    formData,
+    selectedNames,
+}: {
+    multipleSelection: boolean;
+    maquinasConIP: MaquinaConIP[];
+    formData: InstalacionFormData;
+    selectedNames: { cliente: string; area: string; contrato: string };
+}) => (
+    <div className="mb-6 p-4 bg-gradient-to-r from-edit/10 to-edit-hover/5 border border-edit-hover rounded-lg">
+        <p className="text-sm font-semibold text-text mb-3 flex items-center gap-2">
+            <SummarizeIcon fontSize="small" /> {multipleSelection && maquinasConIP.length > 1 ? 'Resumen de las instalaciones' : 'Resumen de la instalación'}
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+            {multipleSelection ? (
+                <div className="rounded px-3 py-2 md:col-span-2">
+                    <span className="text-gray-600 block text-xs mb-1">Máquinas a instalar:</span>
+                    <span className="font-semibold text-gray-900">{maquinasConIP.length} (Áreas independientes)</span>
+                </div>
+            ) : (
+                <>
+                    <div className="rounded px-3 py-2"><span className="text-gray-600 block text-xs mb-1">Máquina ID:</span><span className="font-semibold text-gray-900">{formData.maquina_id}</span></div>
+                    <div className="rounded px-3 py-2"><span className="text-gray-600 block text-xs mb-1">Área global:</span><span className="font-semibold uppercase text-gray-900">{selectedNames.area || formData.area_id}</span></div>
+                </>
+            )}
+            <div className="rounded px-3 py-2 md:col-span-2"><span className="text-gray-600 block text-xs mb-1">Cliente:</span><span className="font-semibold uppercase text-gray-900">{selectedNames.cliente}</span></div>
+            <div className="rounded px-3 py-2 md:col-span-2"><span className="text-gray-600 block text-xs mb-1">Contrato:</span><span className="font-semibold uppercase text-gray-900">{selectedNames.contrato || formData.contrato_id}</span></div>
+        </div>
+    </div>
+);
+
+const etiquetaEnviar = (multiple: boolean, cantidad: number) => {
+    if (!multiple || cantidad === 0) return 'Crear instalación';
+    return `Crear ${cantidad} ${cantidad === 1 ? 'instalación' : 'instalaciones'}`;
+};
 
 interface InstalacionFormProps {
     onSuccess: (showSuccessModal?: boolean) => void;
@@ -98,7 +167,7 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
         title: string,
         message: string,
         type: 'warning' | 'activate' | 'delete' | 'info' = 'warning',
-        details?: Array<{ label: string, text: string }>
+        details?: DetalleModal
     ) => {
         let modalContent: React.ReactNode = message;
 
@@ -212,45 +281,42 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
     };
 
     const validateForm = (): boolean => {
-        const errors: Record<string, string> = {};
-
-        if (!selectedClienteId) errors.cliente = 'Debe seleccionar un cliente';
-        if (!formData.contrato_id || formData.contrato_id === 0) errors.contrato = 'Debe seleccionar un contrato';
-
-        if (multipleSelection) {
-            if (maquinasConIP.length === 0) errors.maquina = 'Debe agregar al menos una máquina';
-
-            const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-            maquinasConIP.forEach((item, index) => {
-                if (!item.area_id || item.area_id === 0) errors[`area_${index}`] = `Seleccione un área para la máquina ${item.maquina.serie}`;
-                if (!item.ip_address || item.ip_address.trim() === '') {
-                    errors[`ip_${index}`] = `La máquina ${item.maquina.serie} requiere una dirección IP`;
-                } else if (!ipRegex.test(item.ip_address.trim())) {
-                    errors[`ip_${index}`] = `IP inválida para ${item.maquina.serie}`;
-                }
-            });
-        } else {
-            if (!formData.area_id || formData.area_id === 0) errors.area = 'Debe seleccionar un área';
-            if (!formData.maquina_id || formData.maquina_id === 0) errors.maquina = 'Debe seleccionar una máquina';
-            if (!formData.ip_address || formData.ip_address.trim() === '') {
-                errors.ip_address = 'La dirección IP es obligatoria';
-            } else {
-                const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-                if (!ipRegex.test(formData.ip_address.trim())) errors.ip_address = 'Formato de IP inválido';
-            }
-        }
+        const errors = validarFormularioInstalacion({
+            clienteId: selectedClienteId,
+            datos: formData,
+            multiple: multipleSelection,
+            maquinas: maquinasConIP,
+        });
 
         setValidationErrors(errors);
 
         if (Object.keys(errors).length > 0) {
-            const errorDetails = Object.entries(errors).map(([key, text]) => ({
-                label: key.includes('_') ? 'Revisión' : key.charAt(0).toUpperCase() + key.slice(1),
-                text
-            }));
-            mostrarModal('Formulario incompleto', 'Por favor, revise los siguientes campos antes de guardar:', 'warning', errorDetails);
+            mostrarModal('Formulario incompleto', 'Por favor, revise los siguientes campos antes de guardar:', 'warning', detallesDeErrores(errors));
             return false;
         }
         return true;
+    };
+
+    const crearVarias = async () => {
+        const total = maquinasConIP.length;
+        setCreationProgress({ current: 0, total });
+        const { exitos, errores } = await crearInstalaciones(maquinasConIP, formData, (actual) =>
+            setCreationProgress({ current: actual, total })
+        );
+
+        if (errores.length === 0) {
+            resetForm();
+            onSuccess(true);
+            return;
+        }
+        const details = errores.map(e => ({ label: `Serie ${e.maquina}`, text: e.error }));
+        if (exitos > 0) {
+            mostrarModal('Instalación parcial', `Se instalaron ${exitos} máquinas, pero hubo problemas con algunas:`, 'warning', details);
+            resetForm();
+            onSuccess(false);
+        } else {
+            mostrarModal('Error de Instalación', 'No se pudo completar la instalación. Revise los errores:', 'warning', details);
+        }
     };
 
     const handleSubmit = async () => {
@@ -260,79 +326,29 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
             setSubmitting(true);
 
             if (multipleSelection && maquinasConIP.length > 0) {
-                setCreationProgress({ current: 0, total: maquinasConIP.length });
-                const actionErrors: Array<{ maquina: string; error: string }> = [];
-                let successCount = 0;
-
-                for (let i = 0; i < maquinasConIP.length; i++) {
-                    const item = maquinasConIP[i];
-                    try {
-                        const dataToSend: InstalacionFormData = {
-                            maquina_id: item.maquina.id_maquina,
-                            area_id: item.area_id || 0,
-                            contrato_id: formData.contrato_id,
-                            ip_address: item.ip_address.trim(),
-                            fecha_instalacion: formData.fecha_instalacion,
-                            observaciones: item.observaciones?.trim() || undefined,
-                            costo_renta_mensual: item.costo_renta_mensual || 0,
-                            contador_acumulativo: item.contador_acumulativo,
-                            contabilidad_por_usuario: item.contabilidad_por_usuario
-                        };
-                        await createInstalacion(dataToSend);
-                        successCount++;
-                        setCreationProgress({ current: i + 1, total: maquinasConIP.length });
-                    } catch (err: unknown) {
-                        const error = err as { message?: string; response?: { data?: { message?: string } } };
-                        actionErrors.push({
-                            maquina: item.maquina.serie,
-                            error: error.response?.data?.message || error.message || 'Error desconocido'
-                        });
-                    }
-                }
-
-                if (actionErrors.length > 0) {
-                    const details = actionErrors.map(e => ({ label: `Serie ${e.maquina}`, text: e.error }));
-                    if (successCount > 0) {
-                        mostrarModal('Instalación parcial', `Se instalaron ${successCount} máquinas, pero hubo problemas con algunas:`, 'warning', details);
-                        resetForm();
-                        onSuccess(false);
-                    } else {
-                        mostrarModal('Error de Instalación', 'No se pudo completar la instalación. Revise los errores:', 'warning', details);
-                    }
-                } else {
-                    resetForm();
-                    onSuccess(true);
-                }
-
+                await crearVarias();
             } else {
-                const dataToSend: InstalacionFormData = {
-                    maquina_id: formData.maquina_id,
-                    area_id: formData.area_id,
-                    contrato_id: formData.contrato_id,
-                    ip_address: formData.ip_address.trim(),
-                    fecha_instalacion: formData.fecha_instalacion,
-                    observaciones: formData.observaciones?.trim() || undefined,
-                    costo_renta_mensual: formData.costo_renta_mensual || 0,
-                    contador_acumulativo: formData.contador_acumulativo,
-                    contabilidad_por_usuario: formData.contabilidad_por_usuario
-                };
-                await createInstalacion(dataToSend);
+                await createInstalacion(datosDeFormulario(formData));
                 resetForm();
                 onSuccess(true);
             }
 
         } catch (err: unknown) {
-            const error = err as { message?: string; response?: { data?: { message?: string } } };
-            const errorMessage = error.response?.data?.message || error.message || 'Ocurrió un error al procesar la solicitud.';
-            mostrarModal('Error inesperado', errorMessage, 'warning');
+            mostrarModal('Error inesperado', mensajeDeError(err, 'Ocurrió un error al procesar la solicitud.'), 'warning');
         } finally {
             setSubmitting(false);
             setCreationProgress({ current: 0, total: 0 });
         }
     };
 
-    const canSubmit = selectedClienteId && formData.contrato_id > 0 &&
-        (multipleSelection ? maquinasConIP.length > 0 : formData.area_id > 0 && formData.maquina_id > 0 && formData.ip_address.trim() !== '') && !submitting;
+    const canSubmit = !submitting && puedeEnviarInstalacion({
+        clienteId: selectedClienteId,
+        datos: formData,
+        multiple: multipleSelection,
+        maquinas: maquinasConIP,
+    });
+    const hayResumen = formData.contrato_id > 0 &&
+        (multipleSelection ? maquinasConIP.length > 0 : formData.maquina_id > 0 && formData.area_id > 0);
 
     return (
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 relative">
@@ -394,27 +410,13 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
                 />
             </div>
 
-            {formData.contrato_id > 0 && (multipleSelection ? maquinasConIP.length > 0 : formData.maquina_id > 0 && formData.area_id > 0) && (
-                <div className="mb-6 p-4 bg-gradient-to-r from-edit/10 to-edit-hover/5 border border-edit-hover rounded-lg">
-                    <p className="text-sm font-semibold text-text mb-3 flex items-center gap-2">
-                        <SummarizeIcon fontSize="small" /> {multipleSelection && maquinasConIP.length > 1 ? 'Resumen de las instalaciones' : 'Resumen de la instalación'}
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                        {multipleSelection ? (
-                            <div className="rounded px-3 py-2 md:col-span-2">
-                                <span className="text-gray-600 block text-xs mb-1">Máquinas a instalar:</span>
-                                <span className="font-semibold text-gray-900">{maquinasConIP.length} (Áreas independientes)</span>
-                            </div>
-                        ) : (
-                            <>
-                                <div className="rounded px-3 py-2"><span className="text-gray-600 block text-xs mb-1">Máquina ID:</span><span className="font-semibold text-gray-900">{formData.maquina_id}</span></div>
-                                <div className="rounded px-3 py-2"><span className="text-gray-600 block text-xs mb-1">Área global:</span><span className="font-semibold uppercase text-gray-900">{selectedNames.area || formData.area_id}</span></div>
-                            </>
-                        )}
-                        <div className="rounded px-3 py-2 md:col-span-2"><span className="text-gray-600 block text-xs mb-1">Cliente:</span><span className="font-semibold uppercase text-gray-900">{selectedNames.cliente}</span></div>
-                        <div className="rounded px-3 py-2 md:col-span-2"><span className="text-gray-600 block text-xs mb-1">Contrato:</span><span className="font-semibold uppercase text-gray-900">{selectedNames.contrato || formData.contrato_id}</span></div>
-                    </div>
-                </div>
+            {hayResumen && (
+                <ResumenInstalacion
+                    multipleSelection={multipleSelection}
+                    maquinasConIP={maquinasConIP}
+                    formData={formData}
+                    selectedNames={selectedNames}
+                />
             )}
 
             <InstalacionFormAction
@@ -422,7 +424,7 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
                 onCancel={onCancel}
                 isSubmitting={submitting}
                 isDisabled={!canSubmit}
-                submitLabel={multipleSelection && maquinasConIP.length > 0 ? `Crear ${maquinasConIP.length} ${maquinasConIP.length === 1 ? 'instalación' : 'instalaciones'}` : 'Crear instalación'}
+                submitLabel={etiquetaEnviar(multipleSelection, maquinasConIP.length)}
                 loadingLabel={creationProgress.total > 0 ? `Creando ${creationProgress.current}/${creationProgress.total}...` : 'Creando instalación...'}
             />
         </div>

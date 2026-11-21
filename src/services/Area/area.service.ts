@@ -6,7 +6,7 @@ const RESOURCE_URL = '/api/areas'; // apiFetch agrega la URL base
 
 const getAuthHeaders = (isPost = false) => {
     const token = getToken();
-    const headers: any = {
+    const headers: Record<string, string> = {
         'Authorization': `Bearer ${token}`
     };
     if (isPost) {
@@ -15,12 +15,19 @@ const getAuthHeaders = (isPost = false) => {
     return headers;
 };
 
+// El backend puede mandar cliente_id o id_cliente, y activo como número, booleano o texto
+type AreaApi = Omit<Area, "cliente_id" | "activo"> & {
+    cliente_id?: number;
+    id_cliente?: number;
+    activo: number | boolean | string;
+};
+
 /**
  * Normalizes area data from backend to ensure frontend consistency
  */
-const mapArea = (a: any): Area => ({
+const mapArea = (a: AreaApi): Area => ({
     ...a,
-    cliente_id: a.cliente_id || a.id_cliente,
+    cliente_id: (a.cliente_id || a.id_cliente) as number,
     activo: (a.activo === true || a.activo === 1 || a.activo === '1') ? 1 : 0
 });
 
@@ -166,7 +173,7 @@ export async function activarArea(id: number): Promise<boolean> {
     }
 }
 
-export async function getEstadisticasArea(id: number): Promise<any> {
+export async function getEstadisticasArea(id: number): Promise<Record<string, unknown> | null> {
     try {
         const res = await apiFetch(`${RESOURCE_URL}/${id}/estadisticas`, { headers: getAuthHeaders() });
         if (!res.ok) throw new Error(`Error: ${res.status}`);
@@ -178,7 +185,7 @@ export async function getEstadisticasArea(id: number): Promise<any> {
     }
 }
 
-export async function getHistorialCambiosArea(id: number): Promise<any[]> {
+export async function getHistorialCambiosArea(id: number): Promise<Record<string, unknown>[]> {
     try {
         const res = await apiFetch(`${RESOURCE_URL}/${id}/historial-cambios`, { headers: getAuthHeaders() });
         if (!res.ok) throw new Error(`Error: ${res.status}`);

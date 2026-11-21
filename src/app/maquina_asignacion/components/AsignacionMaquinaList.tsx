@@ -201,9 +201,11 @@ export const InstalacionesList: React.FC<InstalacionesListProps> = ({
                             className="border-2 border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow"
                         >
                             {/* Header del cliente */}
-                            <div
+                            <button
+                                type="button"
                                 onClick={() => toggleCliente(cliente.cliente_id)}
-                                className="flex flex-wrap items-center justify-between gap-3 p-4 bg-white hover:bg-gray-50 cursor-pointer transition-all border-b border-transparent data-[expanded=true]:border-gray-100"
+                                aria-expanded={isClienteExpanded}
+                                className="w-full text-left flex flex-wrap items-center justify-between gap-3 p-4 bg-white hover:bg-gray-50 cursor-pointer transition-all border-b border-transparent data-[expanded=true]:border-gray-100"
                                 data-expanded={isClienteExpanded}
                             >
                                 <div className="flex items-center gap-3">
@@ -236,7 +238,7 @@ export const InstalacionesList: React.FC<InstalacionesListProps> = ({
                                         </span>
                                     </div>
                                 </div>
-                            </div>
+                            </button>
 
                             {/* Contenido expandido del cliente: áreas */}
                             {isClienteExpanded && (
@@ -250,9 +252,11 @@ export const InstalacionesList: React.FC<InstalacionesListProps> = ({
                                                 className="border-b border-gray-100 last:border-b-0"
                                             >
                                                 {/* Header del área */}
-                                                <div
+                                                <button
+                                                    type="button"
                                                     onClick={() => toggleArea(cliente.cliente_id, area.area_id)}
-                                                    className="flex items-center justify-between p-3 px-6 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-all"
+                                                    aria-expanded={isAreaExpanded}
+                                                    className="w-full text-left flex items-center justify-between p-3 px-6 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-all"
                                                 >
                                                     <div className="flex items-center gap-3">
                                                         {isAreaExpanded ? (
@@ -280,7 +284,7 @@ export const InstalacionesList: React.FC<InstalacionesListProps> = ({
                                                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-complement/20 text-complement">
                                                         <CheckIcon className="w-2 h-2 mr-1 font-xs" /> {area.instalaciones.length} máquina{area.instalaciones.length !== 1 ? 's' : ''}
                                                     </span>
-                                                </div>
+                                                </button>
 
                                                 {/* Contenido expandido del área: tabla de instalaciones */}
                                                 {isAreaExpanded && (

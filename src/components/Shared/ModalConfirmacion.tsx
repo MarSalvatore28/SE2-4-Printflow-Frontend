@@ -32,6 +32,13 @@ export default function ModalConfirmacion({
 }: Readonly<ModalConfirmacionProps>) {
   const [inputValue, setInputValue] = useState('');
 
+  // Al cerrar (cancelar, Escape, fondo o X) se borra lo escrito: el próximo modal empieza vacío
+  const [abiertoAntes, setAbiertoAntes] = useState(isOpen);
+  if (isOpen !== abiertoAntes) {
+    setAbiertoAntes(isOpen);
+    if (!isOpen) setInputValue('');
+  }
+
   // Sigue montado 200 ms después de cerrar, para la animación de salida
   const [isRendered, setIsRendered] = useState(isOpen);
   if (isOpen && !isRendered) setIsRendered(true);

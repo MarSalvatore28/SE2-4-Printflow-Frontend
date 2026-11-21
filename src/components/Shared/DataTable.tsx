@@ -115,7 +115,7 @@ function DataTable<T>({
                       >
                         {column.render
                           ? column.render(item)
-                          : (item as any)[column.key]}
+                          : (item as Record<string, React.ReactNode>)[column.key]}
                       </td>
                     ))}
                     {showActions && (

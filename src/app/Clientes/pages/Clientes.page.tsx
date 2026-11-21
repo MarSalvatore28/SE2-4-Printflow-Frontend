@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, type ReactNode } from 'react';
 import ClientesFormPage from '@app/Clientes/pages/ClientesForm.page';
 import ContractFormPage from '@app/Clientes/pages/ContractForm.page';
 import ClientList from '@app/Clientes/components/ClientList';
@@ -19,12 +19,22 @@ import {
     updateContrato,
     deleteCliente,
     activarCliente,
-    type ClienteFormData,
     type Contrato
 } from '@app/Clientes/types';
-
-// Datos del formulario de cliente y de contrato (al editar un cliente se guarda su id)
-type FormularioCliente = ClienteFormData & { id_cliente?: number };
+import {
+    datosClienteEditado,
+    datosClienteNuevo,
+    datosContrato,
+    datosContratoDeCliente,
+    esPestanaContrato,
+    faltanteCliente,
+    faltanteContrato,
+    filtrarClientes,
+    textosModalCliente,
+    type FormularioCliente,
+    type PestanaClientes,
+} from '@app/Clientes/utils/formularioCliente';
+import { clasePestana } from '@utils/pestanas';
 
 const INITIAL_FORM_STATE: FormularioCliente = {
     nombre: '',
@@ -84,10 +94,51 @@ const contratoEnFormulario = (contrato: Contrato) => ({
     printer_bill: contrato.printer_bill || INITIAL_FORM_STATE.printer_bill,
 });
 
+// Tarjeta de un formulario con su título y descripción
+const PanelFormulario = ({ titulo, descripcion, children }: { titulo: string; descripcion: string; children: ReactNode }) => (
+    <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-8">
+        <div className="mb-6">
+            <h2 className="text-xl font-bold text-gray-800">{titulo}</h2>
+            <p className="text-sm text-gray-500 mt-1">{descripcion}</p>
+        </div>
+        <hr className="border-gray-200 mb-8" />
+        {children}
+    </div>
+);
+
+// Mientras carga, un indicador; si falló, el error; si no, la lista
+const EstadoLista = ({ cargando, error, children }: { cargando: boolean; error: string | null; children: ReactNode }) => {
+    if (cargando) {
+        return (
+            <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            </div>
+        );
+    }
+    if (error) {
+        return (
+            <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 italic">
+                {error}
+            </div>
+        );
+    }
+    return <>{children}</>;
+};
+
+const TEXTOS_CLIENTE = {
+    nuevo: { titulo: 'Nuevo cliente', descripcion: 'Ingresa los datos para registrar un nuevo cliente en el sistema.' },
+    editar: { titulo: 'Editar cliente', descripcion: 'Modifica la información general de este cliente.' },
+};
+
+const TEXTOS_CONTRATO = {
+    crear: { titulo: 'Nuevo contrato', descripcion: 'Ingresa los datos para registrar y asignar un nuevo contrato al cliente.' },
+    editar: { titulo: 'Modificar contrato', descripcion: 'Modifica las condiciones y tarifas del contrato seleccionado.' },
+};
+
 const ClientesPage = () => {
     // Crear, editar y desactivar clientes y contratos: solo admin (el operador y el auditor consultan)
     const { puedeEditarCatalogos } = usePermisos();
-    const [activeTab, setActiveTab] = useState<'agregar' | 'listar' | 'Crear Contrato' | 'Editar Contrato'>('listar');
+    const [activeTab, setActiveTab] = useState<PestanaClientes>('listar');
     const [allClients, setAllClients] = useState<ClienteParaTabla[]>([]);
     const [showInactive, setShowInactive] = useState<boolean>(false);
     const [filterTerm, setFilterTerm] = useState<string>('');
@@ -129,7 +180,7 @@ const ClientesPage = () => {
         cliente: null
     });
 
-    const fetchClients = async () => {
+    const fetchClients = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
@@ -149,6 +200,34 @@ const ClientesPage = () => {
         } finally {
             setLoading(false);
         }
+    }, []);
+
+    const cerrarModal = () => setModalConfig(prev => ({ ...prev, isOpen: false }));
+
+    const mostrarErrorAlGuardar = (err: unknown, porDefecto: string) => {
+        setModalConfig({
+            isOpen: true,
+            type: 'warning',
+            title: 'Error al guardar',
+            message: (err instanceof Error && err.message) || porDefecto,
+            cliente: null,
+            showCancel: false,
+            confirmText: 'Entendido',
+            onConfirm: cerrarModal
+        });
+    };
+
+    const mostrarExito = (title: string, message: string, onConfirm: () => void) => {
+        setModalConfig({
+            isOpen: true,
+            type: 'activate',
+            title,
+            message,
+            cliente: null,
+            showCancel: false,
+            confirmText: 'Aceptar',
+            onConfirm
+        });
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -167,106 +246,61 @@ const ClientesPage = () => {
         }));
     };
 
-    const handleSave = async () => {
-        if (activeTab === 'Crear Contrato' || activeTab === 'Editar Contrato') {
-            if (!formData.cliente_id) {
-                setWarningModal({ isOpen: true, message: 'Debe asignar un cliente para guardar el contrato.' });
-                return;
-            }
-            if (!formData.fecha_inicio) {
-                setWarningModal({ isOpen: true, message: 'La fecha de inicio es obligatoria para el contrato.' });
-                return;
-            }
+    const guardarContrato = async () => {
+        const faltante = faltanteContrato(formData);
+        if (faltante) {
+            setWarningModal({ isOpen: true, message: faltante });
+            return;
+        }
 
-            setSubmitting(true);
-            setError(null);
-            try {
-                const contractData = {
-                    fecha_inicio: formData.fecha_inicio,
-                    fecha_fin: formData.fecha_fin || null,
-                    copias_bn_incluidas: Number(formData.impresiones_bn_incluidas || 0),
-                    copias_color_incluidas: Number(formData.impresiones_color_incluidas || 0),
-                    impresiones_bn_incluidas: Number(formData.impresiones_bn_incluidas || 0),
-                    impresiones_color_incluidas: Number(formData.impresiones_color_incluidas || 0),
-                    costo_copia_bn: Number(formData.costo_impresion_bn || 0),
-                    costo_copia_color: Number(formData.costo_impresion_color || 0),
-                    costo_impresion_bn: Number(formData.costo_impresion_bn || 0),
-                    costo_impresion_color: Number(formData.costo_impresion_color || 0),
-                    costo_excedente_copia_bn: Number(formData.costo_excedente_impresion_bn || 0),
-                    costo_excedente_copia_color: Number(formData.costo_excedente_impresion_color || 0),
-                    costo_excedente_impresion_bn: Number(formData.costo_excedente_impresion_bn || 0),
-                    costo_excedente_impresion_color: Number(formData.costo_excedente_impresion_color || 0),
-                    tiene_renta: Boolean(formData.tiene_renta),
-                    tiene_software_control: Boolean(formData.tiene_software_control),
-                    printer_bill: formData.printer_bill
-                };
+        setSubmitting(true);
+        setError(null);
+        try {
+            const contractData = datosContrato(formData);
 
-                if (activeTab === 'Editar Contrato' && formData.id_contrato) {
-                    const resultado = await updateContrato(formData.id_contrato, {
-                        ...contractData,
-                        cliente_id: Number(formData.cliente_id)
-                    });
-                    avisarSuperposicion(resultado.advertencia);
-                    setModalConfig({
-                        isOpen: true,
-                        type: 'activate',
-                        title: 'Contrato actualizado',
-                        message: 'El contrato se ha actualizado correctamente.',
-                        cliente: null,
-                        showCancel: false,
-                        confirmText: 'Aceptar',
-                        onConfirm: () => {
-                            setModalConfig(prev => ({ ...prev, isOpen: false }));
-                            setActiveTab('listar');
-                            setFormData(INITIAL_FORM_STATE);
-                            fetchClients();
-                        }
-                    });
-                } else {
-                    const creado = await createContrato(Number(formData.cliente_id), contractData);
-                    avisarSuperposicion(creado?.advertencia);
-
-                    setModalConfig({
-                        isOpen: true,
-                        type: 'activate',
-                        title: 'Contrato asignado',
-                        message: 'El contrato se ha creado y asignado correctamente.',
-                        cliente: null,
-                        showCancel: false,
-                        confirmText: 'Aceptar',
-                        onConfirm: () => {
-                            setModalConfig(prev => ({ ...prev, isOpen: false }));
-                            // NO redirigimos, limpiamos para poder crear otro si lo desea
-                            setFormData(INITIAL_FORM_STATE);
-                            fetchClients();
-                        }
-                    });
-                }
-
-            } catch (err) {
-                console.error('Error saving contract:', err);
-                setModalConfig({
-                    isOpen: true,
-                    type: 'warning',
-                    title: 'Error al guardar',
-                    message: (err instanceof Error && err.message) || 'No se pudo guardar el contrato.',
-                    cliente: null,
-                    showCancel: false,
-                    confirmText: 'Entendido',
-                    onConfirm: () => setModalConfig(prev => ({ ...prev, isOpen: false }))
+            if (activeTab === 'Editar Contrato' && formData.id_contrato) {
+                const resultado = await updateContrato(formData.id_contrato, {
+                    ...contractData,
+                    cliente_id: Number(formData.cliente_id)
                 });
-            } finally {
-                setSubmitting(false);
+                avisarSuperposicion(resultado.advertencia);
+                mostrarExito('Contrato actualizado', 'El contrato se ha actualizado correctamente.', () => {
+                    cerrarModal();
+                    setActiveTab('listar');
+                    setFormData(INITIAL_FORM_STATE);
+                    void fetchClients();
+                });
+            } else {
+                const creado = await createContrato(Number(formData.cliente_id), contractData);
+                avisarSuperposicion(creado?.advertencia);
+                mostrarExito('Contrato asignado', 'El contrato se ha creado y asignado correctamente.', () => {
+                    cerrarModal();
+                    // NO redirigimos, limpiamos para poder crear otro si lo desea
+                    setFormData(INITIAL_FORM_STATE);
+                    void fetchClients();
+                });
             }
-            return;
+        } catch (err) {
+            console.error('Error saving contract:', err);
+            mostrarErrorAlGuardar(err, 'No se pudo guardar el contrato.');
+        } finally {
+            setSubmitting(false);
         }
+    };
 
-        if (!formData.nombre) {
-            setWarningModal({ isOpen: true, message: 'El nombre del cliente es un campo obligatorio.' });
-            return;
+    // Al editar un cliente se guarda también su contrato vigente
+    const actualizarClienteYContrato = async (idCliente: number) => {
+        await updateCliente(idCliente, datosClienteEditado(formData));
+        if (formData.id_contrato) {
+            const resultado = await updateContrato(formData.id_contrato, datosContratoDeCliente(formData));
+            avisarSuperposicion(resultado.advertencia);
         }
-        if (!formData.ruc) {
-            setWarningModal({ isOpen: true, message: 'El RUC del cliente es un campo obligatorio.' });
+    };
+
+    const guardarCliente = async () => {
+        const faltante = faltanteCliente(formData);
+        if (faltante) {
+            setWarningModal({ isOpen: true, message: faltante });
             return;
         }
 
@@ -277,90 +311,38 @@ const ClientesPage = () => {
 
         try {
             if (wasEditing && formData.id_cliente) {
-                const payload = {
-                    nombre: formData.nombre,
-                    ruc: formData.ruc,
-                    razon_social: formData.razon_social,
-                    activo: formData.activo,
-                    tiene_renta: Boolean(formData.tiene_renta),
-                    tiene_software_control: Boolean(formData.tiene_software_control),
-                    printer_bill: formData.printer_bill
-                };
-                await updateCliente(formData.id_cliente, payload);
-
-                if (formData.id_contrato) {
-                    const resultado = await updateContrato(formData.id_contrato, {
-                        cliente_id: formData.id_cliente,
-                        fecha_inicio: formData.fecha_inicio,
-                        fecha_fin: formData.fecha_fin,
-                        copias_bn_incluidas: Number(formData.impresiones_bn_incluidas),
-                        copias_color_incluidas: Number(formData.impresiones_color_incluidas),
-                        impresiones_bn_incluidas: Number(formData.impresiones_bn_incluidas),
-                        impresiones_color_incluidas: Number(formData.impresiones_color_incluidas),
-                        costo_copia_bn: Number(formData.costo_impresion_bn),
-                        costo_copia_color: Number(formData.costo_impresion_color),
-                        costo_impresion_bn: Number(formData.costo_impresion_bn),
-                        costo_impresion_color: Number(formData.costo_impresion_color),
-                        costo_excedente_copia_bn: Number(formData.costo_excedente_impresion_bn || 0),
-                        costo_excedente_copia_color: Number(formData.costo_excedente_impresion_color || 0),
-                        costo_excedente_impresion_bn: Number(formData.costo_excedente_impresion_bn || 0),
-                        costo_excedente_impresion_color: Number(formData.costo_excedente_impresion_color || 0),
-                        tiene_renta: Boolean(formData.tiene_renta),
-                        tiene_software_control: Boolean(formData.tiene_software_control),
-                        printer_bill: formData.printer_bill,
-                    });
-                    avisarSuperposicion(resultado.advertencia);
-                }
+                await actualizarClienteYContrato(formData.id_cliente);
             } else {
-                await createCliente({
-                    nombre: formData.nombre,
-                    ruc: formData.ruc,
-                    razon_social: formData.razon_social,
-                    tiene_renta: Boolean(formData.tiene_renta),
-                    tiene_software_control: Boolean(formData.tiene_software_control),
-                    printer_bill: formData.printer_bill
-                });
+                await createCliente(datosClienteNuevo(formData));
             }
 
             setFilterClientId(null);
             setFilterTerm('');
-            fetchClients();
+            void fetchClients();
 
-            setModalConfig({
-                isOpen: true,
-                type: 'activate',
-                title: wasEditing ? 'Cliente actualizado' : 'Cliente creado',
-                message: wasEditing
+            mostrarExito(
+                wasEditing ? 'Cliente actualizado' : 'Cliente creado',
+                wasEditing
                     ? 'La información del cliente se ha actualizado correctamente.'
                     : 'El cliente se ha registrado exitosamente en el sistema.',
-                cliente: null,
-                showCancel: false,
-                confirmText: 'Aceptar',
-                onConfirm: () => {
-                    setModalConfig(prev => ({ ...prev, isOpen: false }));
+                () => {
+                    cerrarModal();
                     setFormData(INITIAL_FORM_STATE);
                     setIsEditing(false);
                     if (wasEditing) {
                         setActiveTab('listar');
                     }
                 }
-            });
+            );
         } catch (err) {
             console.error('Error saving client:', err);
-            setModalConfig({
-                isOpen: true,
-                type: 'warning',
-                title: 'Error al guardar',
-                message: (err instanceof Error && err.message) || 'No se pudo guardar el cliente.',
-                cliente: null,
-                showCancel: false,
-                confirmText: 'Entendido',
-                onConfirm: () => setModalConfig(prev => ({ ...prev, isOpen: false }))
-            });
+            mostrarErrorAlGuardar(err, 'No se pudo guardar el cliente.');
         } finally {
             setSubmitting(false);
         }
     };
+
+    const handleSave = () => (esPestanaContrato(activeTab) ? guardarContrato() : guardarCliente());
 
     const handleCancel = () => {
         setFormData(INITIAL_FORM_STATE);
@@ -434,7 +416,7 @@ const ClientesPage = () => {
             handleCloseModalConfirm();
         } catch (err) {
             console.error('Error toggling client status:', err);
-            fetchClients();
+            void fetchClients();
         }
     };
 
@@ -480,33 +462,37 @@ const ClientesPage = () => {
     const handleRefresh = () => {
         setFilterClientId(null);
         setFilterTerm('');
-        fetchClients();
+        void fetchClients();
     };
 
     useEffect(() => {
-        if (activeTab === 'listar' || activeTab === 'Crear Contrato' || activeTab === 'Editar Contrato') {
-            fetchClients();
+        if (activeTab === 'listar' || esPestanaContrato(activeTab)) {
+            void fetchClients();
         }
-    }, [activeTab]);
+    }, [activeTab, fetchClients]);
 
-    const displayedClients = allClients.filter(client => {
-        if (!showInactive && !client.activo) return false;
-
-        if (filterClientId) {
-            return client.id_cliente === filterClientId;
-        }
-        if (filterTerm) {
-            const searchWords = filterTerm.toLowerCase().split(' ').filter(w => w.length > 0);
-            return searchWords.every(word =>
-                client.nombre.toLowerCase().includes(word) ||
-                client.ruc?.toLowerCase().includes(word) ||
-                (client.razon_social && client.razon_social.toLowerCase().includes(word))
-            );
-        }
-        return true;
+    const displayedClients = filtrarClientes(allClients, {
+        mostrarInactivos: showInactive,
+        clienteId: filterClientId,
+        termino: filterTerm,
     });
     const clientesSinContrato = displayedClients.filter(c => !c.id_contrato);
     const clientesConContrato = displayedClients.filter(c => !!c.id_contrato);
+    const editandoContrato = activeTab === 'Editar Contrato';
+    const textosCliente = isEditing ? TEXTOS_CLIENTE.editar : TEXTOS_CLIENTE.nuevo;
+    const textosContrato = editandoContrato ? TEXTOS_CONTRATO.editar : TEXTOS_CONTRATO.crear;
+    // Crear contrato: clientes sin contrato; editar: clientes con contrato
+    const clientesContrato = editandoContrato ? clientesConContrato : clientesSinContrato;
+    const textosModal = textosModalCliente(modalConfig);
+    // Sin permiso de edición la lista no muestra acciones
+    const accionesLista = puedeEditarCatalogos
+        ? { onEdit: handleEdit, onDelete: handleDelete, onToggleActive: handleToggleActive }
+        : {};
+    const abrirPestana = (pestana: PestanaClientes) => {
+        setFormData(INITIAL_FORM_STATE);
+        setIsEditing(false);
+        setActiveTab(pestana);
+    };
 
     return (
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
@@ -516,50 +502,26 @@ const ClientesPage = () => {
             <div className="flex flex-wrap border-b border-gray-100 p-2 gap-2 md:gap-4">
                 <button
                     onClick={() => setActiveTab('listar')}
-                    className={`px-3 md:px-6 py-2 rounded-md transition-all ${activeTab === 'listar'
-                        ? 'bg-gray-50 text-gray-900 border border-gray-200 shadow-sm font-medium'
-                        : 'text-gray-500 hover:text-gray-800'
-                        }`}
+                    className={clasePestana(activeTab === 'listar')}
                 >
                     Listar
                 </button>
                 {puedeEditarCatalogos && (<>
                 <button
-                    onClick={() => {
-                        setFormData(INITIAL_FORM_STATE);
-                        setIsEditing(false);
-                        setActiveTab('agregar');
-                    }}
-                    className={`px-3 md:px-6 py-2 rounded-md transition-all ${activeTab === 'agregar'
-                        ? 'bg-gray-50 text-gray-900 border border-gray-200 shadow-sm font-medium'
-                        : 'text-gray-500 hover:text-gray-800'
-                        }`}
+                    onClick={() => abrirPestana('agregar')}
+                    className={clasePestana(activeTab === 'agregar')}
                 >
                     {isEditing && activeTab === 'agregar' ? 'Editar cliente' : 'Agregar'}
                 </button>
                 <button
-                    onClick={() => {
-                        setFormData(INITIAL_FORM_STATE);
-                        setIsEditing(false);
-                        setActiveTab('Crear Contrato');
-                    }}
-                    className={`px-3 md:px-6 py-2 rounded-md transition-all ${activeTab === 'Crear Contrato'
-                        ? 'bg-gray-50 text-gray-900 border border-gray-200 shadow-sm font-medium'
-                        : 'text-gray-500 hover:text-gray-800'
-                        }`}
+                    onClick={() => abrirPestana('Crear Contrato')}
+                    className={clasePestana(activeTab === 'Crear Contrato')}
                 >
                     Crear contrato
                 </button>
                 <button
-                    onClick={() => {
-                        setFormData(INITIAL_FORM_STATE);
-                        setIsEditing(false);
-                        setActiveTab('Editar Contrato');
-                    }}
-                    className={`px-3 md:px-6 py-2 rounded-md transition-all ${activeTab === 'Editar Contrato'
-                        ? 'bg-gray-50 text-gray-900 border border-gray-200 shadow-sm font-medium'
-                        : 'text-gray-500 hover:text-gray-800'
-                        }`}
+                    onClick={() => abrirPestana('Editar Contrato')}
+                    className={clasePestana(activeTab === 'Editar Contrato')}
                 >
                     Editar contrato
                 </button>
@@ -568,18 +530,7 @@ const ClientesPage = () => {
 
             <div className="py-4 md:p-8">
                 {activeTab === 'agregar' ? (
-                    < div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-8">
-                        <div className="mb-6">
-                            <h2 className="text-xl font-bold text-gray-800">
-                                {isEditing ? 'Editar cliente' : 'Nuevo cliente'}
-                            </h2>
-                            <p className="text-sm text-gray-500 mt-1">
-                                {isEditing
-                                    ? 'Modifica la información general de este cliente.'
-                                    : 'Ingresa los datos para registrar un nuevo cliente en el sistema.'}
-                            </p>
-                        </div>
-                        <hr className="border-gray-200 mb-8" />
+                    <PanelFormulario titulo={textosCliente.titulo} descripcion={textosCliente.descripcion}>
                         <ClientesFormPage
                             formData={formData}
                             onChange={handleInputChange}
@@ -588,15 +539,10 @@ const ClientesPage = () => {
                             isSubmitting={submitting}
                             isEditing={isEditing}
                         />
-                    </div>
-                ) : activeTab === 'Crear Contrato' || activeTab === 'Editar Contrato' ? (
-                    activeTab === 'Editar Contrato' && !isEditing ? (
-                        <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-8">
-                            <div className="mb-6">
-                                <h2 className="text-xl font-bold text-gray-800">Editar contrato</h2>
-                                <p className="text-sm text-gray-500 mt-1">Busca y selecciona el cliente al que deseas modificarle su contrato actual.</p>
-                            </div>
-                            <hr className="border-gray-200 mb-8" />
+                    </PanelFormulario>
+                ) : esPestanaContrato(activeTab) ? (
+                    editandoContrato && !isEditing ? (
+                        <PanelFormulario titulo="Editar contrato" descripcion="Busca y selecciona el cliente al que deseas modificarle su contrato actual.">
                             <div className="bg-accent/10 border border-accent/50 rounded-lg p-6">
                                 <BusquedaInteligenteClientes
                                     key={`buscador-editar-${activeTab}`}
@@ -607,30 +553,19 @@ const ClientesPage = () => {
                                 {loading && (<div className="mt-4 text-center text-gray-500">Cargando contrato...</div>)}
                                 {error && (<div className="mt-4 text-center text-red-600">{error}</div>)}
                             </div>
-                        </div>
+                        </PanelFormulario>
                     ) : (
-                        <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-8">
-                            <div className="mb-6">
-                                <h2 className="text-xl font-bold text-gray-800">
-                                    {activeTab === 'Editar Contrato' ? 'Modificar contrato' : 'Nuevo contrato'}
-                                </h2>
-                                <p className="text-sm text-gray-500 mt-1">
-                                    {activeTab === 'Editar Contrato'
-                                        ? 'Modifica las condiciones y tarifas del contrato seleccionado.'
-                                        : 'Ingresa los datos para registrar y asignar un nuevo contrato al cliente.'}
-                                </p>
-                            </div>
-                            <hr className="border-gray-200 mb-8" />
+                        <PanelFormulario titulo={textosContrato.titulo} descripcion={textosContrato.descripcion}>
                             <ContractFormPage
                                 formData={formData}
                                 onChange={handleInputChange}
                                 onSave={handleSave}
                                 onCancel={handleCancel}
                                 isSubmitting={submitting}
-                                isEditing={activeTab === 'Editar Contrato' ? true : isEditing}
-                                clients={activeTab === 'Editar Contrato' ? clientesConContrato : clientesSinContrato}
+                                isEditing={editandoContrato || isEditing}
+                                clients={clientesContrato}
                             />
-                        </div>
+                        </PanelFormulario>
                     )
                 ) : (
                     <div className="flex flex-col gap-6">
@@ -681,23 +616,13 @@ const ClientesPage = () => {
                             </button>
                         </div>
 
-                        {loading ? (
-                            <div className="flex justify-center py-12">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                            </div>
-                        ) : error ? (
-                            <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 italic">
-                                {error}
-                            </div>
-                        ) : (
+                        <EstadoLista cargando={loading} error={error}>
                             <ClientList
                                 clients={displayedClients}
-                                onEdit={puedeEditarCatalogos ? handleEdit : undefined}
-                                onDelete={puedeEditarCatalogos ? handleDelete : undefined}
-                                onToggleActive={puedeEditarCatalogos ? handleToggleActive : undefined}
+                                {...accionesLista}
                                 onVerDetalles={handleVerDetalles}
                             />
-                        )}
+                        </EstadoLista>
                     </div>
                 )}
             </div>
@@ -716,27 +641,11 @@ const ClientesPage = () => {
                 onClose={handleCloseModalConfirm}
                 onConfirm={handleConfirmModal}
                 type={modalConfig.type}
-                title={
-                    modalConfig.title || (
-                        modalConfig.type === 'delete'
-                            ? '¿Desactivar cliente?'
-                            : '¿Activar cliente?'
-                    )
-                }
-                message={
-                    modalConfig.message || (
-                        modalConfig.type === 'delete'
-                            ? `¿Estás seguro de que deseas desactivar al cliente "${modalConfig.cliente?.nombre}"? Podrás reactivarlo después si lo necesitas.`
-                            : `¿Deseas activar al cliente "${modalConfig.cliente?.nombre}"?`
-                    )
-                }
-                confirmText={
-                    modalConfig.confirmText || (
-                        modalConfig.type === 'delete' ? 'Desactivar' : 'Activar'
-                    )
-                }
+                title={textosModal.title}
+                message={textosModal.message}
+                confirmText={textosModal.confirmText}
                 cancelText="Cancelar"
-                showCancel={modalConfig.showCancel !== undefined ? modalConfig.showCancel : true}
+                showCancel={textosModal.showCancel}
             />
 
             <ModalAdvertencia

@@ -6,6 +6,8 @@ import UsuarioList from '@app/Usuarios/components/UsuarioList';
 import UsuarioForm from '@app/Usuarios/components/UsuarioForm';
 import { useAuth } from '@context/AuthContext';
 import { etiquetaRol } from '@utils/permisos';
+import { clasePestana } from '@utils/pestanas';
+import { coincide, nombreCompleto, ordenar, textosCambioEstado } from '@app/Usuarios/utils/usuarios';
 import {
     fetchUsuarios,
     fetchRoles,
@@ -20,19 +22,18 @@ type Tab = 'listar' | 'formulario';
 const mensajeDe = (err: unknown, porDefecto: string) =>
     err instanceof Error && err.message ? err.message : porDefecto;
 
-const nombreCompleto = (u: Usuario) => [u.nombre, u.apellido].filter(Boolean).join(' ');
-
-// Cada palabra del término debe aparecer en el nombre, el correo o el rol.
-const coincide = (u: Usuario, termino: string) => {
-    const texto = [u.nombre, u.apellido, u.email, u.rol, etiquetaRol(u.rol)]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-    return termino.toLowerCase().split(/\s+/).filter(Boolean).every(p => texto.includes(p));
-};
-
-const ordenar = (lista: Usuario[]) =>
-    [...lista].sort((a, b) => Number(b.activo) - Number(a.activo) || nombreCompleto(a).localeCompare(nombreCompleto(b)));
+const EncabezadoFormulario = ({ editando }: { editando: Usuario | null }) => (
+    <div className="mb-6">
+        <h2 className="text-xl font-bold text-gray-800">
+            {editando ? `Editar usuario ${editando.email}` : 'Nuevo Usuario'}
+        </h2>
+        <p className="text-sm text-gray-500 mt-1">
+            {editando
+                ? 'Modifica los datos o el rol. La contraseña solo cambia si escribes una nueva.'
+                : 'El usuario queda activo y puede iniciar sesión con el correo y la contraseña que definas.'}
+        </p>
+    </div>
+);
 
 // Gestión de usuarios y roles (S4-03). Solo admin: el menú y PermisoRuta la ocultan a los demás roles.
 const UsuariosPage = () => {
@@ -64,7 +65,7 @@ const UsuariosPage = () => {
 
     useEffect(() => {
         let cancelado = false;
-        (async () => {
+        void (async () => {
             try {
                 const [listaUsuarios, listaRoles] = await Promise.all([fetchUsuarios(), fetchRoles()]);
                 if (cancelado) return;
@@ -187,20 +188,17 @@ const UsuariosPage = () => {
         }
     };
 
-    const tabClass = (activa: boolean) =>
-        `px-3 md:px-6 py-2 rounded-md transition-all ${activa
-            ? 'bg-gray-50 text-gray-900 border border-gray-200 shadow-sm font-medium'
-            : 'text-gray-500 hover:text-gray-800'}`;
+    const textosEstado = textosCambioEstado(confirmar.usuario);
 
     return (
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
             <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Usuarios</h1>
 
             <div className="flex flex-wrap border-b border-gray-100 p-2 gap-2 md:gap-4">
-                <button onClick={() => setActiveTab('listar')} className={tabClass(activeTab === 'listar')}>
+                <button onClick={() => setActiveTab('listar')} className={clasePestana(activeTab === 'listar')}>
                     Listar
                 </button>
-                <button onClick={abrirNuevo} className={tabClass(activeTab === 'formulario')}>
+                <button onClick={abrirNuevo} className={clasePestana(activeTab === 'formulario')}>
                     {activeTab === 'formulario' && editando ? 'Editar Usuario' : 'Agregar'}
                 </button>
             </div>
@@ -208,16 +206,7 @@ const UsuariosPage = () => {
             <div className="py-4 md:p-8 min-h-[400px]">
                 {activeTab === 'formulario' ? (
                     <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-8">
-                        <div className="mb-6">
-                            <h2 className="text-xl font-bold text-gray-800">
-                                {editando ? `Editar usuario ${editando.email}` : 'Nuevo Usuario'}
-                            </h2>
-                            <p className="text-sm text-gray-500 mt-1">
-                                {editando
-                                    ? 'Modifica los datos o el rol. La contraseña solo cambia si escribes una nueva.'
-                                    : 'El usuario queda activo y puede iniciar sesión con el correo y la contraseña que definas.'}
-                            </p>
-                        </div>
+                        <EncabezadoFormulario editando={editando} />
 
                         <hr className="border-gray-200 mb-8" />
 
@@ -279,7 +268,7 @@ const UsuariosPage = () => {
                             </div>
 
                             <button
-                                onClick={() => { limpiarFiltros(); recargarUsuarios(); }}
+                                onClick={() => { limpiarFiltros(); void recargarUsuarios(); }}
                                 className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium h-[42px]"
                             >
                                 Ver todos
@@ -333,12 +322,10 @@ const UsuariosPage = () => {
                 isOpen={confirmar.abierto}
                 onClose={() => setConfirmar(prev => ({ ...prev, abierto: false }))}
                 onConfirm={confirmarCambioEstado}
-                type={confirmar.usuario?.activo ? 'delete' : 'activate'}
-                title={confirmar.usuario?.activo ? '¿Desactivar usuario?' : '¿Activar usuario?'}
-                message={confirmar.usuario?.activo
-                    ? `¿Deseas desactivar a ${confirmar.usuario ? nombreCompleto(confirmar.usuario) : ''} (${confirmar.usuario?.email})? No podrá iniciar sesión y su sesión abierta se cerrará en su próxima acción.`
-                    : `¿Deseas activar a ${confirmar.usuario ? nombreCompleto(confirmar.usuario) : ''} (${confirmar.usuario?.email ?? ''})? Podrá volver a iniciar sesión.`}
-                confirmText={confirmar.usuario?.activo ? 'Desactivar' : 'Activar'}
+                type={textosEstado.type}
+                title={textosEstado.title}
+                message={textosEstado.message}
+                confirmText={textosEstado.confirmText}
                 cancelText="Cancelar"
             />
 

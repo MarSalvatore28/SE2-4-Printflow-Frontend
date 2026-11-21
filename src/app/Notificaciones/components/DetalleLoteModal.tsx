@@ -20,6 +20,7 @@ import {
 } from '@services/Notificaciones/detalleLote.service';
 import { useNotification } from '@context/NotificationContext';
 import { usePermisos } from '@hooks/usePermisos';
+import { useDialogoAccesible } from '@hooks/useDialogoAccesible';
 import { formatNumber } from '@utils/formatUtils';
 
 interface DetalleLoteModalProps {
@@ -44,7 +45,7 @@ const fechaCorteDe = (reportes: ReporteStaging[], lote: Lote): string | null => 
   const fechas = reportes
     .map((r) => r.consolidado_fecha_corte)
     .filter((f): f is string => Boolean(f))
-    .sort();
+    .sort((a, b) => a.localeCompare(b));
   return fechas.length ? fechas[fechas.length - 1] : lote.fecha_corte;
 };
 
@@ -116,14 +117,12 @@ export const DetalleLoteModal = ({ loteId, onClose, onFechaCorteChange, onLoteAc
     void cargar();
   }, [cargar]);
 
-  // Escape cierra (salvo mientras se aprueba o rechaza)
-  useEffect(() => {
-    const alEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !procesando) onClose();
-    };
-    document.addEventListener('keydown', alEscape);
-    return () => document.removeEventListener('keydown', alEscape);
+  // Escape cierra (salvo mientras se aprueba o rechaza), el foco queda dentro y vuelve al cerrar
+  const dialogoRef = useRef<HTMLDivElement>(null);
+  const cerrarSiSePuede = useCallback(() => {
+    if (!procesando) onClose();
   }, [onClose, procesando]);
+  useDialogoAccesible(true, cerrarSiSePuede, dialogoRef);
 
   const despuesDeLaAccion = async () => {
     const actualizado = await cargar();
@@ -197,12 +196,16 @@ export const DetalleLoteModal = ({ loteId, onClose, onFechaCorteChange, onLoteAc
 
   return (
     <div
+      role="presentation"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      onClick={() => !procesando && onClose()}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) cerrarSiSePuede();
+      }}
     >
       <div
-        className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
+        ref={dialogoRef}
+        tabIndex={-1}
+        className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col focus:outline-none"
         role="dialog"
         aria-modal="true"
         aria-labelledby="titulo-detalle-lote"

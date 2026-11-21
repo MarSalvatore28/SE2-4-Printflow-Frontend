@@ -4,6 +4,7 @@ import type {
   Contrato,
   InstalacionActiva
 } from '@models/Cliente/cliente.types';
+import type { HistorialData } from '@models/Cliente/Historialcliente.types';
 import { getToken } from '@services/Auth/auth.service';
 import { apiFetch } from '@services/api';
 
@@ -91,7 +92,7 @@ export async function getClienteByRuc(ruc: string): Promise<ClienteParaTabla | n
   }
 }
 
-export async function createCliente(cliente: any): Promise<number> {
+export async function createCliente(cliente: Record<string, unknown>): Promise<number> {
   try {
     const res = await apiFetch(`${RESOURCE_URL}`, {
       method: "POST",
@@ -112,7 +113,7 @@ export async function createCliente(cliente: any): Promise<number> {
   }
 }
 
-export async function updateCliente(id: number, cliente: any): Promise<boolean> {
+export async function updateCliente(id: number, cliente: Record<string, unknown>): Promise<boolean> {
   try {
     const res = await apiFetch(`${RESOURCE_URL}/${id}`, {
       method: "PUT",
@@ -191,7 +192,7 @@ export async function getContratoById(id: number): Promise<Contrato | null> {
   }
 }
 
-export async function createContrato(clienteId: number, contratoData: any) {
+export async function createContrato(clienteId: number, contratoData: Record<string, unknown>) {
   try {
     const res = await apiFetch(`/api/contratos`, {
       method: "POST",
@@ -215,7 +216,7 @@ export async function createContrato(clienteId: number, contratoData: any) {
   }
 }
 
-export async function updateContrato(id: number, contrato: any): Promise<{ success: boolean; advertencia?: string }> {
+export async function updateContrato(id: number, contrato: Record<string, unknown>): Promise<{ success: boolean; advertencia?: string }> {
   try {
     const res = await apiFetch(`/api/contratos/${id}`, {
       method: "PUT",
@@ -260,7 +261,7 @@ export async function getInstalacionesByCliente(clienteId: number): Promise<Inst
   }
 }
 
-export async function createInstalacion(instalacion: any) {
+export async function createInstalacion(instalacion: Record<string, unknown>) {
   try {
     const res = await apiFetch(`${RESOURCE_URL}/instalaciones`, {
       method: "POST",
@@ -306,7 +307,7 @@ export async function tieneHistorial(clienteId: number): Promise<boolean> {
   }
 }
 
-export async function getUltimoCambio(clienteId: number): Promise<any | null> {
+export async function getUltimoCambio(clienteId: number): Promise<HistorialData | null> {
   try {
     const res = await apiFetch(`${RESOURCE_URL}/${clienteId}/ultimo-cambio`, {
       headers: getAuthHeaders()
@@ -320,7 +321,7 @@ export async function getUltimoCambio(clienteId: number): Promise<any | null> {
   }
 }
 
-export async function getHistorialCliente(clienteId: number): Promise<any[]> {
+export async function getHistorialCliente(clienteId: number): Promise<HistorialData[]> {
   try {
     const res = await apiFetch(`${RESOURCE_URL}/${clienteId}/historial`, {
       headers: getAuthHeaders()

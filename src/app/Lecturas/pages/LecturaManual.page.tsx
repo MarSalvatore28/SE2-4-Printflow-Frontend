@@ -61,6 +61,45 @@ const CampoForm: FC<{ id: string; label: string; error?: string; ayuda?: ReactNo
     </div>
 );
 
+// Asignación y última lectura aprobada de la máquina elegida
+const ReferenciaLectura: FC<{
+    asignacion: InstalacionActivaCliente | null;
+    ultima: LecturaAprobada | null | undefined;
+    periodo: string;
+}> = ({ asignacion, ultima, periodo }) => (
+    <aside className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm" data-testid="referencia-lectura">
+        <h2 className="font-semibold text-gray-900 mb-3">Referencia</h2>
+        {!asignacion ? (
+            <p className="text-gray-500">Elija la máquina para ver su asignación y su última lectura aprobada.</p>
+        ) : (
+            <dl className="space-y-2">
+                <div>
+                    <dt className="text-xs uppercase tracking-wide text-gray-500">Máquina</dt>
+                    <dd className="font-mono font-semibold text-gray-900">{asignacion.serie}</dd>
+                    <dd className="text-gray-600">{asignacion.modelo_nombre || 'Sin modelo'}{asignacion.tipo_impresion ? ` · ${esBn(asignacion) ? 'B/N' : asignacion.tipo_impresion}` : ''}</dd>
+                </div>
+                <div>
+                    <dt className="text-xs uppercase tracking-wide text-gray-500">Asignación</dt>
+                    <dd className="text-gray-900">{asignacion.cliente_nombre} · {asignacion.area_nombre}</dd>
+                    <dd className="text-gray-600">IP {asignacion.ip_address || '—'} · instalada el {formatFechaISO(asignacion.fecha_instalacion)}</dd>
+                </div>
+                <div>
+                    <dt className="text-xs uppercase tracking-wide text-gray-500">Última lectura aprobada{periodo ? ` antes de ${periodo}` : ''}</dt>
+                    {ultima === undefined ? (
+                        <dd className="text-gray-500 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Consultando…</dd>
+                    ) : ultima === null ? (
+                        <dd className="text-gray-600">Sin lecturas aprobadas.</dd>
+                    ) : (
+                        <dd className="text-gray-900" data-testid="ultima-lectura">
+                            {ultima.periodo}: B/N <span className="font-mono">{formatNumber(ultima.bn)}</span> · color <span className="font-mono">{formatNumber(ultima.color)}</span>
+                        </dd>
+                    )}
+                </div>
+            </dl>
+        )}
+    </aside>
+);
+
 const LecturaManualPage = () => {
     const [params] = useSearchParams();
     const seriePedida = (params.get('serie') || '').trim().toUpperCase();
@@ -298,37 +337,7 @@ const LecturaManualPage = () => {
                     </div>
                 </div>
 
-                <aside className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm" data-testid="referencia-lectura">
-                    <h2 className="font-semibold text-gray-900 mb-3">Referencia</h2>
-                    {!asignacion ? (
-                        <p className="text-gray-500">Elija la máquina para ver su asignación y su última lectura aprobada.</p>
-                    ) : (
-                        <dl className="space-y-2">
-                            <div>
-                                <dt className="text-xs uppercase tracking-wide text-gray-500">Máquina</dt>
-                                <dd className="font-mono font-semibold text-gray-900">{asignacion.serie}</dd>
-                                <dd className="text-gray-600">{asignacion.modelo_nombre || 'Sin modelo'}{asignacion.tipo_impresion ? ` · ${esBn(asignacion) ? 'B/N' : asignacion.tipo_impresion}` : ''}</dd>
-                            </div>
-                            <div>
-                                <dt className="text-xs uppercase tracking-wide text-gray-500">Asignación</dt>
-                                <dd className="text-gray-900">{asignacion.cliente_nombre} · {asignacion.area_nombre}</dd>
-                                <dd className="text-gray-600">IP {asignacion.ip_address || '—'} · instalada el {formatFechaISO(asignacion.fecha_instalacion)}</dd>
-                            </div>
-                            <div>
-                                <dt className="text-xs uppercase tracking-wide text-gray-500">Última lectura aprobada{periodo ? ` antes de ${periodo}` : ''}</dt>
-                                {ultima === undefined ? (
-                                    <dd className="text-gray-500 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Consultando…</dd>
-                                ) : ultima === null ? (
-                                    <dd className="text-gray-600">Sin lecturas aprobadas.</dd>
-                                ) : (
-                                    <dd className="text-gray-900" data-testid="ultima-lectura">
-                                        {ultima.periodo}: B/N <span className="font-mono">{formatNumber(ultima.bn)}</span> · color <span className="font-mono">{formatNumber(ultima.color)}</span>
-                                    </dd>
-                                )}
-                            </div>
-                        </dl>
-                    )}
-                </aside>
+                <ReferenciaLectura asignacion={asignacion} ultima={ultima} periodo={periodo} />
             </div>
         </div>
     );

@@ -1,4 +1,5 @@
 import type {
+    Instalacion,
     InstalacionCompleta,
     InstalacionActivaCliente,
     MaquinaSinInstalacion,
@@ -190,7 +191,7 @@ export async function updateInstalacion(
         contabilidad_por_usuario: boolean;
         fecha_instalacion?: string;
     }
-): Promise<any> {
+): Promise<Instalacion> {
     const res = await apiFetch(`/api/instalacion/${idInstalacion}`, {
         method: 'PATCH',
         headers: getAuthHeaders(),

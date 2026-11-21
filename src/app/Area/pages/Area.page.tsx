@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AreaList from '@app/Area/components/AreaList';
 import BusquedaInteligenteAreas from '@app/Area/components/BusquedaInteligenteAreas';
 import ModalConfirmacion from '@components/Shared/ModalConfirmacion';
@@ -8,6 +8,8 @@ import { usePermisos } from '@hooks/usePermisos';
 import AreasFormPage from './AreasForm.page';
 import { fetchAllClientes } from '@services/Clientes/clientes.service';
 import { type Client } from '../../Clientes/types';
+import { filtrarAreas } from '@app/Area/utils/filtrarAreas';
+import { clasePestana } from '@utils/pestanas';
 
 import {
     type Area,
@@ -25,6 +27,35 @@ const INITIAL_FORM_STATE: Partial<Area> = {
     cliente_id: undefined,
     activo: 1
 };
+
+type AccionModal = 'delete' | 'activate';
+
+// Título, mensaje y botón del modal de desactivar o activar un área
+const TEXTOS_MODAL: Record<AccionModal, { titulo: string; mensaje: (nombre?: string) => string; boton: string }> = {
+    delete: {
+        titulo: '¿Desactivar área?',
+        mensaje: (nombre) => `¿Estás seguro de que deseas desactivar el área "${nombre}"? Podrás reactivarla después si lo necesitas.`,
+        boton: 'Desactivar',
+    },
+    activate: {
+        titulo: '¿Activar área?',
+        mensaje: (nombre) => `¿Deseas activar el área "${nombre}"?`,
+        boton: 'Activar',
+    },
+};
+
+const EncabezadoFormulario = ({ editando }: { editando: boolean }) => (
+    <div className="mb-6">
+        <h2 className="text-xl font-bold text-gray-800">
+            {editando ? 'Editar área' : 'Nueva área'}
+        </h2>
+        <p className="text-sm text-gray-500 mt-1">
+            {editando
+                ? 'Modifica la información del área seleccionada.'
+                : 'Ingresa los datos para registrar una nueva área y vincúlala a un cliente.'}
+        </p>
+    </div>
+);
 
 const AreaPage = () => {
     // Crear, editar y desactivar áreas: solo admin (el operador y el auditor consultan)
@@ -56,7 +87,7 @@ const AreaPage = () => {
         message: ''
     });
 
-    const fetchAreas = async () => {
+    const fetchAreas = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
@@ -68,9 +99,9 @@ const AreaPage = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
-    const fetchAreasAndClients = async () => {
+    const fetchAreasAndClients = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
@@ -88,17 +119,17 @@ const AreaPage = () => {
         } finally {
             setLoading(false);
         }
-    };
-
-    useEffect(() => {
-        fetchAreasAndClients();
     }, []);
 
     useEffect(() => {
+        void fetchAreasAndClients();
+    }, [fetchAreasAndClients]);
+
+    useEffect(() => {
         if (activeTab === 'listar') {
-            fetchAreas();
+            void fetchAreas();
         }
-    }, [activeTab]);
+    }, [activeTab, fetchAreas]);
 
     const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -192,7 +223,7 @@ const AreaPage = () => {
 
     const [modalConfig, setModalConfig] = useState<{
         isOpen: boolean;
-        type: 'delete' | 'activate';
+        type: AccionModal;
         area: Area | null;
     }>({
         isOpen: false,
@@ -228,7 +259,7 @@ const AreaPage = () => {
             } else {
                 await activarArea(area.id_area);
             }
-            fetchAreas();
+            void fetchAreas();
         } catch (err) {
             console.error('Error toggling area status:', err);
             setError('No se pudo cambiar el estado del área.');
@@ -249,7 +280,7 @@ const AreaPage = () => {
         setFilterClientId(null);
         setFilterAreaId(null);
         setFilterTerm('');
-        fetchAreas();
+        void fetchAreas();
     };
 
     const handleEnterSearch = (termino: string) => {
@@ -258,28 +289,17 @@ const AreaPage = () => {
         setFilterTerm(termino.toLowerCase().trim());
     };
 
-    const displayedAreas = allAreas.filter(area => {
-        if (!showInactive && area.activo !== 1) return false;
-
-        if (filterAreaId) {
-            return area.id_area === filterAreaId;
-        }
-
-        if (filterClientId && area.cliente_id !== filterClientId) {
-            return false;
-        }
-
-        if (filterTerm) {
-            const searchWords = filterTerm.toLowerCase().split(' ').filter(word => word.length > 0);
-            return searchWords.every(word =>
-                area.nombre.toLowerCase().includes(word) ||
-                area.cliente_nombre?.toLowerCase().includes(word) ||
-                area.descripcion?.toLowerCase().includes(word)
-            );
-        }
-
-        return true;
+    const displayedAreas = filtrarAreas(allAreas, {
+        mostrarInactivas: showInactive,
+        areaId: filterAreaId,
+        clienteId: filterClientId,
+        termino: filterTerm,
     });
+    const textosModal = TEXTOS_MODAL[modalConfig.type];
+    // Sin permiso de edición la lista no muestra acciones
+    const accionesLista = puedeEditarCatalogos
+        ? { onEdit: handleEdit, onDelete: handleDelete, onToggleActive: handleToggleActive }
+        : {};
 
     return (
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
@@ -290,10 +310,7 @@ const AreaPage = () => {
             <div className="flex flex-wrap border-b border-gray-100 p-2 gap-2 md:gap-4">
                 <button
                     onClick={() => setActiveTab('listar')}
-                    className={`px-3 md:px-6 py-2 rounded-md transition-all ${activeTab === 'listar'
-                        ? 'bg-gray-50 text-gray-900 border border-gray-200 shadow-sm font-medium'
-                        : 'text-gray-500 hover:text-gray-800'
-                        }`}
+                    className={clasePestana(activeTab === 'listar')}
                 >
                     Listar
                 </button>
@@ -304,10 +321,7 @@ const AreaPage = () => {
                         setFormData(INITIAL_FORM_STATE);
                         setActiveTab('agregar');
                     }}
-                    className={`px-3 md:px-6 py-2 rounded-md transition-all ${activeTab === 'agregar'
-                        ? 'bg-gray-50 text-gray-900 border border-gray-200 shadow-sm font-medium'
-                        : 'text-gray-500 hover:text-gray-800'
-                        }`}
+                    className={clasePestana(activeTab === 'agregar')}
                 >
                     {editingArea ? 'Editar área' : 'Agregar'}
                 </button>
@@ -319,16 +333,7 @@ const AreaPage = () => {
                 {activeTab === 'agregar' ? (
                     // ✨ CONTENEDOR TIPO TARJETA IDÉNTICO AL DE INSTALACIONES ✨
                     <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-8">
-                        <div className="mb-6">
-                            <h2 className="text-xl font-bold text-gray-800">
-                                {editingArea ? 'Editar área' : 'Nueva área'}
-                            </h2>
-                            <p className="text-sm text-gray-500 mt-1">
-                                {editingArea
-                                    ? 'Modifica la información del área seleccionada.'
-                                    : 'Ingresa los datos para registrar una nueva área y vincúlala a un cliente.'}
-                            </p>
-                        </div>
+                        <EncabezadoFormulario editando={!!editingArea} />
 
                         <hr className="border-gray-200 mb-8" />
 
@@ -408,9 +413,7 @@ const AreaPage = () => {
                         ) : (
                             <AreaList
                                 areas={displayedAreas}
-                                onEdit={puedeEditarCatalogos ? handleEdit : undefined}
-                                onDelete={puedeEditarCatalogos ? handleDelete : undefined}
-                                onToggleActive={puedeEditarCatalogos ? handleToggleActive : undefined}
+                                {...accionesLista}
                             />
                         )}
                     </div>
@@ -422,17 +425,9 @@ const AreaPage = () => {
                 onClose={handleCloseModal}
                 onConfirm={handleConfirmModal}
                 type={modalConfig.type}
-                title={
-                    modalConfig.type === 'delete'
-                        ? '¿Desactivar área?'
-                        : '¿Activar área?'
-                }
-                message={
-                    modalConfig.type === 'delete'
-                        ? `¿Estás seguro de que deseas desactivar el área "${modalConfig.area?.nombre}"? Podrás reactivarla después si lo necesitas.`
-                        : `¿Deseas activar el área "${modalConfig.area?.nombre}"?`
-                }
-                confirmText={modalConfig.type === 'delete' ? 'Desactivar' : 'Activar'}
+                title={textosModal.titulo}
+                message={textosModal.mensaje(modalConfig.area?.nombre)}
+                confirmText={textosModal.boton}
                 cancelText="Cancelar"
             />
 

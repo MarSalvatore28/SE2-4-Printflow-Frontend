@@ -1,4 +1,4 @@
-import type { AuthResponse, LoginCredentials, ValidateTokenResponse } from "@models/auth.types";
+import type { AuthResponse, LoginCredentials, User, ValidateTokenResponse } from "@models/auth.types";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 const AUTH_URL = `${API_BASE}/api/auth`;
@@ -38,27 +38,23 @@ export const validateToken = async (): Promise<ValidateTokenResponse> => {
     const token = getToken();
     if (!token) throw new Error('No token found');
 
-    try {
-        const response = await fetch(`${AUTH_URL}/validate-token`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        handleUnauthorized(response);
-
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-            throw new Error(data.message || 'Token inválido');
+    const response = await fetch(`${AUTH_URL}/validate-token`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
         }
+    });
 
-        return data;
-    } catch (error) {
-        throw error;
+    handleUnauthorized(response);
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Token inválido');
     }
+
+    return data;
 };
 
 export const logoutBackend = async (): Promise<void> => {
@@ -93,11 +89,11 @@ export const removeToken = () => {
     localStorage.removeItem('token');
 };
 
-export const saveUser = (user: any) => {
+export const saveUser = (user: User) => {
     localStorage.setItem('user', JSON.stringify(user));
 };
 
-export const getUser = (): any | null => {
+export const getUser = (): User | null => {
     const userStr = localStorage.getItem('user');
     if (!userStr) return null;
     try {

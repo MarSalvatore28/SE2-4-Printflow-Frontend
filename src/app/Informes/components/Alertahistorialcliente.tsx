@@ -19,31 +19,31 @@ export const AlertaHistorialCliente: React.FC<AlertaHistorialClienteProps> = ({
     const [modalAbierto, setModalAbierto] = useState<boolean>(false);
 
     useEffect(() => {
-        if (clienteId && mostrar) {
-            cargarHistorial();
-        }
-    }, [clienteId]);
+        if (!clienteId || !mostrar) return;
 
-    const cargarHistorial = async () => {
-        setLoading(true);
-        try {
-            const tiene = await tieneHistorial(clienteId);
+        const cargarHistorial = async () => {
+            setLoading(true);
+            try {
+                const tiene = await tieneHistorial(clienteId);
 
-            if (tiene) {
-                const ultimoCambio = await getUltimoCambio(clienteId);
-                
-                if (ultimoCambio) {
-                    setHistorial(ultimoCambio);
+                if (tiene) {
+                    const ultimoCambio = await getUltimoCambio(clienteId);
+
+                    if (ultimoCambio) {
+                        setHistorial(ultimoCambio);
+                    }
+                } else {
+                    setHistorial(null);
                 }
-            } else {
-                setHistorial(null);
+            } catch (error) {
+                console.error('Error al cargar historial:', error);
+            } finally {
+                setLoading(false);
             }
-        } catch (error) {
-            console.error('Error al cargar historial:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+        };
+
+        void cargarHistorial();
+    }, [clienteId, mostrar]);
 
     const abrirModal = () => {
         setModalAbierto(true);

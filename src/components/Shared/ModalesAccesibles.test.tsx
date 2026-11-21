@@ -95,6 +95,21 @@ describe('ModalConfirmacion', () => {
     expect(campo?.getAttribute('aria-label')).toBe('Motivo');
   });
 
+  it('al cancelar se borra el texto escrito: al volver a abrir el campo está vacío', () => {
+    montar(<ModalConfirmacion {...props} showInput inputPlaceholder="Motivo" />);
+    const campo = () => dialogo()?.querySelector('textarea') as HTMLTextAreaElement;
+    act(() => {
+      const asignar = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')?.set;
+      asignar?.call(campo(), 'motivo anterior');
+      campo().dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    expect(campo().value).toBe('motivo anterior');
+
+    act(() => raiz.render(<ModalConfirmacion {...props} showInput inputPlaceholder="Motivo" isOpen={false} />));
+    act(() => raiz.render(<ModalConfirmacion {...props} showInput inputPlaceholder="Motivo" />));
+    expect(campo().value).toBe('');
+  });
+
   it('al cerrar devuelve el foco al botón que lo abrió', () => {
     const abridor = document.createElement('button');
     document.body.appendChild(abridor);

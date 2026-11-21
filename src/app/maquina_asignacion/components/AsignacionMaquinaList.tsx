@@ -203,7 +203,7 @@ export const InstalacionesList: React.FC<InstalacionesListProps> = ({
                             {/* Header del cliente */}
                             <div
                                 onClick={() => toggleCliente(cliente.cliente_id)}
-                                className="flex items-center justify-between p-4 bg-white hover:bg-gray-50 cursor-pointer transition-all border-b border-transparent data-[expanded=true]:border-gray-100"
+                                className="flex flex-wrap items-center justify-between gap-3 p-4 bg-white hover:bg-gray-50 cursor-pointer transition-all border-b border-transparent data-[expanded=true]:border-gray-100"
                                 data-expanded={isClienteExpanded}
                             >
                                 <div className="flex items-center gap-3">
@@ -227,7 +227,7 @@ export const InstalacionesList: React.FC<InstalacionesListProps> = ({
                                 </div>
 
                                 <div className="flex items-center gap-3">
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex flex-wrap items-center gap-2">
                                         <span className="inline-flex items-center px-2 py-1.5 rounded-full text-xs font-bold bg-edit text-white">
                                             {areas.length} área{areas.length !== 1 ? 's' : ''}
                                         </span>

@@ -300,15 +300,15 @@ const InstalacionesPage = () => {
     });
 
     return (
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
             <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Instalaciones</h1>
             {!puedeEditarCatalogos && <AvisoSoloLectura acciones="crear, editar o retirar instalaciones" />}
 
             {/* Tabs */}
-            <div className="flex border-b border-gray-100 p-2 gap-4">
+            <div className="flex flex-wrap border-b border-gray-100 p-2 gap-2 md:gap-4">
                 <button
                     onClick={() => setActiveTab('listar')}
-                    className={`px-6 py-2 rounded-md transition-all ${activeTab === 'listar'
+                    className={`px-3 md:px-6 py-2 rounded-md transition-all ${activeTab === 'listar'
                         ? 'bg-gray-50 text-gray-900 border border-gray-200 shadow-sm font-medium'
                         : 'text-gray-500 hover:text-gray-800'
                         }`}
@@ -321,7 +321,7 @@ const InstalacionesPage = () => {
                         setInstalacionEnEdicion(null);
                         setActiveTab('agregar');
                     }}
-                    className={`px-6 py-2 rounded-md transition-all ${activeTab === 'agregar'
+                    className={`px-3 md:px-6 py-2 rounded-md transition-all ${activeTab === 'agregar'
                         ? 'bg-gray-50 text-gray-900 border border-gray-200 shadow-sm font-medium'
                         : 'text-gray-500 hover:text-gray-800'
                         }`}
@@ -332,7 +332,7 @@ const InstalacionesPage = () => {
             </div>
 
             {/* Content */}
-            <div className="p-8">
+            <div className="py-4 md:p-8">
                 {/* Error Message */}
                 {error && (
                     <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">

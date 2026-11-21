@@ -53,11 +53,12 @@ function DataTable<T>({
   }, [data.length]);
 
   return (
-    <div className="border-2 border-gray-200 border-outline rounded-lg overflow-hidden">
+    <div className="max-w-full min-w-0 border-2 border-gray-200 border-outline rounded-lg overflow-hidden">
       <div className="bg-secondary/90 text-white p-4">
         <h2 className="font-bold">{title}</h2>
       </div>
 
+      {/* En pantallas angostas la tabla se desplaza a lo ancho dentro de esta caja */}
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-100 border-b-2 border-gray-300">
@@ -65,7 +66,7 @@ function DataTable<T>({
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className={`px-6 py-3 text-sm font-semibold text-gray-700 ${column.align === 'center'
+                  className={`px-3 md:px-6 py-3 text-sm font-semibold text-gray-700 ${column.align === 'center'
                     ? 'text-center'
                     : column.align === 'right'
                       ? 'text-right'
@@ -76,7 +77,7 @@ function DataTable<T>({
                 </th>
               ))}
               {showActions && (
-                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">
+                <th className="px-3 md:px-6 py-3 text-center text-sm font-semibold text-gray-700">
                   Acciones
                 </th>
               )}
@@ -105,7 +106,7 @@ function DataTable<T>({
                     {columns.map((column) => (
                       <td
                         key={column.key}
-                        className={`px-6 py-4 text-sm ${column.align === 'center'
+                        className={`px-3 md:px-6 py-4 text-sm ${column.align === 'center'
                           ? 'text-center'
                           : column.align === 'right'
                             ? 'text-right'
@@ -118,7 +119,7 @@ function DataTable<T>({
                       </td>
                     ))}
                     {showActions && (
-                      <td className="px-6 py-4 text-sm text-center">
+                      <td className="px-3 md:px-6 py-4 text-sm text-center">
                         <div className="flex justify-center gap-2">
                           {additionalActions && additionalActions(item)}
 

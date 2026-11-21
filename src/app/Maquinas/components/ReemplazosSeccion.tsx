@@ -165,7 +165,7 @@ export const ReemplazosSeccion: FC<ReemplazosSeccionProps> = ({ puedeRegistrar, 
             )}
 
             {formAbierto && (
-                <div className="bg-white border border-gray-200 rounded-lg p-6 sm:p-8">
+                <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-8">
                     <div className="mb-6">
                         <h3 className="text-lg font-bold text-gray-800">Nuevo reemplazo</h3>
                         <p className="text-sm text-gray-500 mt-1">

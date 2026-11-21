@@ -509,14 +509,14 @@ const ClientesPage = () => {
     const clientesConContrato = displayedClients.filter(c => !!c.id_contrato);
 
     return (
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
             <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de clientes</h1>
             {!puedeEditarCatalogos && <AvisoSoloLectura acciones="crear, editar o desactivar clientes y contratos" />}
 
-            <div className="flex border-b border-gray-100 p-2 gap-4">
+            <div className="flex flex-wrap border-b border-gray-100 p-2 gap-2 md:gap-4">
                 <button
                     onClick={() => setActiveTab('listar')}
-                    className={`px-6 py-2 rounded-md transition-all ${activeTab === 'listar'
+                    className={`px-3 md:px-6 py-2 rounded-md transition-all ${activeTab === 'listar'
                         ? 'bg-gray-50 text-gray-900 border border-gray-200 shadow-sm font-medium'
                         : 'text-gray-500 hover:text-gray-800'
                         }`}
@@ -530,7 +530,7 @@ const ClientesPage = () => {
                         setIsEditing(false);
                         setActiveTab('agregar');
                     }}
-                    className={`px-6 py-2 rounded-md transition-all ${activeTab === 'agregar'
+                    className={`px-3 md:px-6 py-2 rounded-md transition-all ${activeTab === 'agregar'
                         ? 'bg-gray-50 text-gray-900 border border-gray-200 shadow-sm font-medium'
                         : 'text-gray-500 hover:text-gray-800'
                         }`}
@@ -543,7 +543,7 @@ const ClientesPage = () => {
                         setIsEditing(false);
                         setActiveTab('Crear Contrato');
                     }}
-                    className={`px-6 py-2 rounded-md transition-all ${activeTab === 'Crear Contrato'
+                    className={`px-3 md:px-6 py-2 rounded-md transition-all ${activeTab === 'Crear Contrato'
                         ? 'bg-gray-50 text-gray-900 border border-gray-200 shadow-sm font-medium'
                         : 'text-gray-500 hover:text-gray-800'
                         }`}
@@ -556,7 +556,7 @@ const ClientesPage = () => {
                         setIsEditing(false);
                         setActiveTab('Editar Contrato');
                     }}
-                    className={`px-6 py-2 rounded-md transition-all ${activeTab === 'Editar Contrato'
+                    className={`px-3 md:px-6 py-2 rounded-md transition-all ${activeTab === 'Editar Contrato'
                         ? 'bg-gray-50 text-gray-900 border border-gray-200 shadow-sm font-medium'
                         : 'text-gray-500 hover:text-gray-800'
                         }`}
@@ -566,9 +566,9 @@ const ClientesPage = () => {
                 </>)}
             </div>
 
-            <div className="p-8">
+            <div className="py-4 md:p-8">
                 {activeTab === 'agregar' ? (
-                    < div className="bg-white border border-gray-200 rounded-lg p-6 sm:p-8">
+                    < div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-8">
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-gray-800">
                                 {isEditing ? 'Editar cliente' : 'Nuevo cliente'}
@@ -591,7 +591,7 @@ const ClientesPage = () => {
                     </div>
                 ) : activeTab === 'Crear Contrato' || activeTab === 'Editar Contrato' ? (
                     activeTab === 'Editar Contrato' && !isEditing ? (
-                        <div className="bg-white border border-gray-200 rounded-lg p-6 sm:p-8">
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-8">
                             <div className="mb-6">
                                 <h2 className="text-xl font-bold text-gray-800">Editar contrato</h2>
                                 <p className="text-sm text-gray-500 mt-1">Busca y selecciona el cliente al que deseas modificarle su contrato actual.</p>
@@ -609,7 +609,7 @@ const ClientesPage = () => {
                             </div>
                         </div>
                     ) : (
-                        <div className="bg-white border border-gray-200 rounded-lg p-6 sm:p-8">
+                        <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-8">
                             <div className="mb-6">
                                 <h2 className="text-xl font-bold text-gray-800">
                                     {activeTab === 'Editar Contrato' ? 'Modificar contrato' : 'Nuevo contrato'}

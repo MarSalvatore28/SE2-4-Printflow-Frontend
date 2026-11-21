@@ -46,6 +46,20 @@ const valoresIniciales = (usuario: Usuario | null): UsuarioFormValues => ({
 const inputClass = (conError: boolean) =>
     `w-full rounded-md border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:text-gray-500 ${conError ? 'border-red-500' : 'border-gray-300'}`;
 
+// Qué puede hacer cada rol, bajo el selector
+const AYUDA_ROL: Record<string, string> = {
+    auditor: 'Solo puede consultar: no crea, edita ni aprueba.',
+    operador: 'Consulta todo y aprueba o rechaza lotes; no edita catálogos ni usuarios.',
+    admin: 'Acceso total, incluida la gestión de usuarios.',
+};
+
+const AyudaRol = ({ error, esUsted, rol }: { error?: string; esUsted: boolean; rol?: string }) => {
+    if (error) return <p className="mt-1 text-sm text-red-600">{error}</p>;
+    if (esUsted) return <p className="mt-1 text-xs text-gray-500">No puede quitarse a sí mismo el rol de administrador.</p>;
+    const ayuda = rol ? AYUDA_ROL[rol] : undefined;
+    return ayuda ? <p className="mt-1 text-xs text-gray-500">{ayuda}</p> : null;
+};
+
 export const UsuarioForm: FC<UsuarioFormProps> = ({
     usuario,
     roles,
@@ -168,17 +182,7 @@ export const UsuarioForm: FC<UsuarioFormProps> = ({
                             </option>
                         ))}
                     </select>
-                    {errores.rol_id ? (
-                        <p className="mt-1 text-sm text-red-600">{errores.rol_id}</p>
-                    ) : esUsted ? (
-                        <p className="mt-1 text-xs text-gray-500">No puede quitarse a sí mismo el rol de administrador.</p>
-                    ) : rolElegido?.nombre === 'auditor' ? (
-                        <p className="mt-1 text-xs text-gray-500">Solo puede consultar: no crea, edita ni aprueba.</p>
-                    ) : rolElegido?.nombre === 'operador' ? (
-                        <p className="mt-1 text-xs text-gray-500">Consulta todo y aprueba o rechaza lotes; no edita catálogos ni usuarios.</p>
-                    ) : rolElegido?.nombre === 'admin' ? (
-                        <p className="mt-1 text-xs text-gray-500">Acceso total, incluida la gestión de usuarios.</p>
-                    ) : null}
+                    <AyudaRol error={errores.rol_id} esUsted={esUsted} rol={rolElegido?.nombre} />
                 </div>
 
                 <div>

@@ -1,14 +1,18 @@
 import type { FC } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Undo2 } from 'lucide-react';
 import DataTable from '@components/Shared/DataTable';
 import type { Reemplazo } from '@models/Maquina/reemplazo.types';
 import { formatNumber, formatFechaISO } from '@utils/formatUtils';
 
 interface ReemplazoListProps {
     reemplazos: Reemplazo[];
+    /** Solo para el administrador: sin esta función no se muestra «Anular» */
+    onAnular?: (reemplazo: Reemplazo) => void;
+    /** Reemplazo que se está anulando (su botón queda deshabilitado) */
+    anulandoId?: number | null;
 }
 
-const contadores = (bn: number, color: number) => (
+const contadores = (bn: number | null, color: number | null) => (
     <span className="text-xs text-gray-500">
         B/N <span className="font-mono text-gray-700">{formatNumber(bn)}</span> · color <span className="font-mono text-gray-700">{formatNumber(color)}</span>
     </span>
@@ -84,14 +88,33 @@ const columns = [
     }
 ];
 
-export const ReemplazoList: FC<ReemplazoListProps> = ({ reemplazos }) => (
+export const ReemplazoList: FC<ReemplazoListProps> = ({ reemplazos, onAnular, anulandoId = null }) => (
     <DataTable<Reemplazo>
         title={`Reemplazos registrados (${reemplazos.length})`}
         columns={columns}
         data={reemplazos}
         getItemId={(r) => r.id_maquina_cambio}
         emptyMessage="No hay reemplazos registrados"
-        showActions={false}
+        showActions={Boolean(onAnular)}
+        additionalActions={onAnular ? (r) => {
+            const enCurso = anulandoId === r.id_maquina_cambio;
+            // Un período aprobado no se recalcula: no se ofrece anular
+            const bloqueado = r.periodo_aprobado || anulandoId !== null;
+            return (
+                <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); onAnular(r); }}
+                    disabled={bloqueado}
+                    title={r.periodo_aprobado
+                        ? `El período ${r.periodo_afectado} ya está aprobado: el reemplazo no se puede anular`
+                        : `Anular el reemplazo de ${r.saliente_serie} por ${r.entrante_serie}`}
+                    aria-label={`Anular el reemplazo de ${r.saliente_serie} por ${r.entrante_serie}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-50"
+                >
+                    <Undo2 className="w-4 h-4" /> {enCurso ? 'Anulando...' : 'Anular'}
+                </button>
+            );
+        } : undefined}
     />
 );
 

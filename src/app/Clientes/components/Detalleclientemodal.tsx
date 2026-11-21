@@ -101,8 +101,8 @@ const ListaInstalaciones = ({ instalaciones }: { instalaciones?: InstalacionClie
     }
     return (
         <>
-            {instalaciones.map((inst, idx) => (
-                <div key={idx} className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex justify-between items-center">
+            {instalaciones.map((inst) => (
+                <div key={inst.id_instalacion} className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex justify-between items-center">
                     <div>
                         <span className="font-bold text-gray-700 block">{inst.maquina_modelo} (SN: {inst.maquina_serie})</span>
                         <span className="text-xs text-gray-500">Área: {inst.area_nombre || 'General'} | IP: {inst.ip_address || 'N/A'}</span>

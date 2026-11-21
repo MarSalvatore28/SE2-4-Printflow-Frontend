@@ -129,9 +129,9 @@ export const AlertaHistorialCliente: React.FC<AlertaHistorialClienteProps> = ({
                     </p>
 
                     <div className="space-y-2">
-                        {cambios.map((cambio, index) => (
+                        {cambios.map((cambio) => (
                             <div 
-                                key={index} 
+                                key={cambio.campo} 
                                 className="bg-white rounded-md p-2 border border-amber-200"
                             >
                                 <div className="text-xs font-medium text-amber-900 mb-1">

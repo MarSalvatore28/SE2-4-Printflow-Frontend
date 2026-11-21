@@ -81,8 +81,8 @@ export const ModalHistorialCliente: React.FC<ModalHistorialClienteProps> = ({
                 </div>
 
                 <div className="space-y-3">
-                    {cambios.map((c, idx) => (
-                        <div key={idx} className="bg-white rounded-md p-3 shadow-sm">
+                    {cambios.map((c) => (
+                        <div key={c.campo} className="bg-white rounded-md p-3 shadow-sm">
                             <div className="text-xs font-semibold text-gray-700 mb-2">
                                 {c.campo}
                             </div>

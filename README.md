@@ -37,12 +37,14 @@ Se incorporan por fases, según el plan del proyecto:
 | Módulo | Descripción |
 |---|---|
 | Acceso | Inicio de sesión por rol (administrador, operador y auditor) y rutas protegidas |
-| Catálogos | Clientes, contratos con tarifas, áreas, máquinas y cambio de máquinas |
+| Catálogos | Clientes, contratos con tarifas, áreas, máquinas, y el reemplazo de una máquina (también anularlo si fue un error) |
 | Asignaciones | Máquina asignada a un área de un cliente, bajo un contrato vigente |
-| Reportes recibidos | Lotes en revisión, detalle de errores, aprobación y reprocesamiento |
+| Reportes recibidos | Lotes en revisión, detalle de errores con su motivo, aprobación, rechazo y reprocesamiento |
+| Lectura manual | Registrar la lectura de una impresora que no envió su correo |
 | Notificaciones | Avisos en tiempo real cuando llega un lote nuevo |
-| Informes | Consolidado por cliente y período, con exportación a PDF y Excel |
+| Informes | Consolidado por cliente y período con la facturación del contrato, detalle por usuario y exportación a PDF y Excel con los mismos números |
 | Usuarios | Gestión de usuarios y roles, con menú según el rol |
+| Accesibilidad y celular | Modales y buscador usables solo con el teclado; menú plegable y tablas desplazables en pantallas angostas |
 
 ## Tecnologías
 

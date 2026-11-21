@@ -291,10 +291,10 @@ const UsuariosPage = () => {
                         </div>
 
                         {aviso && (
-                            <div role="status" className="p-3 bg-green-50 text-green-800 rounded-lg border border-green-200 flex justify-between items-center">
+                            <output className="p-3 bg-green-50 text-green-800 rounded-lg border border-green-200 flex justify-between items-center">
                                 <span>{aviso}</span>
                                 <button onClick={() => setAviso(null)} className="text-green-700 hover:text-green-900 text-sm" aria-label="Cerrar aviso">✕</button>
-                            </div>
+                            </output>
                         )}
 
                         {loading ? (

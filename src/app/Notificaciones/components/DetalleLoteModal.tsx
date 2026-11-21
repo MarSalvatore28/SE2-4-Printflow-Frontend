@@ -266,16 +266,15 @@ export const DetalleLoteModal = ({ loteId, onClose, onFechaCorteChange, onLoteAc
               )}
 
               {aviso && (
-                <div
+                <output
                   className={`flex items-start gap-2 p-3 rounded-lg border text-sm ${aviso.tipo === 'ok'
                     ? 'bg-green-50 border-green-200 text-green-800'
                     : 'bg-red-50 border-red-200 text-red-800'}`}
-                  role="status"
                   data-testid="aviso-lote"
                 >
                   {aviso.tipo === 'ok' ? <CheckCircle className="w-4 h-4 mt-0.5" /> : <XCircle className="w-4 h-4 mt-0.5" />}
                   <span>{aviso.texto}</span>
-                </div>
+                </output>
               )}
 
               {erroresAprobacion.length > 0 && (

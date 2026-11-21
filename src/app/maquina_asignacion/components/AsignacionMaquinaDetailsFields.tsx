@@ -60,6 +60,8 @@ interface InstalacionFormFieldsProps {
     onUpdateMaquinaContador?: (maquinaId: number, val: boolean) => void;
     onUpdateMaquinaContabilidad?: (maquinaId: number, val: boolean) => void;
     onUpdateMaquinaArea?: (maquinaId: number, areaId: number) => void;
+    /** Máquinas que ya se instalaron en este formulario: no se ofrecen otra vez */
+    excluirMaquinas?: number[];
 }
 
 // id: va en el primer octeto, para asociarle un <label htmlFor>
@@ -373,7 +375,8 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
     onUpdateMaquinaRenta,
     onUpdateMaquinaContador,
     onUpdateMaquinaContabilidad,
-    onUpdateMaquinaArea
+    onUpdateMaquinaArea,
+    excluirMaquinas = []
 }) => {
     const [areas, setAreas] = useState<Area[]>([]);
     const [contratos, setContratos] = useState<Contrato[]>([]);
@@ -454,7 +457,7 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
     };
 
     const maquinasNoAgregadas = maquinasDisponibles.filter(
-        m => !maquinasConIP.some(mc => mc.maquina.id_maquina === m.id_maquina)
+        m => !maquinasConIP.some(mc => mc.maquina.id_maquina === m.id_maquina) && !excluirMaquinas.includes(m.id_maquina)
     );
 
     const tieneRenta = selectedContrato?.renta_equipo === true;

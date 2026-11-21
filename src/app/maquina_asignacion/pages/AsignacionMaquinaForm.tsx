@@ -25,18 +25,18 @@ const crearInstalaciones = async (
     onProgreso: (actual: number) => void,
 ) => {
     const errores: Array<{ maquina: string; error: string }> = [];
-    let exitos = 0;
+    const instaladas: number[] = [];
     for (let i = 0; i < maquinas.length; i++) {
         const item = maquinas[i];
         try {
             await createInstalacion(datosDeMaquina(item, datos)); // NOSONAR: de a una, en orden, para mostrar el avance (n de total) sin cargar la API
-            exitos++;
+            instaladas.push(item.maquina.id_maquina);
             onProgreso(i + 1);
         } catch (err: unknown) {
             errores.push({ maquina: item.maquina.serie, error: mensajeDeError(err, 'Error desconocido') });
         }
     }
-    return { exitos, errores };
+    return { instaladas, errores };
 };
 
 const ResumenInstalacion = ({
@@ -79,7 +79,7 @@ const etiquetaEnviar = (multiple: boolean, cantidad: number) => {
 };
 
 interface InstalacionFormProps {
-    onSuccess: (showSuccessModal?: boolean) => void;
+    onSuccess: (showSuccessModal?: boolean, count?: number) => void;
     onCancel: () => void;
     clientesDisponibles: Client[];
     multipleSelection?: boolean;
@@ -120,6 +120,8 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
     });
 
     const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+    // Máquinas que ya se instalaron en un envío parcial: dejan de ofrecerse
+    const [yaInstaladas, setYaInstaladas] = useState<number[]>([]);
     const [creationProgress, setCreationProgress] = useState({ current: 0, total: 0 });
 
     const [selectedNames, setSelectedNames] = useState({
@@ -301,20 +303,23 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
     const crearVarias = async () => {
         const total = maquinasConIP.length;
         setCreationProgress({ current: 0, total });
-        const { exitos, errores } = await crearInstalaciones(maquinasConIP, formData, (actual) =>
+        const { instaladas, errores } = await crearInstalaciones(maquinasConIP, formData, (actual) =>
             setCreationProgress({ current: actual, total })
         );
 
         if (errores.length === 0) {
             resetForm();
-            onSuccess(true);
+            onSuccess(true, instaladas.length);
             return;
         }
         const details = errores.map(e => ({ label: `Serie ${e.maquina}`, text: e.error }));
-        if (exitos > 0) {
-            mostrarModal('Instalación parcial', `Se instalaron ${exitos} máquinas, pero hubo problemas con algunas:`, 'warning', details);
-            resetForm();
-            onSuccess(false);
+        if (instaladas.length > 0) {
+            // Antes se reiniciaba el formulario y el aviso se perdía. Ahora quedan solo las que
+            // fallaron, con sus datos, para corregirlas y volver a enviar.
+            setMaquinasConIP(prev => prev.filter(item => !instaladas.includes(item.maquina.id_maquina)));
+            setYaInstaladas(prev => [...prev, ...instaladas]);
+            const cuantas = instaladas.length === 1 ? 'Se instaló 1 máquina' : `Se instalaron ${instaladas.length} máquinas`;
+            mostrarModal('Instalación parcial', `${cuantas}. Las que fallaron siguen en la lista para corregirlas:`, 'warning', details);
         } else {
             mostrarModal('Error de Instalación', 'No se pudo completar la instalación. Revise los errores:', 'warning', details);
         }
@@ -407,6 +412,7 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
                     onUpdateMaquinaContador={handleUpdateMaquinaContador}
                     onUpdateMaquinaContabilidad={handleUpdateMaquinaContabilidad}
                     onUpdateMaquinaArea={handleUpdateMaquinaArea}
+                    excluirMaquinas={yaInstaladas}
                 />
             </div>
 

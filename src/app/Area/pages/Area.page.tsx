@@ -82,7 +82,7 @@ const AreaPage = () => {
         message: ''
     });
 
-    const [warningModal, setWarningModal] = useState<{ isOpen: boolean; message: string }>({
+    const [warningModal, setWarningModal] = useState<{ isOpen: boolean; message: string; title?: string }>({
         isOpen: false,
         message: ''
     });
@@ -167,7 +167,7 @@ const AreaPage = () => {
     };
 
     const handleSave = async () => {
-        if (!formData.nombre || !formData.cliente_id) {
+        if (!formData.nombre?.trim() || !formData.cliente_id) {
             setWarningModal({
                 isOpen: true,
                 message: 'El nombre y el cliente son campos obligatorios para poder guardar el área.'
@@ -199,7 +199,11 @@ const AreaPage = () => {
 
         } catch (err) {
             console.error('Error saving area:', err);
-            setError((err instanceof Error && err.message) || 'No se pudo guardar el área');
+            setWarningModal({
+                isOpen: true,
+                title: 'No se pudo guardar el área',
+                message: (err instanceof Error && err.message) || 'No se pudo guardar el área.'
+            });
         } finally {
             setSubmitting(false);
         }
@@ -264,7 +268,12 @@ const AreaPage = () => {
             void fetchAreas();
         } catch (err) {
             console.error('Error toggling area status:', err);
-            setError('No se pudo cambiar el estado del área.');
+            // El motivo del backend (por ejemplo, el área tiene máquinas asignadas), sin tapar la lista
+            setWarningModal({
+                isOpen: true,
+                title: 'No se pudo cambiar el estado',
+                message: (err instanceof Error && err.message) || 'No se pudo cambiar el estado del área.'
+            });
         } finally {
             handleCloseModal();
         }
@@ -459,6 +468,7 @@ const AreaPage = () => {
             <ModalAdvertencia
                 isOpen={warningModal.isOpen}
                 onClose={() => setWarningModal({ isOpen: false, message: '' })}
+                title={warningModal.title}
                 message={warningModal.message}
             />
         </div>

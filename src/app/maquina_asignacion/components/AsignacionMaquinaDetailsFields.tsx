@@ -64,7 +64,6 @@ interface InstalacionFormFieldsProps {
     onAddMaquina?: (maquina: MaquinaSinInstalacion) => void;
     onRemoveMaquina?: (maquinaId: number) => void;
     onUpdateMaquinaIP?: (maquinaId: number, ip: string) => void;
-    onUpdateMaquinaFecha?: (maquinaId: number, fecha: string) => void;
     onUpdateMaquinaObservaciones?: (maquinaId: number, obs: string) => void;
     onUpdateMaquinaRenta?: (maquinaId: number, costo: number) => void;
     onUpdateMaquinaContador?: (maquinaId: number, val: boolean) => void;

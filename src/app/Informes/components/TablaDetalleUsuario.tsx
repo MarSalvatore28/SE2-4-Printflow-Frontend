@@ -16,8 +16,6 @@ const formatFechaHora = (fechaStr: string | null | undefined): string => {
 
 interface TablaDetalleUsuarioProps {
     data: DetalleTransaccion[];
-    periodo: string;
-    clienteNombre?: string;
     consolidado?: MaquinaConsolidada[];
 }
 

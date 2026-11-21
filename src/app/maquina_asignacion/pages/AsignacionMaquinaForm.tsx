@@ -240,10 +240,6 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
         setMaquinasConIP(prev => prev.map(item => item.maquina.id_maquina === maquinaId ? { ...item, ip_address: ip } : item));
     };
 
-    const handleUpdateMaquinaFecha = (maquinaId: number, fecha: string) => {
-        setMaquinasConIP(prev => prev.map(item => item.maquina.id_maquina === maquinaId ? { ...item, fecha_instalacion: fecha } : item));
-    };
-
     const handleUpdateMaquinaObservaciones = (maquinaId: number, obs: string) => {
         setMaquinasConIP(prev => prev.map(item => item.maquina.id_maquina === maquinaId ? { ...item, observaciones: obs } : item));
     };
@@ -401,7 +397,6 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
                     onAddMaquina={handleAddMaquina}
                     onRemoveMaquina={handleRemoveMaquina}
                     onUpdateMaquinaIP={handleUpdateMaquinaIP}
-                    onUpdateMaquinaFecha={handleUpdateMaquinaFecha}
                     onUpdateMaquinaObservaciones={handleUpdateMaquinaObservaciones}
                     onUpdateMaquinaRenta={handleUpdateMaquinaRenta}
                     onUpdateMaquinaContador={handleUpdateMaquinaContador}

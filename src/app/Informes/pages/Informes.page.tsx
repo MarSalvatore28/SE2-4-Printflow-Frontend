@@ -203,8 +203,6 @@ const InformesPage = () => {
                     {transacciones.length > 0 && (
                         <TablaDetalleUsuario
                             data={transacciones}
-                            periodo={`${selectedAño}-${selectedMes}`}
-                            clienteNombre={clienteActual?.nombre}
                             consolidado={reportes}
                         />
                     )}

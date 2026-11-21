@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import type { ClienteParaTabla, ClienteCompleto } from '@models/Cliente/cliente.types';
 import { getClienteCompleto, getContratosByCliente, getInstalacionesByCliente, getClienteById } from '@services/Clientes/clientes.service';
 import { useDialogoAccesible } from '@hooks/useDialogoAccesible';
+import { etiquetaFacturacion } from '@app/Clientes/utils/formularioCliente';
 
 interface DetalleClienteModalProps {
     cliente: ClienteParaTabla;
@@ -211,11 +212,11 @@ export const DetalleClienteModal: React.FC<DetalleClienteModalProps> = ({ client
                                 {cliente.activo ? 'ACTIVO' : 'INACTIVO'}
                             </span>
                         </div>
-                        {cliente.printer_bill && (
+                        {contrato && (
                             <div className="flex justify-between">
                                 <span className="text-gray-600">Contabilización:</span>
                                 <span className="font-medium text-gray-900 text-sm">
-                                    {cliente.printer_bill}
+                                    {etiquetaFacturacion(contrato.printer_bill ?? contrato.facturacion_de_impresora)}
                                 </span>
                             </div>
                         )}
@@ -239,8 +240,8 @@ export const DetalleClienteModal: React.FC<DetalleClienteModalProps> = ({ client
                                     {contrato ? formatFecha(contrato.fecha_inicio) : '-'}
                                 </div>
                             </div>
-                            <IndicadorSiNo etiqueta="Software" activo={cliente.tiene_software_control} color="indigo" />
-                            <IndicadorSiNo etiqueta="Renta" activo={cliente.tiene_renta} color="blue" />
+                            <IndicadorSiNo etiqueta="Software" activo={Boolean(contrato?.tiene_software_control ?? contrato?.software_control)} color="indigo" />
+                            <IndicadorSiNo etiqueta="Renta" activo={Boolean(contrato?.tiene_renta ?? contrato?.renta_equipo)} color="blue" />
                         </div>
                     </div>
                 </div>

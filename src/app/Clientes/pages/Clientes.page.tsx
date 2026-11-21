@@ -33,6 +33,8 @@ import {
     textosModalCliente,
     type FormularioCliente,
     type PestanaClientes,
+    FACTURACION,
+    normalizarFacturacion,
 } from '@app/Clientes/utils/formularioCliente';
 import { clasePestana } from '@utils/pestanas';
 
@@ -62,7 +64,7 @@ const INITIAL_FORM_STATE: FormularioCliente = {
 
     tiene_renta: false,
     tiene_software_control: false,
-    printer_bill: 'Todo como Color'
+    printer_bill: FACTURACION.DIFERENCIAR
 };
 
 // Si no se pudo leer el cliente completo, el formulario se llena con su fila de la tabla
@@ -91,7 +93,7 @@ const contratoEnFormulario = (contrato: Contrato) => ({
     costo_excedente_impresion_color: aNumero(contrato.costo_excedente_impresion_color),
     tiene_renta: Boolean(contrato.tiene_renta),
     tiene_software_control: Boolean(contrato.tiene_software_control),
-    printer_bill: contrato.printer_bill || INITIAL_FORM_STATE.printer_bill,
+    printer_bill: normalizarFacturacion(contrato.printer_bill),
 });
 
 // Tarjeta de un formulario con su título y descripción

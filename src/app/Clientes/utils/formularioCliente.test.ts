@@ -6,6 +6,8 @@ import {
     datosContrato,
     datosContratoDeCliente,
     esPestanaContrato,
+    etiquetaFacturacion,
+    normalizarFacturacion,
     faltanteCliente,
     faltanteContrato,
     filtrarClientes,
@@ -117,5 +119,20 @@ describe('textosModalCliente y pestañas', () => {
         expect(esPestanaContrato('Crear Contrato')).toBe(true);
         expect(esPestanaContrato('Editar Contrato')).toBe(true);
         expect(esPestanaContrato('listar')).toBe(false);
+    });
+});
+
+describe('modo de facturación', () => {
+    it('«Todo como Color» (como se guardaba antes) es «Todo como color», el valor que entiende el backend', () => {
+        expect(normalizarFacturacion('Todo como Color')).toBe('Todo como color');
+        expect(normalizarFacturacion('  TODO como  color ')).toBe('Todo como color');
+        expect(normalizarFacturacion('Diferenciar B/N de Color')).toBe('Diferenciar B/N de Color');
+        expect(normalizarFacturacion(undefined)).toBe('Diferenciar B/N de Color');
+    });
+
+    it('etiqueta para la pantalla', () => {
+        expect(etiquetaFacturacion('Todo como Color')).toBe('Todo como color');
+        expect(etiquetaFacturacion('Diferenciar B/N de Color')).toBe('Diferenciar B/N de color');
+        expect(etiquetaFacturacion(null)).toBe('-');
     });
 });

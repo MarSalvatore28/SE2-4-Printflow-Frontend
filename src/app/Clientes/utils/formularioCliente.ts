@@ -29,6 +29,28 @@ export const filtrarClientes = (clientes: ClienteParaTabla[], { mostrarInactivos
         return !termino || coincideTermino(cliente, termino);
     });
 
+// Modos de facturación del contrato, escritos como los compara el backend (src/utils/facturacion.js)
+export const FACTURACION = {
+    DIFERENCIAR: 'Diferenciar B/N de Color',
+    TODO_COLOR: 'Todo como color',
+} as const;
+
+export const OPCIONES_FACTURACION = [
+    { valor: FACTURACION.DIFERENCIAR, etiqueta: 'Diferenciar B/N de color' },
+    { valor: FACTURACION.TODO_COLOR, etiqueta: 'Todo como color' },
+] as const;
+
+// «Todo como Color» (como se guardaba antes) o «todo como color» son el mismo modo.
+// Lo que no se reconoce se trata como «Diferenciar», igual que el cálculo del backend.
+export const normalizarFacturacion = (valor?: string | null): string =>
+    valor?.trim().replace(/\s+/g, ' ').toLowerCase() === FACTURACION.TODO_COLOR.toLowerCase()
+        ? FACTURACION.TODO_COLOR
+        : FACTURACION.DIFERENCIAR;
+
+// Texto que ve el usuario para el modo de facturación ('-' si el cliente no tiene contrato)
+export const etiquetaFacturacion = (valor?: string | null): string =>
+    (valor && OPCIONES_FACTURACION.find((o) => o.valor === normalizarFacturacion(valor))?.etiqueta) || '-';
+
 // Mensaje de advertencia si falta un dato obligatorio, o null si se puede guardar
 export const faltanteContrato = (datos: FormularioCliente): string | null => {
     if (!datos.cliente_id) return 'Debe asignar un cliente para guardar el contrato.';

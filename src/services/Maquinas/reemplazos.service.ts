@@ -46,6 +46,21 @@ export async function createReemplazo(datos: ReemplazoFormData): Promise<Reempla
     return body.data as Reemplazo;
 }
 
+/**
+ * Anula un reemplazo registrado por error (solo admin): la saliente vuelve a su asignación y la
+ * entrante queda libre. Si el período ya tiene lecturas aprobadas, la API responde 409 y el
+ * Error lleva su mensaje.
+ */
+export async function anularReemplazo(id: number, motivo?: string): Promise<Reemplazo> {
+    const texto = motivo?.trim();
+    const res = await apiFetch(`${RESOURCE_URL}/${id}/anular`, {
+        method: 'POST',
+        body: JSON.stringify(texto ? { motivo: texto } : {})
+    });
+    const body = await leerRespuesta<Reemplazo>(res, 'Error al anular el reemplazo');
+    return body.data as Reemplazo;
+}
+
 export async function fetchTiposCambio(): Promise<string[]> {
     const res = await apiFetch(`${RESOURCE_URL}/tipos`);
     const body = await leerRespuesta<string[]>(res, 'Error al obtener los tipos de cambio');

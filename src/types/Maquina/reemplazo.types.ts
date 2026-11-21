@@ -12,8 +12,12 @@ export interface Reemplazo {
     fecha_instalacion_entrante: string;
     tipo_cambio: string;
     razon_cambio: string;
+    /** false si el reemplazo se anuló (el listado no los trae) */
     activo: boolean;
     fecha_registro: string;
+    fecha_anulacion?: string | null;
+    motivo_anulacion?: string | null;
+    usuario_anulacion_nombre?: string | null;
     area_id: number;
     area_nombre: string;
     cliente_id: number;
@@ -27,10 +31,11 @@ export interface Reemplazo {
     entrante_modelo: string | null;
     instalacion_entrante_id: number | null;
     entrante_ip: string | null;
-    saliente_contador_final_bn: number;
-    saliente_contador_final_color: number;
-    entrante_contador_inicial_bn: number;
-    entrante_contador_inicial_color: number;
+    /** null en un reemplazo anulado: sus contadores se borran */
+    saliente_contador_final_bn: number | null;
+    saliente_contador_final_color: number | null;
+    entrante_contador_inicial_bn: number | null;
+    entrante_contador_inicial_color: number | null;
     /** true cuando el lote del período ya se aprobó con el cambio enlazado */
     periodo_aprobado: boolean;
 }

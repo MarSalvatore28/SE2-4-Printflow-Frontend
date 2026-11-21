@@ -1,6 +1,6 @@
 import React from 'react';
 import { formatNumber, formatMoney } from '@utils/formatUtils';
-import { aMonto, MENSAJE_IMPORTE_PENDIENTE, nombreContrato } from '@utils/facturacionUtils';
+import { aMonto, MENSAJE_IMPORTE_PENDIENTE, nombreContrato, NOTA_FACTURACION_FILTRADA } from '@utils/facturacionUtils';
 import type { FacturacionContrato, FacturacionTramo } from '@models/Reporte/reporte.types';
 
 interface FacturacionPeriodoCardProps {
@@ -87,6 +87,12 @@ export const FacturacionPeriodoCard: React.FC<FacturacionPeriodoCardProps> = ({ 
                     <span className="uppercase">Total del período</span>
                     <span data-testid="facturacion-total-periodo" className="font-mono text-lg">{dinero(montoTotalGeneral)}</span>
                 </div>
+            )}
+
+            {contratos.some((c) => c.filtrado) && (
+                <p data-testid="facturacion-filtrada" className="border-t border-gray-200 px-6 py-2 text-xs text-gray-500">
+                    {NOTA_FACTURACION_FILTRADA}.
+                </p>
             )}
         </div>
     );

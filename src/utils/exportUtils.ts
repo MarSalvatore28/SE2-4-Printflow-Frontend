@@ -126,7 +126,7 @@ export const exportToExcel = (
 // ---------------------------------------------------------------------------
 import type { CellDef, CellHookData, RowInput } from "jspdf-autotable";
 import { formatMoney as dineroSinSigno, formatNumber as enteroPDF, formatFechaISO } from "@utils/formatUtils";
-import { aMonto, hayFacturacion, importeReferencial, MENSAJE_IMPORTE_PENDIENTE, nombreContrato, NOTA_IMPORTE_REFERENCIAL } from "@utils/facturacionUtils";
+import { aMonto, hayFacturacion, importeReferencial, MENSAJE_IMPORTE_PENDIENTE, nombreContrato, NOTA_FACTURACION_FILTRADA, NOTA_IMPORTE_REFERENCIAL } from "@utils/facturacionUtils";
 
 export interface ExportPDFData {
   /** `resumen` del consolidado: totales y `facturacion` del backend. */
@@ -417,6 +417,14 @@ export const exportToPDF = (
       y = asegurarEspacio(doc, y, 40);
       y = tablaContratoPDF(doc, c, y);
     });
+    // Igual que la tarjeta y el Excel: con filtro se factura el contrato completo
+    if (contratos.some((c) => c.filtrado)) {
+      doc.setFontSize(8);
+      doc.setTextColor(100);
+      doc.text(`${NOTA_FACTURACION_FILTRADA}.`, MARGEN, y);
+      doc.setTextColor(0);
+      y += 8;
+    }
   }
 
   // Totales del período, al final del consolidado

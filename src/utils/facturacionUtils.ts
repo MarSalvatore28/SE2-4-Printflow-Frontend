@@ -32,7 +32,10 @@ export const nombreContrato = (c: Pick<FacturacionContrato, 'contrato_fecha_inic
         : `Contrato desde el ${inicio}`;
 };
 
-export const MENSAJE_IMPORTE_PENDIENTE ='El importe se calcula al cerrar el período';
+export const MENSAJE_IMPORTE_PENDIENTE = 'El importe se calcula al cerrar el período';
+
+/** Con filtro por área o máquina, el backend factura el contrato completo (`filtrado: true`). */
+export const NOTA_FACTURACION_FILTRADA = 'Con el filtro por área o máquina, la facturación es la del contrato completo';
 
 export const NOTA_IMPORTE_REFERENCIAL =
     'El importe por máquina es referencial (consumo × tarifa por página). El total oficial es el del contrato, en «Facturación del período».';

@@ -21,12 +21,7 @@ import {
     filtrarInstalaciones,
     type DatosEdicionInstalacion,
 } from '@app/maquina_asignacion/utils/instalaciones';
-
-const clasePestana = (activa: boolean) =>
-    `px-3 md:px-6 py-2 rounded-md transition-all ${activa
-        ? 'bg-gray-50 text-gray-900 border border-gray-200 shadow-sm font-medium'
-        : 'text-gray-500 hover:text-gray-800'
-    }`;
+import { clasePestana } from '@utils/pestanas';
 
 // Instalaciones activas de un cliente, o de todos los clientes si no se indica
 const cargarInstalaciones = async (clienteId?: number): Promise<InstalacionActivaCliente[]> => {

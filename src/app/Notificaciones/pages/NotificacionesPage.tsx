@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { X, Bell, CheckCircle, Clock, AlertCircle } from "lucide-react";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -24,7 +24,6 @@ import { DetalleLoteModal } from "@app/Notificaciones/components/DetalleLoteModa
 import { ListadoLotes } from "@app/Notificaciones/components/ListadoLotes";
 import { useNotification } from "@context/NotificationContext";
 import { usePermisos } from "@hooks/usePermisos";
-import React from "react";
 import { filtrarNotificaciones, loteAccionable } from "@app/Notificaciones/utils/notificacionesFiltro";
 
 type Pestana = "todas" | "no-leidas" | "lotes";

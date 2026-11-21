@@ -2,7 +2,9 @@ import * as XLSX from "xlsx-js-style";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import type { ClienteParaTabla } from "@models/Cliente/cliente.types";
-import type { MaquinaConsolidada, DetalleTransaccion } from "@models/Reporte/reporte.types";
+import type {
+  MaquinaConsolidada, DetalleTransaccion, FacturacionContrato, FacturacionTramo, ResumenConsolidado,
+} from "@models/Reporte/reporte.types";
 import {
   FORMATO_DINERO, FORMATO_ENTERO, hojaConsolidado, hojaUsuarios, nombreArchivoExcel,
   type Celda, type DatosExcel, type EstiloFila, type HojaExcel,
@@ -119,10 +121,10 @@ export const exportToExcel = (
 // ---------------------------------------------------------------------------
 // PDF del consolidado (S4-01)
 // Lo que usa solo el PDF se importa aquí, junto a sus funciones, para que el PDF
-// y el Excel de este archivo se puedan cambiar por separado.
+// y el Excel de este archivo se puedan cambiar por separado (los tipos del reporte
+// van arriba, en un solo import).
 // ---------------------------------------------------------------------------
 import type { CellDef, CellHookData, RowInput } from "jspdf-autotable";
-import type { FacturacionContrato, FacturacionTramo, ResumenConsolidado } from "@models/Reporte/reporte.types";
 import { formatMoney as dineroSinSigno, formatNumber as enteroPDF, formatFechaISO } from "@utils/formatUtils";
 import { aMonto, hayFacturacion, importeReferencial, MENSAJE_IMPORTE_PENDIENTE, NOTA_IMPORTE_REFERENCIAL } from "@utils/facturacionUtils";
 

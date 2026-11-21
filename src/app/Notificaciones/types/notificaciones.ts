@@ -22,6 +22,7 @@ export interface Notificacion {
   periodo?: string | null;
   total_registros?: number | null;
   fecha_aprobacion?: string | null;
+  fecha_rechazo?: string | null; // el rechazo queda en el lote (migración 034 del backend)
   usuario_nombre?: string | null; // quién aprobó el lote
 }
 
@@ -87,6 +88,10 @@ export interface Lote {
   notificaciones_no_leidas: number;
   usuario_aprobacion_id: number | null;
   usuario_aprobacion_nombre: string | null;
+  fecha_rechazo?: string | null;
+  motivo_rechazo?: string | null;
+  usuario_rechazo_id?: number | null;
+  usuario_rechazo_nombre?: string | null;
   clientes: ClienteLote[];
 }
 

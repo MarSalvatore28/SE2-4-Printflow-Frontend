@@ -131,7 +131,11 @@ describe('textosModalCliente y pestañas', () => {
         expect(desactivar.message).toContain('desactivar al cliente "Andina"');
         expect(desactivar.message).toContain('se retiran sus máquinas asignadas');
         expect(desactivar.showCancel).toBe(true);
-        expect(textosModalCliente({ type: 'activate', cliente: cliente(1, { nombre: 'Andina' }) }).confirmText).toBe('Activar');
+        const activar = textosModalCliente({ type: 'activate', cliente: cliente(1, { nombre: 'Andina' }) });
+        expect(activar.confirmText).toBe('Activar');
+        // Vuelven solo las áreas y los contratos que cayeron con el cliente
+        expect(activar.message).toContain('Vuelven las áreas y los contratos que se desactivaron con él');
+        expect(activar.message).toContain('siguen inactivos');
     });
 
     it('esPestanaContrato', () => {

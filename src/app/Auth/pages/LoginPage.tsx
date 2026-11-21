@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@context/AuthContext';
 import type { LoginCredentials } from '@models/auth.types';
+import { borrarAvisoLogin, leerAvisoLogin } from '@services/Auth/auth.service';
 
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -15,6 +16,9 @@ const LoginPage = () => {
         password: ''
     });
     const [error, setError] = useState<string | null>(null);
+    // «Tu sesión terminó...» si se llegó aquí porque la sesión venció o la cerraron
+    const [aviso] = useState(leerAvisoLogin);
+    useEffect(() => borrarAvisoLogin(), []);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,6 +63,11 @@ const LoginPage = () => {
             <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="bg-white py-8 px-4 shadow rounded-lg sm:px-10">
                     <form className="space-y-6" onSubmit={handleSubmit}>
+                        {aviso && !error && (
+                            <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded" role="status">
+                                {aviso}
+                            </div>
+                        )}
                         {error && (
                             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
                                 <span className="block sm:inline">{error}</span>

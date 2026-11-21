@@ -27,7 +27,7 @@ export const AreaList: React.FC<AreaListProps> = ({
         if (!acc[clienteId]) {
             acc[clienteId] = {
                 cliente_id: clienteId,
-                cliente_nombre: area.cliente_nombre || `Cliente ${clienteId}`,
+                cliente_nombre: area.cliente_nombre || 'Sin cliente',
                 areas: []
             };
         }

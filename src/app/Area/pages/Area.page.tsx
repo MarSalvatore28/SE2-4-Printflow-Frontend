@@ -179,11 +179,11 @@ const AreaPage = () => {
         setError(null);
 
         try {
+            // El estado se cambia con Activar/Desactivar en la lista (el backend valida las máquinas asignadas)
             const payload: AreaFormData = {
                 nombre: formData.nombre.trim(),
                 descripcion: formData.descripcion?.trim() || null,
-                cliente_id: Number(formData.cliente_id),
-                activo: Number(formData.activo)
+                cliente_id: Number(formData.cliente_id)
             };
 
             if (editingArea?.id_area) {
@@ -222,8 +222,10 @@ const AreaPage = () => {
             nombre: area.nombre,
             descripcion: area.descripcion || '',
             cliente_id: area.cliente_id,
+            cliente_nombre: area.cliente_nombre,
             activo: area.activo
         });
+        setFormKey(prev => prev + 1);
         setActiveTab('agregar');
     };
 

@@ -19,7 +19,6 @@ export interface AreaFormData {
     cliente_id: number | string;
     nombre: string;
     descripcion?: string | null;
-    activo: number | boolean;
 }
 
 export type AreaCreate = Omit<Area, 'id_area' | 'cliente_nombre' | 'total_instalaciones_activas'>;

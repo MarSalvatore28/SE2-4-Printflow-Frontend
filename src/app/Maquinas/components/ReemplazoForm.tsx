@@ -305,7 +305,7 @@ export const ReemplazoForm: FC<ReemplazoFormProps> = ({ maquinas, tipos, isSubmi
             <div className="md:w-1/3">
                 <Campo id="reemplazo-ip" label="IP de la entrante" error={errores.ip_address}
                     ayuda={saliente?.ip ? `Vacío = la misma IP de la saliente (${saliente.ip})` : 'Vacío = la misma IP de la saliente'}>
-                    <input id="reemplazo-ip" className={`${inputClass(!!errores.ip_address)} font-mono`} placeholder={saliente?.ip || '10.20.1.12'}
+                    <input id="reemplazo-ip" className={`${inputClass(!!errores.ip_address)} font-mono`} placeholder={saliente?.ip || '10.20.1.12' /* NOSONAR: IP de ejemplo del placeholder, no se usa para conectarse */}
                         value={valores.ip_address} onChange={(e) => cambiar('ip_address', e.target.value)} maxLength={15} />
                 </Campo>
             </div>

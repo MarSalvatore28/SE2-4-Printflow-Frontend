@@ -8,7 +8,7 @@ import type {
   MaquinaConsolidada,
   ResumenConsolidado,
 } from '@models/Reporte/reporte.types';
-import { aMonto, hayFacturacion, importeReferencial, MENSAJE_IMPORTE_PENDIENTE, NOTA_IMPORTE_REFERENCIAL } from '@utils/facturacionUtils';
+import { aMonto, hayFacturacion, importeReferencial, MENSAJE_IMPORTE_PENDIENTE, nombreContrato, NOTA_IMPORTE_REFERENCIAL } from '@utils/facturacionUtils';
 import { formatFechaISO } from '@utils/formatUtils';
 
 /** Formato de Excel de contadores y páginas. */
@@ -159,7 +159,7 @@ export const filasFacturacion = (resumen: ResumenConsolidado | null): FilaExcel[
   contratos.forEach((c, i) => {
     if (i > 0) filas.push(vacia());
     filas.push(
-      fila('subseccion', `Contrato #${c.contrato_id} · ${modoEnLetras(c)}`),
+      fila('subseccion', `${nombreContrato(c)} · ${modoEnLetras(c)}`),
       fila('cabecera', ...CABECERA_FACTURACION),
       filaTramo('B/N', c.bn),
       filaTramo('Color', c.color),

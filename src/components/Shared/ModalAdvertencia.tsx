@@ -17,18 +17,17 @@ export default function ModalAdvertencia({
     message,
     buttonText = 'Entendido'
 }: Readonly<ModalAdvertenciaProps>) {
-    const [isRendered, setIsRendered] = useState(false);
+    // Sigue montado 200 ms después de cerrar, para la animación de salida
+    const [isRendered, setIsRendered] = useState(isOpen);
+    if (isOpen && !isRendered) setIsRendered(true);
     const dialogoRef = useRef<HTMLDivElement>(null);
     const idTitulo = useId();
     const idMensaje = useId();
 
     useEffect(() => {
-        if (isOpen) {
-            setIsRendered(true);
-        } else {
-            const timer = setTimeout(() => setIsRendered(false), 200);
-            return () => clearTimeout(timer);
-        }
+        if (isOpen) return;
+        const timer = setTimeout(() => setIsRendered(false), 200);
+        return () => clearTimeout(timer);
     }, [isOpen]);
 
     useDialogoAccesible(isOpen && isRendered, onClose, dialogoRef);

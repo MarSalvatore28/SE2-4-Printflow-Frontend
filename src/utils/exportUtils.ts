@@ -216,8 +216,7 @@ const filasDetallePDF = (data: MaquinaConsolidada[]): RowInput[] => {
       { content: enteroPDF(bn), ...reemplazo },
       { content: enteroPDF(color), ...reemplazo },
       { content: importe, ...reemplazo },
-    ]);
-    filas.push([
+    ], [
       celdaTramo(sale.serie),
       celdaTramo(sale.modelo || ""),
       celdaTramo(`Sale el ${formatFechaISO(sale.fecha_retiro)}`),
@@ -226,8 +225,7 @@ const filasDetallePDF = (data: MaquinaConsolidada[]): RowInput[] => {
       celdaTramo(enteroPDF(sale.contadores.consumo.total_bn)),
       celdaTramo(enteroPDF(sale.contadores.consumo.total_color)),
       celdaTramo(""),
-    ]);
-    filas.push([
+    ], [
       celdaTramo(entra.serie),
       celdaTramo(entra.modelo || ""),
       celdaTramo(`Entra el ${formatFechaISO(entra.fecha_instalacion)}`),

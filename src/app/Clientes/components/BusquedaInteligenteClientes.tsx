@@ -38,14 +38,14 @@ export const BusquedaInteligenteClientes: React.FC<BusquedaInteligenteClientesPr
         return Array.from(mapa.values());
     }, [itemsCompletos]);
 
-    const buscarLocalmente = useCallback(async (term: string): Promise<ClienteParaTabla[]> => {
-        if (!term) return itemsUnicos;
+    const buscarLocalmente = useCallback((term: string): Promise<ClienteParaTabla[]> => {
+        if (!term) return Promise.resolve(itemsUnicos);
         const termLower = term.toLowerCase();
-        return itemsUnicos.filter(c =>
+        return Promise.resolve(itemsUnicos.filter(c =>
             c.nombre.toLowerCase().includes(termLower) ||
             c.ruc?.toLowerCase().includes(termLower) ||
             c.razon_social?.toLowerCase().includes(termLower)
-        );
+        ));
     }, [itemsUnicos]);
 
     return (

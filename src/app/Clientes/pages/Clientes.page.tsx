@@ -375,7 +375,7 @@ const ClientesPage = () => {
         }
     };
 
-    const handleToggleActive = async (client: ClienteParaTabla) => {
+    const handleToggleActive = (client: ClienteParaTabla) => {
         const actionType = client.activo ? 'delete' : 'activate';
         setModalConfig({
             isOpen: true,
@@ -384,7 +384,7 @@ const ClientesPage = () => {
         });
     };
 
-    const handleDelete = async (client: ClienteParaTabla) => {
+    const handleDelete = (client: ClienteParaTabla) => {
         setModalConfig({
             isOpen: true,
             type: 'delete',

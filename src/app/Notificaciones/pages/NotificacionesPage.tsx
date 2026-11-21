@@ -186,7 +186,7 @@ const NotificacionesPage = () => {
     }
   };
 
-  const handleAprobarLote = async (notif: Notificacion) => {
+  const handleAprobarLote = (notif: Notificacion) => {
     if (!notif.id_notificacion) {
       setError("Error: La notificación no tiene un ID válido.");
       return;
@@ -263,7 +263,7 @@ const NotificacionesPage = () => {
     setModalOpen(true);
   };
 
-  const handleRechazarLote = async (notif: Notificacion) => {
+  const handleRechazarLote = (notif: Notificacion) => {
     if (!notif.id_notificacion) {
       setError("Error: La notificación no tiene un ID válido.");
       return;
@@ -313,7 +313,7 @@ const NotificacionesPage = () => {
     setModalOpen(true);
   };
 
-  const handleEliminarNotificacion = async (notificacion: Notificacion) => {
+  const handleEliminarNotificacion = (notificacion: Notificacion) => {
     setModalConfig({
       title: "Eliminar Notificación",
       message:
@@ -504,7 +504,7 @@ const NotificacionesPage = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  void handleAprobarLote(notif);
+                  handleAprobarLote(notif);
                 }}
                 className="inline-flex items-center p-1.5 border border-green-300 shadow-sm rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
                 title="Aprobar Lote"
@@ -514,7 +514,7 @@ const NotificacionesPage = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  void handleRechazarLote(notif);
+                  handleRechazarLote(notif);
                 }}
                 className="inline-flex items-center p-1.5 border border-red-300 shadow-sm rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
                 title="Rechazar Lote"
@@ -542,7 +542,7 @@ const NotificacionesPage = () => {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                void handleEliminarNotificacion(notif);
+                handleEliminarNotificacion(notif);
               }}
               className="inline-flex items-center p-1.5 border border-red-300 shadow-sm rounded text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
               title="Eliminar notificación"

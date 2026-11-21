@@ -23,14 +23,14 @@ export const BusquedaInteligenteAreas: React.FC<BusquedaInteligenteAreasProps> =
     onInputChange,
     onSearchClick
 }) => {
-    const buscarLocalmente = async (termino: string): Promise<Area[]> => {
-        if (!termino) return itemsCompletos;
+    const buscarLocalmente = (termino: string): Promise<Area[]> => {
+        if (!termino) return Promise.resolve(itemsCompletos);
         const term = termino.toLowerCase();
-        return itemsCompletos.filter(area =>
+        return Promise.resolve(itemsCompletos.filter(area =>
             area.nombre.toLowerCase().includes(term) ||
             area.cliente_nombre?.toLowerCase().includes(term) ||
             area.descripcion?.toLowerCase().includes(term)
-        );
+        ));
     };
 
     return (

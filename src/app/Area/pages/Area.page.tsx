@@ -231,7 +231,7 @@ const AreaPage = () => {
         area: null
     });
 
-    const handleToggleActive = async (area: Area) => {
+    const handleToggleActive = (area: Area) => {
         const actionType = area.activo === 1 ? 'delete' : 'activate';
         setModalConfig({
             isOpen: true,
@@ -240,7 +240,7 @@ const AreaPage = () => {
         });
     };
 
-    const handleDelete = async (area: Area) => {
+    const handleDelete = (area: Area) => {
         setModalConfig({
             isOpen: true,
             type: 'delete',

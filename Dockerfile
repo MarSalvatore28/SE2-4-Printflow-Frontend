@@ -10,8 +10,11 @@ ARG VITE_API_BASE_URL=""
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 RUN npm run build
 
-# Etapa 2: servirla con nginx, que también hace de proxy inverso hacia la API
-FROM nginx:1.27-alpine
+# Etapa 2: servirla con nginx, que también hace de proxy inverso hacia la API.
+# Imagen sin root: nginx corre con el usuario nginx (uid 101). Docker deja que un usuario
+# sin privilegios escuche en el puerto 80 dentro del contenedor, así que el puerto no cambia.
+FROM nginxinc/nginx-unprivileged:1.27-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
+USER 101
 EXPOSE 80

@@ -354,8 +354,9 @@ const ClientesPage = () => {
         setLoading(true);
         try {
             const fullData = await getClienteCompleto(client.id_cliente);
-            if (fullData && fullData.contratos && fullData.contratos.length > 0) {
-                const activeContract = fullData.contratos.find((c) => c.activo) || fullData.contratos[0];
+            const contratos = fullData?.contratos ?? [];
+            if (contratos.length > 0) {
+                const activeContract = contratos.find((c) => c.activo) || contratos[0];
                 setFormData({
                     ...INITIAL_FORM_STATE,
                     cliente_id: client.id_cliente,

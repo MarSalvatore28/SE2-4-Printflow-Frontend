@@ -184,7 +184,7 @@ const AreaPage = () => {
                 activo: Number(formData.activo)
             };
 
-            if (editingArea && editingArea.id_area) {
+            if (editingArea?.id_area) {
                 await updateArea(editingArea.id_area, payload);
             } else {
                 await createArea(payload);

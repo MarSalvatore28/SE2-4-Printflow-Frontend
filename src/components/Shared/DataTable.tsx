@@ -100,7 +100,7 @@ function DataTable<T>({
                 return (
                   <tr
                     key={getItemId(item)}
-                    onClick={() => onRowClick && onRowClick(item)}
+                    onClick={() => onRowClick?.(item)}
                     className={`transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-200'}`} 
                   >
                     {columns.map((column) => (
@@ -121,7 +121,7 @@ function DataTable<T>({
                     {showActions && (
                       <td className="px-3 md:px-6 py-4 text-sm text-center">
                         <div className="flex justify-center gap-2">
-                          {additionalActions && additionalActions(item)}
+                          {additionalActions?.(item)}
 
                           {onEdit && (
                             <button

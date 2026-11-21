@@ -103,8 +103,8 @@ export const useInformes = () => {
         return () => { cancelado = true; };
     }, [clave, selectedCliente, periodo, selectedArea, selectedMaquina]);
 
-    const vigente = informe && informe.clave === clave ? informe : null;
-    const errorVigente = errorInforme && errorInforme.clave === clave ? errorInforme.mensaje : null;
+    const vigente = informe?.clave === clave ? informe : null;
+    const errorVigente = errorInforme?.clave === clave ? errorInforme.mensaje : null;
 
     const reportes = vigente?.reportes ?? [];
     const resumen = vigente?.resumen ?? null;

@@ -21,7 +21,7 @@ async function leerRespuesta<T>(res: Response, mensajePorDefecto: string): Promi
     } catch {
         body = null;
     }
-    if (!res.ok || !body || !body.success) {
+    if (!res.ok || !body?.success) {
         throw new Error(body?.message || `${mensajePorDefecto} (${res.status})`);
     }
     return body;

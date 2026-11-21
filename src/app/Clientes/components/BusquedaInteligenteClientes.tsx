@@ -43,8 +43,8 @@ export const BusquedaInteligenteClientes: React.FC<BusquedaInteligenteClientesPr
         const termLower = term.toLowerCase();
         return itemsUnicos.filter(c =>
             c.nombre.toLowerCase().includes(termLower) ||
-            (c.ruc && c.ruc.toLowerCase().includes(termLower)) ||
-            (c.razon_social && c.razon_social.toLowerCase().includes(termLower))
+            c.ruc?.toLowerCase().includes(termLower) ||
+            c.razon_social?.toLowerCase().includes(termLower)
         );
     }, [itemsUnicos]);
 

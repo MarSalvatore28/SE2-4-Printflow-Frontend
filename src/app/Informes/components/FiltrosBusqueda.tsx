@@ -70,7 +70,7 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
         const mapa = new Map();
         if (Array.isArray(clientes)) {
             clientes.forEach(c => {
-                if (c && c.id_cliente && !mapa.has(c.id_cliente)) {
+                if (c?.id_cliente && !mapa.has(c.id_cliente)) {
                     mapa.set(c.id_cliente, c);
                 }
             });
@@ -172,7 +172,7 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
                             return clientesUnicos.filter(c =>
                                 c.nombre.toLowerCase().includes(lower) ||
                                 c.ruc?.toLowerCase().includes(lower) ||
-                                (c.razon_social && c.razon_social.toLowerCase().includes(lower))
+                                c.razon_social?.toLowerCase().includes(lower)
                             );
                         }}
                         onSeleccionar={handleSeleccionarCliente}

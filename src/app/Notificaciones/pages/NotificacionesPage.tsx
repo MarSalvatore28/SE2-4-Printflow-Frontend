@@ -206,7 +206,7 @@ const NotificacionesPage = () => {
         try {
           // Sin período, la API usa el del lote; la fecha de corte solo si es de este lote
           await aprobarNotificacion(notif.id_notificacion, {
-            fecha_corte: fechaCorte && fechaCorte.loteId === notif.lote_id ? fechaCorte.fecha : undefined,
+            fecha_corte: fechaCorte?.loteId === notif.lote_id ? fechaCorte.fecha : undefined,
           });
           await fetchNotificaciones();
           void refrescarCampana();

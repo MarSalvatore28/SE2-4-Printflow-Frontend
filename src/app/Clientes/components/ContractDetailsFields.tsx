@@ -47,7 +47,7 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
 
     const handleNumericChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        const regex = /^\d*\.?\d*$/;
+        const regex = /^\d*(?:\.\d*)?$/;
 
         if (value === '') {
             onChange(e);

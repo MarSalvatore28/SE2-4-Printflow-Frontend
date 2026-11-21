@@ -52,7 +52,6 @@ const InstalacionesPage = () => {
         message: ''
     });
 
-    const [, setInstalacionEnEdicion] = useState<InstalacionActivaCliente | null>(null);
     const [lastActionWasEdit, setLastActionWasEdit] = useState(false);
 
     const [modalRetirar, setModalRetirar] = useState<{
@@ -119,7 +118,6 @@ const InstalacionesPage = () => {
 
     useEffect(() => {
         if (activeTab === 'listar') {
-            setInstalacionEnEdicion(null);
             void fetchInstalaciones(filtroClienteRef.current ?? undefined);
         }
     }, [activeTab, fetchInstalaciones]);
@@ -139,7 +137,6 @@ const InstalacionesPage = () => {
 
     const handleCloseSuccessModal = async () => {
         setSuccessModal(prev => ({ ...prev, isOpen: false }));
-        setInstalacionEnEdicion(null);
         // Solo recargar si fue una creación, no una edición (para no colapsar los paneles)
         if (!lastActionWasEdit) {
             await fetchAllData();
@@ -148,7 +145,6 @@ const InstalacionesPage = () => {
     };
 
     const handleCancel = () => {
-        setInstalacionEnEdicion(null);
         setActiveTab('listar');
     };
 
@@ -294,10 +290,7 @@ const InstalacionesPage = () => {
                 </button>
                 {puedeEditarCatalogos && (
                 <button
-                    onClick={() => {
-                        setInstalacionEnEdicion(null);
-                        setActiveTab('agregar');
-                    }}
+                    onClick={() => setActiveTab('agregar')}
                     className={clasePestana(activeTab === 'agregar')}
                 >
                     Nueva instalación

@@ -355,19 +355,16 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
     const [contratos, setContratos] = useState<Contrato[]>([]);
     const [maquinasDisponibles, setMaquinasDisponibles] = useState<MaquinaSinInstalacion[]>([]);
     const [selectedCliente, setSelectedCliente] = useState<Client | null>(null);
-    const [, setSelectedArea] = useState<Area | null>(null);
     const [selectedContrato, setSelectedContrato] = useState<Contrato | null>(null);
     const [selectedMaquinaId, setSelectedMaquinaId] = useState<number>(0);
     const [loadingAreas, setLoadingAreas] = useState(false);
     const [loadingContratos, setLoadingContratos] = useState(false);
-    const [, setLoadingMaquinas] = useState(false);
 
     useEffect(() => {
         const loadClienteData = async () => {
             if (!selectedCliente) {
                 setAreas([]);
                 setContratos([]);
-                setSelectedArea(null);
                 setSelectedContrato(null);
                 return;
             }
@@ -393,13 +390,10 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
     useEffect(() => {
         const loadMaquinas = async () => {
             try {
-                setLoadingMaquinas(true);
                 const maquinas = await getMaquinasDisponibles();
                 setMaquinasDisponibles(maquinas);
             } catch (error) {
                 console.error('Error cargando máquinas disponibles:', error);
-            } finally {
-                setLoadingMaquinas(false);
             }
         };
         void loadMaquinas();
@@ -407,14 +401,12 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
 
     const handleSelectCliente = (cliente: Client) => {
         setSelectedCliente(cliente);
-        setSelectedArea(null);
         setSelectedContrato(null);
         onSelectCliente(cliente);
     };
 
     const handleSelectArea = (areaId: number) => {
         const area = areas.find(a => a.id_area === areaId);
-        setSelectedArea(area || null);
         onSelectArea(areaId, area?.area_nombre);
     };
 

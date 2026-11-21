@@ -306,7 +306,7 @@ const InstalacionesPage = () => {
 
     return (
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Instalaciones</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de instalaciones</h1>
             {!puedeEditarCatalogos && <AvisoSoloLectura acciones="crear, editar o retirar instalaciones" />}
 
             {/* Tabs */}

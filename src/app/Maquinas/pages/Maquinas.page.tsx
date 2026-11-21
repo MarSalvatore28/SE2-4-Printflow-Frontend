@@ -349,7 +349,7 @@ const MaquinasPage = () => {
 
     return (
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Máquinas</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de máquinas</h1>
             {!puedeEditarCatalogos && <AvisoSoloLectura acciones="crear, editar o desactivar máquinas" />}
 
             <div className="flex flex-wrap border-b border-gray-100 p-2 gap-2 md:gap-4">

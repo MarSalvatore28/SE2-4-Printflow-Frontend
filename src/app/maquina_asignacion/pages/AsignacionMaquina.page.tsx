@@ -42,6 +42,8 @@ const InstalacionesPage = () => {
     const [filterTerm, setFilterTerm] = useState<string>('');
 
     const [loading, setLoading] = useState<boolean>(false);
+    // Guardar o retirar no muestra el «cargando» de la lista: así no se cierran los paneles abiertos
+    const [guardando, setGuardando] = useState(false);
     // errorCarga: no se pudo leer la lista (la reemplaza); error: falló una acción (aviso arriba, la lista sigue)
     const [errorCarga, setErrorCarga] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -165,7 +167,7 @@ const InstalacionesPage = () => {
         }
 
         try {
-            setLoading(true);
+            setGuardando(true);
             setErrorEdicion(null);
 
             const guardada = await updateInstalacion(instalacion.id_instalacion, editData);
@@ -195,11 +197,10 @@ const InstalacionesPage = () => {
 
         } catch (err: unknown) {
             const error = err as { message?: string };
-            console.error('Error actualizando instalación:', err);
             // El modal sigue abierto: el motivo se muestra dentro de él
             setErrorEdicion(error.message || 'No se pudo actualizar la instalación.');
         } finally {
-            setLoading(false);
+            setGuardando(false);
         }
     };
 
@@ -222,7 +223,7 @@ const InstalacionesPage = () => {
         if (!instalacion) return;
 
         try {
-            setLoading(true);
+            setGuardando(true);
             const formData: RetirarInstalacionFormData = {
                 observaciones_retiro: observaciones || undefined,
                 fecha_retiro: fechaRetiro
@@ -249,10 +250,9 @@ const InstalacionesPage = () => {
 
         } catch (err: unknown) {
             const error = err as { message?: string };
-            console.error('Error retirando instalación:', err);
             setError(error.message || 'No se pudo retirar la instalación.');
         } finally {
-            setLoading(false);
+            setGuardando(false);
         }
     };
 
@@ -461,7 +461,7 @@ const InstalacionesPage = () => {
                     onCambiar={(editData) => setModalEdit(prev => ({ ...prev, editData }))}
                     onCerrar={handleCloseModalEdit}
                     onGuardar={handleConfirmEdit}
-                    guardando={loading}
+                    guardando={guardando}
                     error={errorEdicion}
                 />
             )}

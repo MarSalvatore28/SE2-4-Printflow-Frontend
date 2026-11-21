@@ -39,7 +39,7 @@ function DataTable<T>({
   onRowClick,
   additionalActions,
   rowsPerPage = 10,
-}: DataTableProps<T>) {
+}: Readonly<DataTableProps<T>>) {
   const [paginaActual, setPaginaActual] = React.useState(1);
   const totalColumns = columns.length + (showActions ? 1 : 0);
 

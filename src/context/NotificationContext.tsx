@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Notificacion } from '@app/Notificaciones/types/notificaciones';
 import { useAuth } from '@context/AuthContext';
 import { useSocket } from '@context/SocketContext';
@@ -105,9 +105,10 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     }, [refresh]);
 
     // Sin sesión no se muestra nada de la sesión anterior
-    const value: NotificationContextType = isAuthenticated
+    const value = useMemo<NotificationContextType>(() => (isAuthenticated
         ? { notifications, unreadCount, loading: !cargado, error, version, markAsRead, markAllAsRead, refresh }
-        : { notifications: [], unreadCount: 0, loading: false, error: null, version, markAsRead, markAllAsRead, refresh };
+        : { notifications: [], unreadCount: 0, loading: false, error: null, version, markAsRead, markAllAsRead, refresh }
+    ), [isAuthenticated, notifications, unreadCount, cargado, error, version, markAsRead, markAllAsRead, refresh]);
 
     return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>;
 };

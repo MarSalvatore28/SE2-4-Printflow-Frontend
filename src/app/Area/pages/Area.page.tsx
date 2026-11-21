@@ -34,7 +34,7 @@ type AccionModal = 'delete' | 'activate';
 const TEXTOS_MODAL: Record<AccionModal, { titulo: string; mensaje: (nombre?: string) => string; boton: string }> = {
     delete: {
         titulo: '¿Desactivar área?',
-        mensaje: (nombre) => `¿Estás seguro de que deseas desactivar el área "${nombre}"? Podrás reactivarla después si lo necesitas.`,
+        mensaje: (nombre) => `¿Estás seguro de que deseas desactivar el área "${nombre}"? Podrás reactivarla después si lo necesitas; reactivar al cliente no la reactiva.`,
         boton: 'Desactivar',
     },
     activate: {

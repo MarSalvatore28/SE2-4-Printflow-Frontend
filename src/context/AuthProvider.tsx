@@ -8,7 +8,10 @@ import { AuthContext } from '@context/AuthContext';
 const leerSesionGuardada = (): { token: string | null; user: User | null } => {
     const token = authService.getToken();
     const user = authService.getUser();
-    if (!token || !user || isTokenExpired(token)) return { token: null, user: null };
+    if (!token || !user || isTokenExpired(token)) {
+        if (token && user) authService.avisarSesionTerminada();
+        return { token: null, user: null };
+    }
     return { token, user };
 };
 
@@ -50,11 +53,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const interval = setInterval(() => {
             // Lee el token guardado: apiFetch lo renueva con X-Nuevo-Token
             if (isTokenExpired(authService.getToken() ?? '')) {
+                authService.avisarSesionTerminada();
                 logout();
             }
         }, 60000); // cada 1 minuto
         return () => clearInterval(interval);
     }, [token, logout]);
+
+    // apiFetch avisa cuando el token renovado trae otro rol (el admin se lo cambió)
+    useEffect(() => {
+        const alCambiarUsuario = () => setUser(authService.getUser());
+        window.addEventListener(authService.EVENTO_USUARIO, alCambiarUsuario);
+        return () => window.removeEventListener(authService.EVENTO_USUARIO, alCambiarUsuario);
+    }, []);
 
     const login = useCallback(async (credentials: LoginCredentials) => {
         // Si falla, el error llega tal cual a la pantalla de login

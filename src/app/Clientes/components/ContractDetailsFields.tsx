@@ -1,6 +1,7 @@
 import React from 'react';
 import { type ClienteFormData, type ClienteParaTabla } from '@models/Cliente/cliente.types';
 import { BuscadorInteligente } from '@components/Shared/BuscadorInteligente';
+import { OPCIONES_FACTURACION } from '@app/Clientes/utils/formularioCliente';
 import HomeRepairServiceIcon from '@mui/icons-material/HomeRepairService';
 import CandlestickChartIcon from '@mui/icons-material/CandlestickChart';
 import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
@@ -174,8 +175,9 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                             value={formData.printer_bill}
                             onChange={onChange}
                         >
-                            <option value="Todo como Color">Todo como Color</option>
-                            <option value="Diferenciar B/N de Color">Diferenciar B/N de Color</option>
+                            {OPCIONES_FACTURACION.map((o) => (
+                                <option key={o.valor} value={o.valor}>{o.etiqueta}</option>
+                            ))}
                         </select>
                     </div>
                 </div>

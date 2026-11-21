@@ -4,11 +4,15 @@ import {
     datosClienteEditado,
     datosClienteNuevo,
     datosContrato,
-    datosContratoDeCliente,
+    errorRuc,
     esPestanaContrato,
+    etiquetaFacturacion,
+    normalizarFacturacion,
     faltanteCliente,
     faltanteContrato,
     filtrarClientes,
+    hoyLocal,
+    textoPermitido,
     textosModalCliente,
     type FormularioCliente,
 } from './formularioCliente';
@@ -71,7 +75,26 @@ describe('validaciones', () => {
     it('cliente: nombre y RUC', () => {
         expect(faltanteCliente(formulario())).toBeNull();
         expect(faltanteCliente(formulario({ nombre: '' }))).toBe('El nombre del cliente es un campo obligatorio.');
+        expect(faltanteCliente(formulario({ nombre: '   ' }))).toBe('El nombre del cliente es un campo obligatorio.');
         expect(faltanteCliente(formulario({ ruc: '' }))).toBe('El RUC del cliente es un campo obligatorio.');
+        // Antes el aviso en rojo no impedía guardar un RUC con otra provincia o terminación
+        expect(faltanteCliente(formulario({ ruc: '9991234567001' }))).toMatch(/01 y 24/);
+        expect(faltanteCliente(formulario({ ruc: '0991234567002' }))).toMatch(/terminar en 001/);
+    });
+
+    it('RUC: 13 dígitos, provincia 01 a 24 o 30 y 001', () => {
+        expect(errorRuc('')).toBeNull();
+        expect(errorRuc('0900000001001')).toBeNull();
+        expect(errorRuc('3090000000001')).toBeNull();
+        expect(errorRuc('09000000010')).toMatch(/13 dígitos/);
+        expect(errorRuc('2500000000001')).toMatch(/01 y 24/);
+        expect(errorRuc('0900000001002')).toMatch(/001/);
+    });
+
+    it('nombre: tildes, comillas, paréntesis y «&» se pueden escribir', () => {
+        expect(textoPermitido('Colegio Horizonte (demo)')).toBe(true);
+        expect(textoPermitido(`O'Brien & Hijos "Ñandú" #2`)).toBe(true);
+        expect(textoPermitido('con\tcontrol')).toBe(false);
     });
 });
 
@@ -86,16 +109,13 @@ describe('datos que se envían', () => {
         expect(d.tiene_software_control).toBe(true);
     });
 
-    it('contrato de un cliente editado: lleva el id del cliente y la fecha fin tal cual', () => {
-        const d = datosContratoDeCliente(formulario());
-        expect(d.cliente_id).toBe(4);
-        expect(d.fecha_fin).toBe('');
-        expect(d.costo_excedente_impresion_color).toBe(0);
-    });
-
-    it('cliente nuevo sin «activo» y cliente editado con «activo»', () => {
-        expect(datosClienteNuevo(formulario())).not.toHaveProperty('activo');
-        expect(datosClienteEditado(formulario({ activo: false })).activo).toBe(false);
+    it('cliente nuevo o editado: solo nombre, RUC y razón social, sin estado ni contrato', () => {
+        expect(datosClienteNuevo(formulario({ nombre: '  Andina  ', razon_social: '  ' }))).toEqual({
+            nombre: 'Andina', ruc: '0991234567001', razon_social: null,
+        });
+        const editado = datosClienteEditado(formulario({ activo: false }));
+        expect(editado).not.toHaveProperty('activo');
+        expect(editado).not.toHaveProperty('printer_bill');
     });
 });
 
@@ -109,6 +129,7 @@ describe('textosModalCliente y pestañas', () => {
         const desactivar = textosModalCliente({ type: 'delete', cliente: cliente(1, { nombre: 'Andina' }) });
         expect(desactivar.title).toBe('¿Desactivar cliente?');
         expect(desactivar.message).toContain('desactivar al cliente "Andina"');
+        expect(desactivar.message).toContain('se retiran sus máquinas asignadas');
         expect(desactivar.showCancel).toBe(true);
         expect(textosModalCliente({ type: 'activate', cliente: cliente(1, { nombre: 'Andina' }) }).confirmText).toBe('Activar');
     });
@@ -117,5 +138,27 @@ describe('textosModalCliente y pestañas', () => {
         expect(esPestanaContrato('Crear Contrato')).toBe(true);
         expect(esPestanaContrato('Editar Contrato')).toBe(true);
         expect(esPestanaContrato('listar')).toBe(false);
+    });
+});
+
+describe('hoyLocal', () => {
+    it('usa la fecha del navegador, no la UTC (a las 20:00 en Ecuador sigue siendo hoy)', () => {
+        expect(hoyLocal(new Date(2026, 10, 21, 20, 30))).toBe('2026-11-21');
+        expect(hoyLocal(new Date(2026, 0, 5, 0, 1))).toBe('2026-01-05');
+    });
+});
+
+describe('modo de facturación', () => {
+    it('«Todo como Color» (como se guardaba antes) es «Todo como color», el valor que entiende el backend', () => {
+        expect(normalizarFacturacion('Todo como Color')).toBe('Todo como color');
+        expect(normalizarFacturacion('  TODO como  color ')).toBe('Todo como color');
+        expect(normalizarFacturacion('Diferenciar B/N de Color')).toBe('Diferenciar B/N de Color');
+        expect(normalizarFacturacion(undefined)).toBe('Diferenciar B/N de Color');
+    });
+
+    it('etiqueta para la pantalla', () => {
+        expect(etiquetaFacturacion('Todo como Color')).toBe('Todo como color');
+        expect(etiquetaFacturacion('Diferenciar B/N de Color')).toBe('Diferenciar B/N de color');
+        expect(etiquetaFacturacion(null)).toBe('-');
     });
 });

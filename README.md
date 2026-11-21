@@ -72,15 +72,15 @@ git clone https://github.com/MarSalvatore28/SE2-4-Printflow.git
 git clone https://github.com/MarSalvatore28/SE2-4-Printflow-Frontend.git
 
 cd SE2-4-Printflow
-copy .env.example .env     # completar DB_PASSWORD y SECRET_KEY
+npm run configurar         # crea el .env del backend con claves nuevas al azar
 docker compose up -d --build
 ```
 
-La web queda en http://localhost:8080.
+La web queda en http://localhost:8080. Usuarios de prueba: `admin@`, `operador@` y `auditor@printflow.local`, contraseña `Printflow2026*`. Para cargar datos, sacar el token y probar la API (Postman, Swagger y seguridad), sigue [`docs/probar.md`](https://github.com/MarSalvatore28/SE2-4-Printflow/blob/main/docs/probar.md) del backend: no hay que pedirle claves a nadie.
 
 ## Desarrollo local
 
-Para trabajar en la interfaz con recarga automática, con la API corriendo (ver el README del backend):
+Para trabajar en la interfaz con recarga automática, con el sistema levantado en Docker desde el backend (arriba). `npm run dev` usa la API de Docker en http://localhost:8080:
 
 ```powershell
 cd C:\printflow\SE2-4-Printflow-Frontend
@@ -93,7 +93,7 @@ npm run dev                # http://localhost:5173
 
 | Variable | Descripción | Valor en desarrollo |
 |---|---|---|
-| `VITE_API_BASE_URL` | Dirección de la API. Vacía cuando la web y la API comparten dominio (Docker) | `http://localhost:9000` |
+| `VITE_API_BASE_URL` | Dirección de la API. Vacía cuando la web y la API comparten dominio (Docker) | `http://localhost:8080` (la API de Docker; `http://localhost:9000` si corres `npm start` en el backend) |
 
 Las variables `VITE_*` se incluyen en el código compilado: **nunca** deben contener claves ni secretos.
 

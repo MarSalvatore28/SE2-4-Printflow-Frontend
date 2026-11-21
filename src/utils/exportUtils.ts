@@ -297,7 +297,7 @@ const anexoUsuariosPDF = (doc: jsPDF, transacciones: DetalleTransaccion[]) => {
   porMaquina.forEach((trans) => {
     const maquina = trans[0].maquina;
     y = asegurarEspacio(doc, y, 30);
-    const fecha = trans[0].transaccion.fecha ? String(trans[0].transaccion.fecha).substring(0, 16).replace("T", " ").replace(/-/g, "/") : "N/A";
+    const fecha = trans[0].transaccion.fecha ? String(trans[0].transaccion.fecha).substring(0, 16).replace("T", " ").replaceAll("-", "/") : "N/A";
     doc.setFontSize(9);
     doc.text(`${maquina.area || "Sin área"} · ${maquina.modelo || "Sin modelo"} · Serie ${maquina.serie || "N/A"} · IP ${maquina.ip} · Tomado el ${fecha}`, MARGEN, y);
 

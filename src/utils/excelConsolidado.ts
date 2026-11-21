@@ -257,7 +257,7 @@ export const ordenarComoPantalla = (transacciones: DetalleTransaccion[]): Detall
 const fechaToma = (ip: string, trans: DetalleTransaccion[], consolidado: MaquinaConsolidada[]): string => {
   const m = consolidado.find((c) => c.info.ip === ip);
   const fecha = m?.info.fecha_corte_actual ?? m?.info.fecha_corte ?? trans[0]?.transaccion.fecha;
-  return fecha ? String(fecha).substring(0, 16).replace('T', ' ').replace(/-/g, '/') : 'N/A';
+  return fecha ? String(fecha).substring(0, 16).replace('T', ' ').replaceAll('-', '/') : 'N/A';
 };
 
 /**

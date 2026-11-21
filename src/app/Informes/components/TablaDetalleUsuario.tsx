@@ -11,7 +11,7 @@ import { ordenarTransacciones, type OrdenTabla } from '@app/Informes/utils/orden
 const formatFechaHora = (fechaStr: string | null | undefined): string => {
     if (!fechaStr) return 'N/A';
     const dStr = typeof fechaStr === 'string' ? fechaStr : (fechaStr as Date).toISOString();
-    return dStr.substring(0, 16).replace('T', ' ').replace(/-/g, '/');
+    return dStr.substring(0, 16).replace('T', ' ').replaceAll('-', '/');
 };
 
 interface TablaDetalleUsuarioProps {

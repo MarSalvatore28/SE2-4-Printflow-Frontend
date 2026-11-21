@@ -434,8 +434,7 @@ export const DetalleLoteModal = ({ loteId, onClose, onFechaCorteChange, onLoteAc
                     Se pasarán los {reportes.length} reporte(s) del lote a los reportes oficiales y se borrarán de staging.
                   </p>
                   <label className="block text-sm font-medium text-gray-700">
-                    Período del informe
-                    <input
+                    Período del informe<input
                       type="month"
                       value={periodo}
                       onChange={(e) => setPeriodo(e.target.value)}
@@ -468,8 +467,7 @@ export const DetalleLoteModal = ({ loteId, onClose, onFechaCorteChange, onLoteAc
                     Al rechazar el lote se eliminan sus reportes de staging. Esta acción no se puede deshacer.
                   </p>
                   <label className="block text-sm font-medium text-gray-700">
-                    Motivo del rechazo (opcional)
-                    <textarea
+                    Motivo del rechazo (opcional)<textarea
                       value={motivo}
                       onChange={(e) => setMotivo(e.target.value)}
                       maxLength={500}

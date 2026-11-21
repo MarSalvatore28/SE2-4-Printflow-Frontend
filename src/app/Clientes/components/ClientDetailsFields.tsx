@@ -79,8 +79,7 @@ export const ClientDetailsFields: React.FC<ClientDetailsFieldsProps> = ({ formDa
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="input-container">
                 <label className="input-label block text-sm font-medium text-gray-700 mb-1">
-                    Nombre comercial *
-                    <span className="text-xs text-gray-400 ml-2 font-normal">
+                    Nombre comercial *<span className="text-xs text-gray-400 ml-2 font-normal">
                         ({(formData.nombre || '').length}/80)
                     </span>
                 </label>
@@ -145,8 +144,7 @@ export const ClientDetailsFields: React.FC<ClientDetailsFieldsProps> = ({ formDa
 
             <div className="input-container md:col-span-2">
                 <label className="input-label block text-sm font-medium text-gray-700 mb-1">
-                    Razón social
-                    <span className="text-xs text-gray-400 ml-2 font-normal">
+                    Razón social<span className="text-xs text-gray-400 ml-2 font-normal">
                         ({(formData.razon_social || '').length}/80)
                     </span>
                 </label>

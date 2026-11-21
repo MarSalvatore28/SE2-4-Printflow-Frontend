@@ -69,6 +69,27 @@ describe('validarFormularioInstalacion', () => {
     });
 });
 
+describe('validarFormularioInstalacion: fecha e IP repetida', () => {
+    it('la fecha es obligatoria y no puede ser futura', () => {
+        const base = { clienteId: 1, multiple: false, maquinas: [], hoy: '2026-11-21' };
+        expect(validarFormularioInstalacion({ ...base, datos: datos({ fecha_instalacion: '' }) }))
+            .toEqual({ fecha: 'Indique la fecha de instalación' });
+        expect(validarFormularioInstalacion({ ...base, datos: datos({ fecha_instalacion: '2026-11-22' }) }))
+            .toEqual({ fecha: 'La fecha de instalación no puede ser futura' });
+        expect(validarFormularioInstalacion({ ...base, datos: datos({ fecha_instalacion: '2026-11-21' }) })).toEqual({});
+    });
+
+    it('múltiple: dos máquinas de la lista no pueden llevar la misma IP (aunque se escriba con ceros)', () => {
+        const errores = validarFormularioInstalacion({
+            clienteId: 1,
+            datos: datos(),
+            multiple: true,
+            maquinas: [maquina(1, { ip_address: '10.0.0.9' }), maquina(2, { ip_address: '010.000.000.009' })],
+        });
+        expect(errores).toEqual({ ip_1: 'La IP 10.0.0.9 de SER2 ya la lleva SER1 en esta lista' });
+    });
+});
+
 describe('detallesDeErrores', () => {
     it('las claves de una máquina salen como «Revisión» y las demás con mayúscula inicial', () => {
         expect(detallesDeErrores({ cliente: 'a', ip_0: 'b', ip_address: 'c' })).toEqual([

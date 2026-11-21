@@ -129,7 +129,7 @@ export interface FacturacionTramo {
   monto_excedente: string;
 }
 
-/** DIFERENCIAR: B/N y color por separado. TODO_COLOR: todas las páginas cuentan como color. */
+/** Modo de facturación del contrato: B/N y color por separado, o todas las páginas cuentan como color. */
 export type ModoFacturacion = 'DIFERENCIAR' | 'TODO_COLOR';
 
 /** Importe de un contrato en el período, tal como lo calcula el backend (S3-06). */

@@ -1,7 +1,12 @@
 import type { InstalacionFormData } from '@models/Instalacion/Instalacion.types';
 import type { MaquinaConIP } from '@app/maquina_asignacion/components/AsignacionMaquinaDetailsFields';
 
-const IP_REGEX = /^(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
+// IPv4: cuatro números de 1 a 3 cifras, cada uno hasta 255 (se aceptan ceros a la izquierda, como antes)
+const OCTETO = /^\d{1,3}$/;
+const esIPv4 = (ip: string) => {
+    const partes = ip.split('.');
+    return partes.length === 4 && partes.every((p) => OCTETO.test(p) && Number(p) <= 255);
+};
 
 const vacio = (texto?: string) => !texto || texto.trim() === '';
 
@@ -15,7 +20,7 @@ const erroresMultiple = (maquinas: MaquinaConIP[]): ErroresFormulario => {
         if (!item.area_id) errores[`area_${index}`] = `Seleccione un área para la máquina ${item.maquina.serie}`;
         if (vacio(item.ip_address)) {
             errores[`ip_${index}`] = `La máquina ${item.maquina.serie} requiere una dirección IP`;
-        } else if (!IP_REGEX.test(item.ip_address.trim())) {
+        } else if (!esIPv4(item.ip_address.trim())) {
             errores[`ip_${index}`] = `IP inválida para ${item.maquina.serie}`;
         }
     });
@@ -29,7 +34,7 @@ const erroresSimple = (datos: InstalacionFormData): ErroresFormulario => {
     if (!datos.maquina_id) errores.maquina = 'Debe seleccionar una máquina';
     if (vacio(datos.ip_address)) {
         errores.ip_address = 'La dirección IP es obligatoria';
-    } else if (!IP_REGEX.test(datos.ip_address.trim())) {
+    } else if (!esIPv4(datos.ip_address.trim())) {
         errores.ip_address = 'Formato de IP inválido';
     }
     return errores;

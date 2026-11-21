@@ -1,4 +1,4 @@
-import { useState, type FC } from 'react';
+import { useEffect, useRef, useState, type FC } from 'react';
 import { Plus, X } from 'lucide-react';
 import type {
     Maquina,
@@ -57,6 +57,11 @@ export const MaquinaForm: FC<MaquinaFormProps> = ({
     const [errores, setErrores] = useState<ErroresCampo>({});
 
     const [creandoModelo, setCreandoModelo] = useState(false);
+    const nuevoModeloRef = useRef<HTMLInputElement>(null);
+    // Al pulsar «nuevo modelo» el foco pasa a su campo (lo pidió el usuario con el botón)
+    useEffect(() => {
+        if (creandoModelo) nuevoModeloRef.current?.focus();
+    }, [creandoModelo]);
     const [nombreModelo, setNombreModelo] = useState('');
     const [errorModelo, setErrorModelo] = useState<string | null>(null);
     const [guardandoModelo, setGuardandoModelo] = useState(false);
@@ -200,6 +205,7 @@ export const MaquinaForm: FC<MaquinaFormProps> = ({
                             <label htmlFor="nuevo-modelo" className="block text-xs font-semibold text-gray-600 mb-1">Nombre del nuevo modelo</label>
                             <div className="flex gap-2">
                                 <input
+                                    ref={nuevoModeloRef}
                                     id="nuevo-modelo"
                                     type="text"
                                     className={inputClass(!!errorModelo)}
@@ -208,7 +214,6 @@ export const MaquinaForm: FC<MaquinaFormProps> = ({
                                     onChange={(e) => { setNombreModelo(e.target.value); setErrorModelo(null); }}
                                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void handleCrearModelo(); } }}
                                     maxLength={100}
-                                    autoFocus
                                 />
                                 <button
                                     type="button"

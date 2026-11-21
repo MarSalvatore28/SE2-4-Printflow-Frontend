@@ -28,7 +28,7 @@ const crearInstalaciones = async (
     for (let i = 0; i < maquinas.length; i++) {
         const item = maquinas[i];
         try {
-            await createInstalacion(datosDeMaquina(item, datos));
+            await createInstalacion(datosDeMaquina(item, datos)); // NOSONAR: de a una, en orden, para mostrar el avance (n de total) sin cargar la API
             exitos++;
             onProgreso(i + 1);
         } catch (err: unknown) {

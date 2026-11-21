@@ -183,7 +183,7 @@ export const exportToExcel = (
       }, {});
 
       Object.values(totalesByUser).forEach((u: any) => {
-        filasTransacciones.push([u.id, u.nombre, u.total_copias + u.total_impresiones, u.total_impresiones, u.total_copias, u.print_bn, u.print_color, u.copia_bn, u.copia_color]);
+        filasTransacciones.push([u.id, u.nombre, u.total_copias + u.total_impresiones, u.total_impresiones, u.total_copias, u.copia_bn, u.copia_color, u.print_bn, u.print_color]);
       });
 
       const totalM = Object.values(totalesByUser).reduce((acc: any, t: any) => ({

@@ -47,7 +47,7 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
 
     const handleNumericChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        const regex = /^\d*\.?\d*$/;
+        const regex = /^\d*(?:\.\d*)?$/;
 
         if (value === '') {
             onChange(e);
@@ -74,8 +74,9 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                     Asignar cliente
                 </h3>
                 <div>
-                    <label className="input-label mb-1 block text-sm font-medium text-gray-700">Buscar cliente existente (nombre o RUC)</label>
+                    <label htmlFor="contrato-cliente" className="input-label mb-1 block text-sm font-medium text-gray-700">Buscar cliente existente (nombre o RUC)</label>
                     <BuscadorInteligente<ClienteParaTabla>
+                        inputId="contrato-cliente"
                         key={formData.cliente_id ? `cliente-${formData.cliente_id}` : 'sin-cliente'}
                         placeholder="Escriba para buscar..."
                         buscarFn={buscarClientes}
@@ -99,15 +100,16 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
 
             <div>
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                    <svg aria-hidden="true" className="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
                     </svg>
                     Vigencia del contrato
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="input-container">
-                        <label className="input-label block text-sm font-medium text-gray-700 mb-1">Fecha de inicio</label>
+                        <label htmlFor="contrato-fecha-inicio" className="input-label block text-sm font-medium text-gray-700 mb-1">Fecha de inicio</label>
                         <input
+                            id="contrato-fecha-inicio"
                             type="date"
                             name="fecha_inicio"
                             className={standardInputClass}
@@ -116,8 +118,9 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                         />
                     </div>
                     <div className="input-container">
-                        <label className="input-label block text-sm font-medium text-gray-700 mb-1">Fecha de fin (opcional)</label>
+                        <label htmlFor="contrato-fecha-fin" className="input-label block text-sm font-medium text-gray-700 mb-1">Fecha de fin (opcional)</label>
                         <input
+                            id="contrato-fecha-fin"
                             type="date"
                             name="fecha_fin"
                             className={standardInputClass}
@@ -137,8 +140,9 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="input-container">
-                        <label className="input-label font-bold text-xs mb-1 block text-gray-600">¿Tiene renta de equipos?</label>
+                        <label htmlFor="contrato-tiene-renta" className="input-label font-bold text-xs mb-1 block text-gray-600">¿Tiene renta de equipos?</label>
                         <select
+                            id="contrato-tiene-renta"
                             name="tiene_renta"
                             className={standardInputClass}
                             value={formData.tiene_renta ? 'true' : 'false'}
@@ -149,8 +153,9 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                         </select>
                     </div>
                     <div className="input-container">
-                        <label className="input-label font-bold text-xs mb-1 block text-gray-600">¿Software de control?</label>
+                        <label htmlFor="contrato-software-control" className="input-label font-bold text-xs mb-1 block text-gray-600">¿Software de control?</label>
                         <select
+                            id="contrato-software-control"
                             name="tiene_software_control"
                             className={standardInputClass}
                             value={formData.tiene_software_control ? 'true' : 'false'}
@@ -161,8 +166,9 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                         </select>
                     </div>
                     <div className="input-container">
-                        <label className="input-label font-bold text-xs mb-1 block text-gray-600">Facturación de impresora</label>
+                        <label htmlFor="contrato-printer-bill" className="input-label font-bold text-xs mb-1 block text-gray-600">Facturación de impresora</label>
                         <select
+                            id="contrato-printer-bill"
                             name="printer_bill"
                             className={standardInputClass}
                             value={formData.printer_bill}
@@ -185,8 +191,9 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                     </h4>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="group">
-                            <label className="block text-xs font-semibold text-gray-600 mb-1.5 ml-1">Impresión B/N</label>
+                            <label htmlFor="contrato-bn-incluidas" className="block text-xs font-semibold text-gray-600 mb-1.5 ml-1">Impresión B/N</label>
                             <input
+                                id="contrato-bn-incluidas"
                                 type="text"
                                 name="impresiones_bn_incluidas"
                                 className={standardInputClass}
@@ -197,8 +204,9 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                             />
                         </div>
                         <div className="group">
-                            <label className="block text-xs font-semibold text-gray-600 mb-1.5 ml-1">Impresión color</label>
+                            <label htmlFor="contrato-color-incluidas" className="block text-xs font-semibold text-gray-600 mb-1.5 ml-1">Impresión color</label>
                             <input
+                                id="contrato-color-incluidas"
                                 type="text"
                                 name="impresiones_color_incluidas"
                                 className={standardInputClass}
@@ -218,10 +226,11 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                     </h4>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="group">
-                            <label className="block text-xs font-semibold text-gray-600 mb-1.5 ml-1">Impresión B/N</label>
+                            <label htmlFor="contrato-costo-bn" className="block text-xs font-semibold text-gray-600 mb-1.5 ml-1">Impresión B/N</label>
                             <div className="relative">
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">$</span>
                                 <input
+                                    id="contrato-costo-bn"
                                     type="text"
                                     name="costo_impresion_bn"
                                     className={`${standardInputClass} pl-6`}
@@ -233,10 +242,11 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                             </div>
                         </div>
                         <div className="group">
-                            <label className="block text-xs font-semibold text-gray-600 mb-1.5 ml-1">Impresión color</label>
+                            <label htmlFor="contrato-costo-color" className="block text-xs font-semibold text-gray-600 mb-1.5 ml-1">Impresión color</label>
                             <div className="relative">
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">$</span>
                                 <input
+                                    id="contrato-costo-color"
                                     type="text"
                                     name="costo_impresion_color"
                                     className={`${standardInputClass} pl-6`}
@@ -261,10 +271,11 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                     </h4>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="group">
-                            <label className="block text-xs font-semibold text-gray-600 mb-1.5 ml-1">Impresión B/N</label>
+                            <label htmlFor="contrato-excedente-bn" className="block text-xs font-semibold text-gray-600 mb-1.5 ml-1">Impresión B/N</label>
                             <div className="relative">
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">$</span>
                                 <input
+                                    id="contrato-excedente-bn"
                                     type="text"
                                     name="costo_excedente_impresion_bn"
                                     className={`${standardInputClass} pl-6`}
@@ -276,10 +287,11 @@ export const ContractDetailsFields: React.FC<ContractDetailsFieldsProps> = ({ fo
                             </div>
                         </div>
                         <div className="group">
-                            <label className="block text-xs font-semibold text-gray-600 mb-1.5 ml-1">Impresión color</label>
+                            <label htmlFor="contrato-excedente-color" className="block text-xs font-semibold text-gray-600 mb-1.5 ml-1">Impresión color</label>
                             <div className="relative">
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">$</span>
                                 <input
+                                    id="contrato-excedente-color"
                                     type="text"
                                     name="costo_excedente_impresion_color"
                                     className={`${standardInputClass} pl-6`}

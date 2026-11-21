@@ -24,7 +24,8 @@ interface UsuarioFormProps {
 }
 
 // Mismas reglas que el backend (src/utils/usuarios.validacion.js)
-const EMAIL_VALIDO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Acepta los mismos correos que antes, pero sin retroceso costoso (igual que el backend)
+const EMAIL_VALIDO = /^[^\s@]+@[^\s@][^\s@.]*\.[^\s@]+$/;
 const PASSWORD_MIN = 8;
 
 const validarPassword = (password: string): string | undefined => {
@@ -108,6 +109,7 @@ export const UsuarioForm: FC<UsuarioFormProps> = ({
     };
 
     const rolElegido = roles.find(r => String(r.id_rol) === valores.rol_id);
+    const textoGuardar = esNuevo ? 'Guardar Usuario' : 'Actualizar Usuario';
 
     return (
         <div className="flex flex-col gap-8">
@@ -243,7 +245,7 @@ export const UsuarioForm: FC<UsuarioFormProps> = ({
                             Guardando...
                         </>
                     ) : (
-                        esNuevo ? 'Guardar Usuario' : 'Actualizar Usuario'
+                        textoGuardar
                     )}
                 </button>
             </div>

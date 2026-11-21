@@ -354,8 +354,9 @@ const ClientesPage = () => {
         setLoading(true);
         try {
             const fullData = await getClienteCompleto(client.id_cliente);
-            if (fullData && fullData.contratos && fullData.contratos.length > 0) {
-                const activeContract = fullData.contratos.find((c) => c.activo) || fullData.contratos[0];
+            const contratos = fullData?.contratos ?? [];
+            if (contratos.length > 0) {
+                const activeContract = contratos.find((c) => c.activo) || contratos[0];
                 setFormData({
                     ...INITIAL_FORM_STATE,
                     cliente_id: client.id_cliente,
@@ -374,7 +375,7 @@ const ClientesPage = () => {
         }
     };
 
-    const handleToggleActive = async (client: ClienteParaTabla) => {
+    const handleToggleActive = (client: ClienteParaTabla) => {
         const actionType = client.activo ? 'delete' : 'activate';
         setModalConfig({
             isOpen: true,
@@ -383,7 +384,7 @@ const ClientesPage = () => {
         });
     };
 
-    const handleDelete = async (client: ClienteParaTabla) => {
+    const handleDelete = (client: ClienteParaTabla) => {
         setModalConfig({
             isOpen: true,
             type: 'delete',
@@ -494,6 +495,112 @@ const ClientesPage = () => {
         setActiveTab(pestana);
     };
 
+    // Contenido de la pestaña: formulario de cliente, de contrato o la lista
+    const renderPestana = () => {
+        if (activeTab === 'agregar') {
+            return (
+                <PanelFormulario titulo={textosCliente.titulo} descripcion={textosCliente.descripcion}>
+                    <ClientesFormPage
+                        formData={formData}
+                        onChange={handleInputChange}
+                        onSave={handleSave}
+                        onCancel={handleCancel}
+                        isSubmitting={submitting}
+                        isEditing={isEditing}
+                    />
+                </PanelFormulario>
+            );
+        }
+        if (esPestanaContrato(activeTab)) {
+            return (
+                editandoContrato && !isEditing ? (
+                    <PanelFormulario titulo="Editar contrato" descripcion="Busca y selecciona el cliente al que deseas modificarle su contrato actual.">
+                        <div className="bg-accent/10 border border-accent/50 rounded-lg p-6">
+                            <BusquedaInteligenteClientes
+                                key={`buscador-editar-${activeTab}`}
+                                onSeleccionar={handleSelectClientForContractEdit}
+                                placeholder="Buscar por nombre o RUC..."
+                                itemsCompletos={clientesConContrato}
+                            />
+                            {loading && (<div className="mt-4 text-center text-gray-500">Cargando contrato...</div>)}
+                            {error && (<div className="mt-4 text-center text-red-600">{error}</div>)}
+                        </div>
+                    </PanelFormulario>
+                ) : (
+                    <PanelFormulario titulo={textosContrato.titulo} descripcion={textosContrato.descripcion}>
+                        <ContractFormPage
+                            formData={formData}
+                            onChange={handleInputChange}
+                            onSave={handleSave}
+                            onCancel={handleCancel}
+                            isSubmitting={submitting}
+                            isEditing={editandoContrato || isEditing}
+                            clients={clientesContrato}
+                        />
+                    </PanelFormulario>
+                )
+            );
+        }
+        return (
+            <div className="flex flex-col gap-6">
+                <div className="flex flex-col md:flex-row gap-4 items-end bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <div className="flex-1 w-full">
+                        <BusquedaInteligenteClientes
+                            onSeleccionar={(c) => {
+                                setFilterClientId(c.id_cliente);
+                                setFilterTerm('');
+                            }}
+                            onEnter={(term) => {
+                                setFilterClientId(null);
+                                setFilterTerm(term.toLowerCase().trim());
+                            }}
+                            onSearchClick={(term) => {
+                                setFilterClientId(null);
+                                setFilterTerm(term.toLowerCase().trim());
+                            }}
+                            onClear={() => {
+                                setFilterClientId(null);
+                                setFilterTerm('');
+                            }}
+                            onInputChange={() => {
+                                if (filterClientId) setFilterClientId(null);
+                            }}
+                            itemsCompletos={allClients}
+                        />
+                    </div>
+
+                    <div className="flex items-center h-[42px] px-2 bg-white rounded-lg border border-gray-200">
+                        <input
+                            id="showInactive"
+                            type="checkbox"
+                            checked={showInactive}
+                            onChange={(e) => setShowInactive(e.target.checked)}
+                            className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2"
+                        />
+                        <label htmlFor="showInactive" className="ml-2 text-sm font-medium text-gray-700 cursor-pointer select-none">
+                            Mostrar inactivos
+                        </label>
+                    </div>
+
+                    <button
+                        onClick={handleRefresh}
+                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium h-[42px]"
+                    >
+                        Ver todos
+                    </button>
+                </div>
+
+                <EstadoLista cargando={loading} error={error}>
+                    <ClientList
+                        clients={displayedClients}
+                        {...accionesLista}
+                        onVerDetalles={handleVerDetalles}
+                    />
+                </EstadoLista>
+            </div>
+        );
+    };
+
     return (
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
             <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de clientes</h1>
@@ -529,102 +636,7 @@ const ClientesPage = () => {
             </div>
 
             <div className="py-4 md:p-8">
-                {activeTab === 'agregar' ? (
-                    <PanelFormulario titulo={textosCliente.titulo} descripcion={textosCliente.descripcion}>
-                        <ClientesFormPage
-                            formData={formData}
-                            onChange={handleInputChange}
-                            onSave={handleSave}
-                            onCancel={handleCancel}
-                            isSubmitting={submitting}
-                            isEditing={isEditing}
-                        />
-                    </PanelFormulario>
-                ) : esPestanaContrato(activeTab) ? (
-                    editandoContrato && !isEditing ? (
-                        <PanelFormulario titulo="Editar contrato" descripcion="Busca y selecciona el cliente al que deseas modificarle su contrato actual.">
-                            <div className="bg-accent/10 border border-accent/50 rounded-lg p-6">
-                                <BusquedaInteligenteClientes
-                                    key={`buscador-editar-${activeTab}`}
-                                    onSeleccionar={handleSelectClientForContractEdit}
-                                    placeholder="Buscar por nombre o RUC..."
-                                    itemsCompletos={clientesConContrato}
-                                />
-                                {loading && (<div className="mt-4 text-center text-gray-500">Cargando contrato...</div>)}
-                                {error && (<div className="mt-4 text-center text-red-600">{error}</div>)}
-                            </div>
-                        </PanelFormulario>
-                    ) : (
-                        <PanelFormulario titulo={textosContrato.titulo} descripcion={textosContrato.descripcion}>
-                            <ContractFormPage
-                                formData={formData}
-                                onChange={handleInputChange}
-                                onSave={handleSave}
-                                onCancel={handleCancel}
-                                isSubmitting={submitting}
-                                isEditing={editandoContrato || isEditing}
-                                clients={clientesContrato}
-                            />
-                        </PanelFormulario>
-                    )
-                ) : (
-                    <div className="flex flex-col gap-6">
-                        <div className="flex flex-col md:flex-row gap-4 items-end bg-gray-50 p-4 rounded-lg border border-gray-200">
-                            <div className="flex-1 w-full">
-                                <BusquedaInteligenteClientes
-                                    onSeleccionar={(c) => {
-                                        setFilterClientId(c.id_cliente);
-                                        setFilterTerm('');
-                                    }}
-                                    onEnter={(term) => {
-                                        setFilterClientId(null);
-                                        setFilterTerm(term.toLowerCase().trim());
-                                    }}
-                                    onSearchClick={(term) => {
-                                        setFilterClientId(null);
-                                        setFilterTerm(term.toLowerCase().trim());
-                                    }}
-                                    onClear={() => {
-                                        setFilterClientId(null);
-                                        setFilterTerm('');
-                                    }}
-                                    onInputChange={() => {
-                                        if (filterClientId) setFilterClientId(null);
-                                    }}
-                                    itemsCompletos={allClients}
-                                />
-                            </div>
-
-                            <div className="flex items-center h-[42px] px-2 bg-white rounded-lg border border-gray-200">
-                                <input
-                                    id="showInactive"
-                                    type="checkbox"
-                                    checked={showInactive}
-                                    onChange={(e) => setShowInactive(e.target.checked)}
-                                    className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2"
-                                />
-                                <label htmlFor="showInactive" className="ml-2 text-sm font-medium text-gray-700 cursor-pointer select-none">
-                                    Mostrar inactivos
-                                </label>
-                            </div>
-
-                            <button
-                                onClick={handleRefresh}
-                                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium h-[42px]"
-                            >
-                                Ver todos
-                            </button>
-                        </div>
-
-                        <EstadoLista cargando={loading} error={error}>
-                            <ClientList
-                                clients={displayedClients}
-                                {...accionesLista}
-                                onVerDetalles={handleVerDetalles}
-                            />
-                        </EstadoLista>
-                    </div>
-                )}
+                {renderPestana()}
             </div>
 
             {

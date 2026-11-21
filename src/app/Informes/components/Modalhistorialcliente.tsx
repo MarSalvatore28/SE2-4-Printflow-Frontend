@@ -81,8 +81,8 @@ export const ModalHistorialCliente: React.FC<ModalHistorialClienteProps> = ({
                 </div>
 
                 <div className="space-y-3">
-                    {cambios.map((c, idx) => (
-                        <div key={idx} className="bg-white rounded-md p-3 shadow-sm">
+                    {cambios.map((c) => (
+                        <div key={c.campo} className="bg-white rounded-md p-3 shadow-sm">
                             <div className="text-xs font-semibold text-gray-700 mb-2">
                                 {c.campo}
                             </div>
@@ -103,6 +103,32 @@ export const ModalHistorialCliente: React.FC<ModalHistorialClienteProps> = ({
     };
 
     if (!isOpen) return null;
+
+    // Contenido: cargando, sin cambios o la lista del historial
+    const renderContenido = () => {
+        if (loading) {
+            return (
+                <div className="flex items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-10 w-10 border-4 border-amber-500 border-t-transparent"></div>
+                </div>
+            );
+        }
+        if (historial.length === 0) {
+            return (
+                <div className="text-center py-12">
+                    <div className="bg-gray-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <History className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <p className="text-gray-600">No hay cambios registrados</p>
+                </div>
+            );
+        }
+        return (
+            <div className="space-y-4">
+                {historial.map((cambio, index) => renderCambio(cambio, index))}
+            </div>
+        );
+    };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -132,22 +158,7 @@ export const ModalHistorialCliente: React.FC<ModalHistorialClienteProps> = ({
 
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-6">
-                    {loading ? (
-                        <div className="flex items-center justify-center py-12">
-                            <div className="animate-spin rounded-full h-10 w-10 border-4 border-amber-500 border-t-transparent"></div>
-                        </div>
-                    ) : historial.length === 0 ? (
-                        <div className="text-center py-12">
-                            <div className="bg-gray-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                                <History className="h-8 w-8 text-gray-400" />
-                            </div>
-                            <p className="text-gray-600">No hay cambios registrados</p>
-                        </div>
-                    ) : (
-                        <div className="space-y-4">
-                            {historial.map((cambio, index) => renderCambio(cambio, index))}
-                        </div>
-                    )}
+                    {renderContenido()}
                 </div>
 
                 {/* Footer */}

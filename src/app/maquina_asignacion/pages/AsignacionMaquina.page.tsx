@@ -52,7 +52,6 @@ const InstalacionesPage = () => {
         message: ''
     });
 
-    const [, setInstalacionEnEdicion] = useState<InstalacionActivaCliente | null>(null);
     const [lastActionWasEdit, setLastActionWasEdit] = useState(false);
 
     const [modalRetirar, setModalRetirar] = useState<{
@@ -119,7 +118,6 @@ const InstalacionesPage = () => {
 
     useEffect(() => {
         if (activeTab === 'listar') {
-            setInstalacionEnEdicion(null);
             void fetchInstalaciones(filtroClienteRef.current ?? undefined);
         }
     }, [activeTab, fetchInstalaciones]);
@@ -139,7 +137,6 @@ const InstalacionesPage = () => {
 
     const handleCloseSuccessModal = async () => {
         setSuccessModal(prev => ({ ...prev, isOpen: false }));
-        setInstalacionEnEdicion(null);
         // Solo recargar si fue una creación, no una edición (para no colapsar los paneles)
         if (!lastActionWasEdit) {
             await fetchAllData();
@@ -148,7 +145,6 @@ const InstalacionesPage = () => {
     };
 
     const handleCancel = () => {
-        setInstalacionEnEdicion(null);
         setActiveTab('listar');
     };
 
@@ -279,6 +275,32 @@ const InstalacionesPage = () => {
 
     const displayedInstalaciones = filtrarInstalaciones(instalaciones, filterTerm);
 
+    // Lista: cargando, el error o las instalaciones
+    const renderLista = () => {
+        if (loading) {
+            return (
+                <div className="flex justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                </div>
+            );
+        }
+        if (error) {
+            return (
+                <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 italic">
+                    {error}
+                </div>
+            );
+        }
+        return (
+            <InstalacionesList
+                instalaciones={displayedInstalaciones}
+                onEdit={puedeEditarCatalogos ? handleEditInstalacion : undefined}
+                onRetirar={puedeEditarCatalogos ? handleRetirarInstalacion : undefined}
+                loading={loading}
+            />
+        );
+    };
+
     return (
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
             <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Instalaciones</h1>
@@ -294,10 +316,7 @@ const InstalacionesPage = () => {
                 </button>
                 {puedeEditarCatalogos && (
                 <button
-                    onClick={() => {
-                        setInstalacionEnEdicion(null);
-                        setActiveTab('agregar');
-                    }}
+                    onClick={() => setActiveTab('agregar')}
                     className={clasePestana(activeTab === 'agregar')}
                 >
                     Nueva instalación
@@ -338,10 +357,11 @@ const InstalacionesPage = () => {
                         {/* Filtros */}
                         <div className="flex flex-col md:flex-row gap-4 items-end bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <div className="flex-1 w-full">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label htmlFor="filtro-instalaciones-cliente" className="block text-sm font-medium text-gray-700 mb-2">
                                     Filtrar por Cliente
                                 </label>
                                 <BusquedaInteligenteClientes
+                                    inputId="filtro-instalaciones-cliente"
                                     onSeleccionar={handleSelectCliente}
                                     placeholder="Buscar por cliente..."
                                     itemsCompletos={clientsList}
@@ -353,10 +373,11 @@ const InstalacionesPage = () => {
                             </div>
 
                             <div className="flex-1 w-full">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label htmlFor="filtro-instalaciones-texto" className="block text-sm font-medium text-gray-700 mb-2">
                                     Búsqueda general
                                 </label>
                                 <input
+                                    id="filtro-instalaciones-texto"
                                     type="text"
                                     placeholder="Buscar por serie, modelo, área o IP..."
                                     value={filterTerm}
@@ -374,22 +395,7 @@ const InstalacionesPage = () => {
                         </div>
 
                         {/* Lista */}
-                        {loading ? (
-                            <div className="flex justify-center py-12">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                            </div>
-                        ) : error ? (
-                            <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 italic">
-                                {error}
-                            </div>
-                        ) : (
-                            <InstalacionesList
-                                instalaciones={displayedInstalaciones}
-                                onEdit={puedeEditarCatalogos ? handleEditInstalacion : undefined}
-                                onRetirar={puedeEditarCatalogos ? handleRetirarInstalacion : undefined}
-                                loading={loading}
-                            />
-                        )}
+                        {renderLista()}
                     </div>
                 )}
             </div>
@@ -423,10 +429,11 @@ const InstalacionesPage = () => {
                             />
                         </div>
                         <div className="mt-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label htmlFor="retiro-observaciones" className="block text-sm font-medium text-gray-700 mb-2">
                                 Observaciones del retiro (opcional)
                             </label>
                             <textarea
+                                id="retiro-observaciones"
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
                                 rows={3}
                                 placeholder="Motivo del retiro, estado de la máquina, etc..."

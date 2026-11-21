@@ -52,8 +52,11 @@ select:focus-visible {
     }
 }
 
-.animate-fade-in {
-    animation: fadeIn 0.3s ease;
+/* Las animaciones solo corren si el sistema no pide reducir el movimiento */
+@media (prefers-reduced-motion: no-preference) {
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease;
+    }
 }
 
 /* Notification Animation */
@@ -69,8 +72,10 @@ select:focus-visible {
     }
 }
 
-.animate-fade-in-down {
-    animation: fade-in-down 0.3s ease-out;
+@media (prefers-reduced-motion: no-preference) {
+    .animate-fade-in-down {
+        animation: fade-in-down 0.3s ease-out;
+    }
 }
 
 @keyframes fadeIn {
@@ -85,6 +90,8 @@ select:focus-visible {
     }
 }
 
-.animate-fadeIn {
-    animation: fadeIn 0.3s ease-out;
+@media (prefers-reduced-motion: no-preference) {
+    .animate-fadeIn {
+        animation: fadeIn 0.3s ease-out;
+    }
 }

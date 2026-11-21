@@ -54,7 +54,7 @@ export function useDialogoAccesible(
         return;
       }
       const primero = enfocables[0];
-      const ultimo = enfocables[enfocables.length - 1];
+      const ultimo = enfocables.at(-1) ?? primero;
       const actual = document.activeElement;
       const fuera = !dialogo.contains(actual);
 

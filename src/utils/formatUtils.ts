@@ -1,5 +1,5 @@
 export const formatCurrency = (value: number | undefined | null): string => {
-    if (value === undefined || value === null || isNaN(value)) {
+    if (value === undefined || value === null || Number.isNaN(Number(value))) {
         return '$0.00';
     }
     return new Intl.NumberFormat('es-EC', {
@@ -10,7 +10,7 @@ export const formatCurrency = (value: number | undefined | null): string => {
 
 /** Formatea un número entero con coma como separador de miles (sin decimales) */
 export const formatNumber = (value: number | undefined | null): string => {
-    if (value === undefined || value === null || isNaN(value)) {
+    if (value === undefined || value === null || Number.isNaN(Number(value))) {
         return '0';
     }
     return new Intl.NumberFormat('en-US', {
@@ -21,7 +21,7 @@ export const formatNumber = (value: number | undefined | null): string => {
 
 /** Formatea un monto monetario: coma como sep. de miles, punto decimal, 2 decimales */
 export const formatMoney = (value: number | undefined | null): string => {
-    if (value === undefined || value === null || isNaN(value)) {
+    if (value === undefined || value === null || Number.isNaN(Number(value))) {
         return '0,00';
     }
     // Intl con es-EC usa punto como separador de miles y coma decimal — lo invertimos

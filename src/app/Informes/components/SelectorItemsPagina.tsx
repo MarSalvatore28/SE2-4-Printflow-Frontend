@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 
 interface SelectorItemsPaginaProps {
     itemsPorPagina: number;
@@ -11,13 +11,15 @@ export const SelectorItemsPagina: React.FC<SelectorItemsPaginaProps> = ({
     onItemsPorPaginaChange,
     opciones = [10, 25, 50, 100]
 }) => {
+    const idSelector = useId();
     return (
         <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-700">
+                <label htmlFor={idSelector} className="text-sm font-medium text-gray-700">
                     Mostrar:
                 </label>
                 <select
+                    id={idSelector}
                     value={itemsPorPagina}
                     onChange={(e) => onItemsPorPaginaChange(Number(e.target.value))}
                     className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"

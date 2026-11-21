@@ -2,7 +2,7 @@ import type { MaquinaConsolidada, ResumenConsolidado } from '@models/Reporte/rep
 
 /** Convierte un monto del backend (texto con 2 decimales o número) a número; lo que no se entienda vale 0. */
 export const aMonto = (valor: string | number | null | undefined): number => {
-    const n = typeof valor === 'number' ? valor : parseFloat(valor ?? '');
+    const n = typeof valor === 'number' ? valor : Number.parseFloat(valor ?? '');
     return Number.isFinite(n) ? n : 0;
 };
 

@@ -200,8 +200,9 @@ export const filasReemplazos = (data: MaquinaConsolidada[]): FilaExcel[] => {
   cambios.forEach((c, i) => {
     if (i > 0) filas.push(vacia());
     const { maquina_saliente: sale, maquina_entrante: entra } = c;
+    const razon = c.razon ? ` · ${c.razon}` : '';
     filas.push(
-      fila('subseccion', `Área: ${c.area} · ${c.tipo}${c.razon ? ` · ${c.razon}` : ''}`),
+      fila('subseccion', `Área: ${c.area} · ${c.tipo}${razon}`),
       fila('cabecera', ...CABECERA_REEMPLAZOS),
       fila('dato', 'Saliente', sale.serie, sale.modelo || '', `Retiro: ${formatFechaISO(sale.fecha_retiro)}`,
         sale.contadores.anterior.global, sale.contadores.actual.global,
@@ -257,7 +258,7 @@ export const ordenarComoPantalla = (transacciones: DetalleTransaccion[]): Detall
 const fechaToma = (ip: string, trans: DetalleTransaccion[], consolidado: MaquinaConsolidada[]): string => {
   const m = consolidado.find((c) => c.info.ip === ip);
   const fecha = m?.info.fecha_corte_actual ?? m?.info.fecha_corte ?? trans[0]?.transaccion.fecha;
-  return fecha ? String(fecha).substring(0, 16).replace('T', ' ').replace(/-/g, '/') : 'N/A';
+  return fecha ? String(fecha).substring(0, 16).replace('T', ' ').replaceAll('-', '/') : 'N/A';
 };
 
 /**

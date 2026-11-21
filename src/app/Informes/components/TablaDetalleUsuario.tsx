@@ -11,13 +11,11 @@ import { ordenarTransacciones, type OrdenTabla } from '@app/Informes/utils/orden
 const formatFechaHora = (fechaStr: string | null | undefined): string => {
     if (!fechaStr) return 'N/A';
     const dStr = typeof fechaStr === 'string' ? fechaStr : (fechaStr as Date).toISOString();
-    return dStr.substring(0, 16).replace('T', ' ').replace(/-/g, '/');
+    return dStr.substring(0, 16).replace('T', ' ').replaceAll('-', '/');
 };
 
 interface TablaDetalleUsuarioProps {
     data: DetalleTransaccion[];
-    periodo: string;
-    clienteNombre?: string;
     consolidado?: MaquinaConsolidada[];
 }
 
@@ -43,8 +41,9 @@ interface EncabezadoOrdenableProps {
 const EncabezadoOrdenable = ({ clave, etiqueta, alineacion, clase = '', orden, onSort }: EncabezadoOrdenableProps) => {
     const activa = orden.key === clave;
     const derecha = alineacion === 'right';
+    const claseExtra = clase ? ` ${clase}` : '';
     return (
-        <th className={`px-4 py-3 ${derecha ? 'text-right' : 'text-left'} cursor-pointer hover:bg-gray-200${clase ? ` ${clase}` : ''}`} onClick={() => onSort(clave)}>
+        <th className={`px-4 py-3 ${derecha ? 'text-right' : 'text-left'} cursor-pointer hover:bg-gray-200${claseExtra}`} onClick={() => onSort(clave)}>
             <div className={`flex items-center ${derecha ? 'justify-end gap-1' : 'gap-1'}`}>
                 {etiqueta}
                 <span className={`transition-opacity ${activa ? 'opacity-100' : 'opacity-0'}`}>

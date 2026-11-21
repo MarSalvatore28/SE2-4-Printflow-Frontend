@@ -172,6 +172,100 @@ export const DetalleClienteModal: React.FC<DetalleClienteModalProps> = ({ client
     const dialogoRef = useRef<HTMLDivElement>(null);
     useDialogoAccesible(true, onClose, dialogoRef);
 
+    // Contenido: cargando, el error o el detalle del cliente
+    const renderContenido = () => {
+        if (loading) {
+            return (
+                <div className="flex justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+            );
+        }
+        if (error) {
+            return (
+                <div className="bg-red-50 p-4 rounded-lg text-red-700 text-center">
+                    {error}
+                </div>
+            );
+        }
+        return (
+            <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+                    <div className="space-y-3">
+                        <h4 className="text-sm font-semibold text-text uppercase tracking-wider border-b pb-1">
+                            Información general
+                        </h4>
+                        <div className="flex justify-between">
+                            <span className="text-gray-600">RUC:</span>
+                            <span className="font-mono text-sm px-2 rounded text-gray-800">
+                                {cliente.ruc || 'N/A'}
+                            </span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-gray-600">Estado:</span>
+                            <span className={`px-2 py-1 rounded text-xs font-bold ${cliente.activo
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
+
+                                }`}>
+                                {cliente.activo ? 'ACTIVO' : 'INACTIVO'}
+                            </span>
+                        </div>
+                        {cliente.printer_bill && (
+                            <div className="flex justify-between">
+                                <span className="text-gray-600">Contabilización:</span>
+                                <span className="font-medium text-gray-900 text-sm">
+                                    {cliente.printer_bill}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="space-y-3">
+                        <h4 className="text-sm font-semibold text-text uppercase tracking-wider border-b pb-1">
+                            Resumen de actividad
+                        </h4>
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-gray-600">Máquinas activas:</span>
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold text-edit">
+                                {fullData?.total_instalaciones || cliente.total_instalaciones || 0}
+                            </span>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2">
+                            <div className={`p-2 rounded text-center bg-edit-hover/10 border border-edit`}>
+                                <div className="text-xs text-text truncate">Inicio del contrato</div>
+                                <div className="text-sm font-bold text-edit">
+                                    {contrato ? formatFecha(contrato.fecha_inicio) : '-'}
+                                </div>
+                            </div>
+                            <IndicadorSiNo etiqueta="Software" activo={cliente.tiene_software_control} color="indigo" />
+                            <IndicadorSiNo etiqueta="Renta" activo={cliente.tiene_renta} color="blue" />
+                        </div>
+                    </div>
+                </div>
+
+                <h4 className="text-sm font-semibold text-text uppercase tracking-wider mb-3">
+                    Límites y costos del contrato
+                </h4>
+                {contrato ? (
+                    <TablaContrato contrato={contrato} />
+                ) : (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                        <p className="text-sm text-yellow-700">Este cliente no tiene un contrato activo registrado.</p>
+                    </div>
+                )}
+
+                <h4 className="text-sm font-semibold text-text uppercase tracking-wider mb-3">
+                    Instalaciones activas
+                </h4>
+                <div className="grid grid-cols-1 gap-3 mb-6">
+                    <ListaInstalaciones instalaciones={fullData?.instalaciones_activas} />
+                </div>
+            </>
+        );
+    };
+
     return (
         <div ref={dialogoRef} tabIndex={-1} className="fixed inset-0 z-50 overflow-y-auto focus:outline-none" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -205,90 +299,7 @@ export const DetalleClienteModal: React.FC<DetalleClienteModalProps> = ({ client
                     </div>
 
                     <div className="px-6 py-6">
-                        {loading ? (
-                            <div className="flex justify-center py-12">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                            </div>
-                        ) : error ? (
-                            <div className="bg-red-50 p-4 rounded-lg text-red-700 text-center">
-                                {error}
-                            </div>
-                        ) : (
-                            <>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-                                    <div className="space-y-3">
-                                        <h4 className="text-sm font-semibold text-text uppercase tracking-wider border-b pb-1">
-                                            Información general
-                                        </h4>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">RUC:</span>
-                                            <span className="font-mono text-sm px-2 rounded text-gray-800">
-                                                {cliente.ruc || 'N/A'}
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Estado:</span>
-                                            <span className={`px-2 py-1 rounded text-xs font-bold ${cliente.activo
-                                                ? 'bg-green-100 text-green-800'
-                                                : 'bg-red-100 text-red-800'
-
-                                                }`}>
-                                                {cliente.activo ? 'ACTIVO' : 'INACTIVO'}
-                                            </span>
-                                        </div>
-                                        {cliente.printer_bill && (
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-600">Contabilización:</span>
-                                                <span className="font-medium text-gray-900 text-sm">
-                                                    {cliente.printer_bill}
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <h4 className="text-sm font-semibold text-text uppercase tracking-wider border-b pb-1">
-                                            Resumen de actividad
-                                        </h4>
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="text-gray-600">Máquinas activas:</span>
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold text-edit">
-                                                {fullData?.total_instalaciones || cliente.total_instalaciones || 0}
-                                            </span>
-                                        </div>
-
-                                        <div className="grid grid-cols-3 gap-2">
-                                            <div className={`p-2 rounded text-center bg-edit-hover/10 border border-edit`}>
-                                                <div className="text-xs text-text truncate">Inicio del contrato</div>
-                                                <div className="text-sm font-bold text-edit">
-                                                    {contrato ? formatFecha(contrato.fecha_inicio) : '-'}
-                                                </div>
-                                            </div>
-                                            <IndicadorSiNo etiqueta="Software" activo={cliente.tiene_software_control} color="indigo" />
-                                            <IndicadorSiNo etiqueta="Renta" activo={cliente.tiene_renta} color="blue" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <h4 className="text-sm font-semibold text-text uppercase tracking-wider mb-3">
-                                    Límites y costos del contrato
-                                </h4>
-                                {contrato ? (
-                                    <TablaContrato contrato={contrato} />
-                                ) : (
-                                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                                        <p className="text-sm text-yellow-700">Este cliente no tiene un contrato activo registrado.</p>
-                                    </div>
-                                )}
-
-                                <h4 className="text-sm font-semibold text-text uppercase tracking-wider mb-3">
-                                    Instalaciones activas
-                                </h4>
-                                <div className="grid grid-cols-1 gap-3 mb-6">
-                                    <ListaInstalaciones instalaciones={fullData?.instalaciones_activas} />
-                                </div>
-                            </>
-                        )}
+                        {renderContenido()}
                     </div>
 
                     <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3">

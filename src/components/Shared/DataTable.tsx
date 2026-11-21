@@ -9,6 +9,13 @@ interface Column<T> {
   align?: 'left' | 'center' | 'right';
 }
 
+// Clase de Tailwind según la alineación de la columna (izquierda si no se indica)
+const CLASE_ALINEACION: Record<NonNullable<Column<unknown>['align']>, string> = {
+  left: 'text-left',
+  center: 'text-center',
+  right: 'text-right',
+};
+
 interface DataTableProps<T> {
   title: string;
   columns: Column<T>[];
@@ -67,12 +74,7 @@ function DataTable<T>({
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className={`px-3 md:px-6 py-3 text-sm font-semibold text-gray-700 ${column.align === 'center'
-                    ? 'text-center'
-                    : column.align === 'right'
-                      ? 'text-right'
-                      : 'text-left'
-                    }`}
+                  className={`px-3 md:px-6 py-3 text-sm font-semibold text-gray-700 ${CLASE_ALINEACION[column.align ?? 'left']}`}
                 >
                   {column.label}
                 </th>
@@ -107,12 +109,7 @@ function DataTable<T>({
                     {columns.map((column) => (
                       <td
                         key={column.key}
-                        className={`px-3 md:px-6 py-4 text-sm ${column.align === 'center'
-                          ? 'text-center'
-                          : column.align === 'right'
-                            ? 'text-right'
-                            : 'text-left'
-                          }`}
+                        className={`px-3 md:px-6 py-4 text-sm ${CLASE_ALINEACION[column.align ?? 'left']}`}
                       >
                         {column.render
                           ? column.render(item)

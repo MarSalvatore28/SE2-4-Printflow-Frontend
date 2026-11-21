@@ -127,58 +127,71 @@ interface SeccionContratoProps {
     tieneRenta: boolean;
 }
 
-const SeccionContrato = ({ loadingContratos, contratos, formData, handleSelectContrato, selectedContrato, tieneRenta }: SeccionContratoProps) => (
-    <div className="p-6 border-b border-gray-100 last:border-0 rounded-lg bg-white shadow-sm">
-        <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <AssignmentIcon className="text-secondary" />
-            Contrato
-        </h3>
-        <div className="input-container">
-            <label className="input-label">Seleccionar contrato *</label>
-            <div className="input-wrapper">
-                {loadingContratos ? (
-                    <div className="p-3 bg-gray-50 text-gray-600 border border-gray-200 rounded-md text-sm">
-                        Cargando contratos...
-                    </div>
-                ) : contratos.length > 0 ? (
-                    <select
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
-                        value={formData.contrato_id || ''}
-                        onChange={(e) => handleSelectContrato(Number(e.target.value))}
-                        required
-                    >
-                        <option value="">-- Seleccione un contrato --</option>
-                        {contratos.map((contrato) => (
-                            <option key={contrato.id_contrato} value={contrato.id_contrato}>
-                                Contrato {contrato.id_contrato} - Desde {formatFechaLocal(contrato.fecha_inicio)}
-                                {contrato.fecha_fin ? ` hasta ${formatFechaLocal(contrato.fecha_fin)}` : ' (Vigente)'}
-                            </option>
-                        ))}
-                    </select>
-                ) : (
-                    <div className="p-3 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-md text-sm font-medium flex items-center gap-2">
-                        <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                        Este cliente no tiene contratos activos.
+const SeccionContrato = ({ loadingContratos, contratos, formData, handleSelectContrato, selectedContrato, tieneRenta }: SeccionContratoProps) => {
+    // Selector: cargando, la lista de contratos o el aviso de que no hay
+    const renderSelector = () => {
+        if (loadingContratos) {
+            return (
+                <div className="p-3 bg-gray-50 text-gray-600 border border-gray-200 rounded-md text-sm">
+                    Cargando contratos...
+                </div>
+            );
+        }
+        if (contratos.length > 0) {
+            return (
+                <select
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+                    value={formData.contrato_id || ''}
+                    onChange={(e) => handleSelectContrato(Number(e.target.value))}
+                    required
+                >
+                    <option value="">-- Seleccione un contrato --</option>
+                    {contratos.map((contrato) => (
+                        <option key={contrato.id_contrato} value={contrato.id_contrato}>
+                            Contrato {contrato.id_contrato} - Desde {formatFechaLocal(contrato.fecha_inicio)}
+                            {contrato.fecha_fin ? ` hasta ${formatFechaLocal(contrato.fecha_fin)}` : ' (Vigente)'}
+                        </option>
+                    ))}
+                </select>
+            );
+        }
+        return (
+            <div className="p-3 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-md text-sm font-medium flex items-center gap-2">
+                <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                Este cliente no tiene contratos activos.
+            </div>
+        );
+    };
+
+    return (
+        <div className="p-6 border-b border-gray-100 last:border-0 rounded-lg bg-white shadow-sm">
+            <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <AssignmentIcon className="text-secondary" />
+                Contrato
+            </h3>
+            <div className="input-container">
+                <label className="input-label">Seleccionar contrato *</label>
+                <div className="input-wrapper">
+                    {renderSelector()}
+                </div>
+                {selectedContrato && (
+                    <div className="mt-3 p-3 bg-edit/10 border border-edit-hover rounded-md space-y-1">
+                        <p className="text-sm font-semibold text-text">
+                            Contrato #{selectedContrato.id_contrato}
+                            {tieneRenta && (
+                                <span className="ml-2 px-2 py-0.5 bg-secondary text-white text-xs rounded-full font-normal">
+                                    Incluye renta
+                                </span>
+                            )}
+                        </p>
                     </div>
                 )}
             </div>
-            {selectedContrato && (
-                <div className="mt-3 p-3 bg-edit/10 border border-edit-hover rounded-md space-y-1">
-                    <p className="text-sm font-semibold text-text">
-                        Contrato #{selectedContrato.id_contrato}
-                        {tieneRenta && (
-                            <span className="ml-2 px-2 py-0.5 bg-secondary text-white text-xs rounded-full font-normal">
-                                Incluye renta
-                            </span>
-                        )}
-                    </p>
-                </div>
-            )}
         </div>
-    </div>
-);
+    );
+};
 
 interface SeccionAreaProps {
     loadingAreas: boolean;
@@ -187,42 +200,55 @@ interface SeccionAreaProps {
     handleSelectArea: (areaId: number) => void;
 }
 
-const SeccionArea = ({ loadingAreas, areas, formData, handleSelectArea }: SeccionAreaProps) => (
-    <div className="p-6 border-b border-gray-100 last:border-0 rounded-lg bg-white shadow-sm">
-        <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <LocationOnIcon className="text-secondary" />
-            Ubicación
-        </h3>
-        <div className="input-container">
-            <label className="input-label">Seleccionar área *</label>
-            <div className="input-wrapper">
-                {loadingAreas ? (
-                    <div className="p-3 bg-gray-50 text-gray-600 border border-gray-200 rounded-md text-sm">
-                        Cargando áreas...
-                    </div>
-                ) : areas.length > 0 ? (
-                    <select
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
-                        value={formData.area_id || ''}
-                        onChange={(e) => handleSelectArea(Number(e.target.value))}
-                        required
-                    >
-                        <option value="">-- Seleccione un área --</option>
-                        {areas.map((area) => (
-                            <option key={area.id_area} value={area.id_area}>
-                                {area.area_nombre} {area.descripcion ? `- ${area.descripcion}` : ''}
-                            </option>
-                        ))}
-                    </select>
-                ) : (
-                    <div className="p-3 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-md text-sm font-medium">
-                        Este cliente no tiene áreas creadas.
-                    </div>
-                )}
+const SeccionArea = ({ loadingAreas, areas, formData, handleSelectArea }: SeccionAreaProps) => {
+    // Selector: cargando, la lista de áreas o el aviso de que no hay
+    const renderSelector = () => {
+        if (loadingAreas) {
+            return (
+                <div className="p-3 bg-gray-50 text-gray-600 border border-gray-200 rounded-md text-sm">
+                    Cargando áreas...
+                </div>
+            );
+        }
+        if (areas.length > 0) {
+            return (
+                <select
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+                    value={formData.area_id || ''}
+                    onChange={(e) => handleSelectArea(Number(e.target.value))}
+                    required
+                >
+                    <option value="">-- Seleccione un área --</option>
+                    {areas.map((area) => (
+                        <option key={area.id_area} value={area.id_area}>
+                            {area.area_nombre} {area.descripcion ? `- ${area.descripcion}` : ''}
+                        </option>
+                    ))}
+                </select>
+            );
+        }
+        return (
+            <div className="p-3 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-md text-sm font-medium">
+                Este cliente no tiene áreas creadas.
+            </div>
+        );
+    };
+
+    return (
+        <div className="p-6 border-b border-gray-100 last:border-0 rounded-lg bg-white shadow-sm">
+            <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <LocationOnIcon className="text-secondary" />
+                Ubicación
+            </h3>
+            <div className="input-container">
+                <label className="input-label">Seleccionar área *</label>
+                <div className="input-wrapper">
+                    {renderSelector()}
+                </div>
             </div>
         </div>
-    </div>
-);
+    );
+};
 
 interface CamposMaquinaUnicaProps {
     formData: InstalacionFormData;

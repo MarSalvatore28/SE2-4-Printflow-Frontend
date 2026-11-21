@@ -219,6 +219,133 @@ const MaquinasPage = () => {
         ? { onEdit: abrirEdicion, onToggleActive: (m: Maquina) => setConfirmar({ abierto: true, maquina: m }) }
         : {};
 
+    // Lista: cargando, el error o las máquinas
+    const renderLista = () => {
+        if (loading) {
+            return (
+                <div className="flex justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                </div>
+            );
+        }
+        if (errorCarga) {
+            return (
+                <div role="alert" className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100">
+                    {errorCarga}
+                </div>
+            );
+        }
+        return (
+            <MaquinaList
+                key={`${filtroId ?? ''}|${filtroTermino}|${mostrarInactivas}`}
+                maquinas={maquinasVisibles}
+                {...accionesLista}
+            />
+        );
+    };
+
+    // Contenido de la pestaña: reemplazos, formulario o la lista
+    const renderPestana = () => {
+        if (activeTab === 'reemplazos') {
+            return (
+                <ReemplazosSeccion puedeRegistrar={puedeEditarCatalogos} onRegistrado={recargarMaquinas} />
+            );
+        }
+        if (activeTab === 'formulario') {
+            return (
+                <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-8">
+                    <EncabezadoFormulario editando={editando} />
+
+                    <hr className="border-gray-200 mb-8" />
+
+                    <MaquinaForm
+                        key={formKey}
+                        maquina={editando}
+                        modelos={modelos}
+                        tipos={tipos}
+                        formatos={formatos}
+                        isSubmitting={guardando}
+                        errorApi={errorForm}
+                        onSave={guardar}
+                        onCancel={cancelarFormulario}
+                        onCrearModelo={crearNuevoModelo}
+                    />
+                </div>
+            );
+        }
+        return (
+            <div className="flex flex-col gap-6">
+                <div className="flex flex-col md:flex-row gap-4 items-end bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <div className="flex-1 w-full">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Buscar máquina (serie, modelo o IP)
+                        </label>
+                        <BuscadorInteligente<Maquina>
+                            key={buscadorKey}
+                            placeholder="Ej: SIMA0001, Ricoh, 10.20.1.11..."
+                            buscarFn={searchMaquinas}
+                            itemsCompletos={maquinas}
+                            getItemKey={(m) => m.id_maquina}
+                            getItemLabel={(m) => m.serie}
+                            onSeleccionar={(m) => {
+                                setFiltroId(m.id_maquina);
+                                setFiltroTermino('');
+                            }}
+                            onEnter={(t) => { setFiltroId(null); setFiltroTermino(t.trim()); }}
+                            onSearchClick={(t) => { setFiltroId(null); setFiltroTermino(t.trim()); }}
+                            onClear={() => { setFiltroId(null); setFiltroTermino(''); }}
+                            onInputChange={() => { if (filtroId) setFiltroId(null); }}
+                            renderItem={(m) => <ItemBuscador maquina={m} />}
+                        />
+                    </div>
+
+                    <div className="flex items-center h-[42px] px-4 bg-white rounded-lg border border-gray-300">
+                        <input
+                            id="mostrarInactivas"
+                            type="checkbox"
+                            checked={mostrarInactivas}
+                            onChange={(e) => setMostrarInactivas(e.target.checked)}
+                            className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2 cursor-pointer"
+                        />
+                        <label htmlFor="mostrarInactivas" className="ml-2 text-sm font-medium text-gray-700 cursor-pointer select-none">
+                            Mostrar inactivas
+                        </label>
+                    </div>
+
+                    <button
+                        onClick={() => { limpiarFiltros(); void recargarMaquinas(); }}
+                        className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium h-[42px]"
+                    >
+                        Ver todas
+                    </button>
+                </div>
+
+                <div className="flex flex-wrap gap-3 text-sm text-gray-600">
+                    <span><span className="font-semibold text-gray-900">{totales.activas}</span> activas</span>
+                    <span>·</span>
+                    <span><span className="font-semibold text-gray-900">{totales.asignadas}</span> con asignación vigente</span>
+                    <span>·</span>
+                    <span><span className="font-semibold text-gray-900">{totales.inactivas}</span> inactivas</span>
+                    {(filtroId || filtroTermino) && (
+                        <>
+                            <span>·</span>
+                            <button onClick={limpiarFiltros} className="text-edit hover:underline">Quitar filtro</button>
+                        </>
+                    )}
+                </div>
+
+                {aviso && (
+                    <output className="p-3 bg-green-50 text-green-800 rounded-lg border border-green-200 flex justify-between items-center">
+                        <span>{aviso}</span>
+                        <button onClick={() => setAviso(null)} className="text-green-700 hover:text-green-900 text-sm" aria-label="Cerrar aviso">✕</button>
+                    </output>
+                )}
+
+                {renderLista()}
+            </div>
+        );
+    };
+
     return (
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
             <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Máquinas</h1>
@@ -239,112 +366,7 @@ const MaquinasPage = () => {
             </div>
 
             <div className="py-4 md:p-8 min-h-[400px]">
-                {activeTab === 'reemplazos' ? (
-                    <ReemplazosSeccion puedeRegistrar={puedeEditarCatalogos} onRegistrado={recargarMaquinas} />
-                ) : activeTab === 'formulario' ? (
-                    <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-8">
-                        <EncabezadoFormulario editando={editando} />
-
-                        <hr className="border-gray-200 mb-8" />
-
-                        <MaquinaForm
-                            key={formKey}
-                            maquina={editando}
-                            modelos={modelos}
-                            tipos={tipos}
-                            formatos={formatos}
-                            isSubmitting={guardando}
-                            errorApi={errorForm}
-                            onSave={guardar}
-                            onCancel={cancelarFormulario}
-                            onCrearModelo={crearNuevoModelo}
-                        />
-                    </div>
-                ) : (
-                    <div className="flex flex-col gap-6">
-                        <div className="flex flex-col md:flex-row gap-4 items-end bg-gray-50 p-4 rounded-lg border border-gray-200">
-                            <div className="flex-1 w-full">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Buscar máquina (serie, modelo o IP)
-                                </label>
-                                <BuscadorInteligente<Maquina>
-                                    key={buscadorKey}
-                                    placeholder="Ej: SIMA0001, Ricoh, 10.20.1.11..."
-                                    buscarFn={searchMaquinas}
-                                    itemsCompletos={maquinas}
-                                    getItemKey={(m) => m.id_maquina}
-                                    getItemLabel={(m) => m.serie}
-                                    onSeleccionar={(m) => {
-                                        setFiltroId(m.id_maquina);
-                                        setFiltroTermino('');
-                                    }}
-                                    onEnter={(t) => { setFiltroId(null); setFiltroTermino(t.trim()); }}
-                                    onSearchClick={(t) => { setFiltroId(null); setFiltroTermino(t.trim()); }}
-                                    onClear={() => { setFiltroId(null); setFiltroTermino(''); }}
-                                    onInputChange={() => { if (filtroId) setFiltroId(null); }}
-                                    renderItem={(m) => <ItemBuscador maquina={m} />}
-                                />
-                            </div>
-
-                            <div className="flex items-center h-[42px] px-4 bg-white rounded-lg border border-gray-300">
-                                <input
-                                    id="mostrarInactivas"
-                                    type="checkbox"
-                                    checked={mostrarInactivas}
-                                    onChange={(e) => setMostrarInactivas(e.target.checked)}
-                                    className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2 cursor-pointer"
-                                />
-                                <label htmlFor="mostrarInactivas" className="ml-2 text-sm font-medium text-gray-700 cursor-pointer select-none">
-                                    Mostrar inactivas
-                                </label>
-                            </div>
-
-                            <button
-                                onClick={() => { limpiarFiltros(); void recargarMaquinas(); }}
-                                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium h-[42px]"
-                            >
-                                Ver todas
-                            </button>
-                        </div>
-
-                        <div className="flex flex-wrap gap-3 text-sm text-gray-600">
-                            <span><span className="font-semibold text-gray-900">{totales.activas}</span> activas</span>
-                            <span>·</span>
-                            <span><span className="font-semibold text-gray-900">{totales.asignadas}</span> con asignación vigente</span>
-                            <span>·</span>
-                            <span><span className="font-semibold text-gray-900">{totales.inactivas}</span> inactivas</span>
-                            {(filtroId || filtroTermino) && (
-                                <>
-                                    <span>·</span>
-                                    <button onClick={limpiarFiltros} className="text-edit hover:underline">Quitar filtro</button>
-                                </>
-                            )}
-                        </div>
-
-                        {aviso && (
-                            <output className="p-3 bg-green-50 text-green-800 rounded-lg border border-green-200 flex justify-between items-center">
-                                <span>{aviso}</span>
-                                <button onClick={() => setAviso(null)} className="text-green-700 hover:text-green-900 text-sm" aria-label="Cerrar aviso">✕</button>
-                            </output>
-                        )}
-
-                        {loading ? (
-                            <div className="flex justify-center py-12">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                            </div>
-                        ) : errorCarga ? (
-                            <div role="alert" className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100">
-                                {errorCarga}
-                            </div>
-                        ) : (
-                            <MaquinaList
-                                key={`${filtroId ?? ''}|${filtroTermino}|${mostrarInactivas}`}
-                                maquinas={maquinasVisibles}
-                                {...accionesLista}
-                            />
-                        )}
-                    </div>
-                )}
+                {renderPestana()}
             </div>
 
             <ModalConfirmacion

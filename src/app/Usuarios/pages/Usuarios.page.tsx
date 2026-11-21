@@ -190,6 +190,33 @@ const UsuariosPage = () => {
 
     const textosEstado = textosCambioEstado(confirmar.usuario);
 
+    // Lista: cargando, el error o los usuarios
+    const renderLista = () => {
+        if (loading) {
+            return (
+                <div className="flex justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                </div>
+            );
+        }
+        if (errorCarga) {
+            return (
+                <div role="alert" className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100">
+                    {errorCarga}
+                </div>
+            );
+        }
+        return (
+            <UsuarioList
+                key={`${filtroId ?? ''}|${filtroTermino}|${mostrarInactivos}`}
+                usuarios={usuariosVisibles}
+                idSesion={idSesion}
+                onEdit={abrirEdicion}
+                onToggleActive={(u) => setConfirmar({ abierto: true, usuario: u })}
+            />
+        );
+    };
+
     return (
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
             <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Usuarios</h1>
@@ -297,23 +324,7 @@ const UsuariosPage = () => {
                             </output>
                         )}
 
-                        {loading ? (
-                            <div className="flex justify-center py-12">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                            </div>
-                        ) : errorCarga ? (
-                            <div role="alert" className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100">
-                                {errorCarga}
-                            </div>
-                        ) : (
-                            <UsuarioList
-                                key={`${filtroId ?? ''}|${filtroTermino}|${mostrarInactivos}`}
-                                usuarios={usuariosVisibles}
-                                idSesion={idSesion}
-                                onEdit={abrirEdicion}
-                                onToggleActive={(u) => setConfirmar({ abierto: true, usuario: u })}
-                            />
-                        )}
+                        {renderLista()}
                     </div>
                 )}
             </div>

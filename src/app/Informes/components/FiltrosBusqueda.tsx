@@ -141,6 +141,9 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
 
     const hayFiltrosActivos = selectedCliente || selectedMes || selectedAño || selectedMaquina || selectedArea;
     const consolidadoListo = selectedCliente && selectedMes && selectedAño;
+    // Máquina que muestra el buscador: la elegida en él o, si no, la que llega en selectedMaquina
+    const maquinaInicial = selectedMaquinaObj
+        ?? (selectedMaquina ? maquinasUnicas.find(m => (m.id_maquina ?? m.idMaquina) === selectedMaquina) : undefined);
 
     return (
         <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl mb-6 border border-gray-200 shadow-sm">
@@ -275,13 +278,7 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
                               )
                             : []
                         }
-                        initialValue={selectedMaquinaObj
-                            ? `${selectedMaquinaObj.modelo} - ${selectedMaquinaObj.serie}`
-                            : selectedMaquina
-                                ? (maquinasUnicas.find(m => (m.id_maquina ?? m.idMaquina) === selectedMaquina)
-                                    ? `${maquinasUnicas.find(m => (m.id_maquina ?? m.idMaquina) === selectedMaquina)!.modelo} - ${maquinasUnicas.find(m => (m.id_maquina ?? m.idMaquina) === selectedMaquina)!.serie}`
-                                    : '')
-                                : ''}
+                        initialValue={maquinaInicial ? `${maquinaInicial.modelo} - ${maquinaInicial.serie}` : ''}
                         renderItem={(maquina) => (
                             <div className="flex flex-col py-1">
                                 <span className="font-semibold text-gray-900 text-sm">{maquina.modelo}</span>

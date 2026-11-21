@@ -13,6 +13,17 @@ interface MaquinaListProps {
 
 const POR_PAGINA = 10;
 
+// Tipo de impresión: Color, B/N o un guion si no tiene
+const etiquetaTipo = (m: Maquina) => {
+    if (m.tipo_impresion === 'Color') {
+        return <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-secondary text-white">Color</span>;
+    }
+    if (m.tipo_impresion) {
+        return <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-gray-500 text-white">B/N</span>;
+    }
+    return <span className="text-gray-400">—</span>;
+};
+
 const columns = [
     {
         key: 'serie',
@@ -30,15 +41,7 @@ const columns = [
         key: 'tipo_impresion',
         label: 'Tipo',
         align: 'center' as const,
-        render: (m: Maquina) => (
-            m.tipo_impresion === 'Color' ? (
-                <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-secondary text-white">Color</span>
-            ) : m.tipo_impresion ? (
-                <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-gray-500 text-white">B/N</span>
-            ) : (
-                <span className="text-gray-400">—</span>
-            )
-        )
+        render: (m: Maquina) => etiquetaTipo(m)
     },
     {
         key: 'asignacion',

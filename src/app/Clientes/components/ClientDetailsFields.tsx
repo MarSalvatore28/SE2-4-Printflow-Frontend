@@ -73,6 +73,13 @@ export const ClientDetailsFields: React.FC<ClientDetailsFieldsProps> = ({ formDa
     };
 
     const rucValidation = validateRuc(formData.ruc || '');
+    // Borde del RUC: rojo si es inválido, verde si es válido, gris si está vacío
+    let claseBordeRuc = 'border-gray-300 focus:ring-primary focus:border-primary';
+    if (formData.ruc) {
+        claseBordeRuc = rucValidation.isValid
+            ? 'border-green-500 focus:border-green-500 focus:ring-green-200'
+            : 'border-red-500 focus:border-red-500 focus:ring-red-200';
+    }
 
     return (
         // Quitamos los paddings extra y el título. Dejamos solo el Grid principal.
@@ -111,12 +118,7 @@ export const ClientDetailsFields: React.FC<ClientDetailsFieldsProps> = ({ formDa
                     <input
                         type="text"
                         name="ruc"
-                        className={`input-field font-mono w-full rounded-md border px-4 py-2 focus:outline-none focus:ring-2 transition-all ${formData.ruc && !rucValidation.isValid
-                                ? 'border-red-500 focus:border-red-500 focus:ring-red-200'
-                                : formData.ruc && rucValidation.isValid
-                                    ? 'border-green-500 focus:border-green-500 focus:ring-green-200'
-                                    : 'border-gray-300 focus:ring-primary focus:border-primary'
-                            }`}
+                        className={`input-field font-mono w-full rounded-md border px-4 py-2 focus:outline-none focus:ring-2 transition-all ${claseBordeRuc}`}
                         placeholder="01XXXXXXXXX001"
                         value={formData.ruc || ''}
                         onChange={handleRucChange}

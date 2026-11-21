@@ -133,9 +133,11 @@ const AreaPage = () => {
 
     const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
+        const esNumerico = name === 'activo' || name === 'cliente_id';
+        const numero = value === '' ? undefined : Number(value);
         setFormData(prev => ({
             ...prev,
-            [name]: (name === 'activo' || name === 'cliente_id') ? (value !== '' ? Number(value) : undefined) : value
+            [name]: esNumerico ? numero : value
         }));
     };
 
@@ -301,6 +303,30 @@ const AreaPage = () => {
         ? { onEdit: handleEdit, onDelete: handleDelete, onToggleActive: handleToggleActive }
         : {};
 
+    // Lista: cargando, el error o las áreas
+    const renderLista = () => {
+        if (loading) {
+            return (
+                <div className="flex justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                </div>
+            );
+        }
+        if (error) {
+            return (
+                <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 italic">
+                    {error}
+                </div>
+            );
+        }
+        return (
+            <AreaList
+                areas={displayedAreas}
+                {...accionesLista}
+            />
+        );
+    };
+
     return (
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
             <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de áreas</h1>
@@ -402,20 +428,7 @@ const AreaPage = () => {
                         </div>
 
                         {/* Lista */}
-                        {loading ? (
-                            <div className="flex justify-center py-12">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                            </div>
-                        ) : error ? (
-                            <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 italic">
-                                {error}
-                            </div>
-                        ) : (
-                            <AreaList
-                                areas={displayedAreas}
-                                {...accionesLista}
-                            />
-                        )}
+                        {renderLista()}
                     </div>
                 )}
             </div>

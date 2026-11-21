@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FC } from 'react';
+import { useEffect, useRef, useState, type FC, type ReactNode } from 'react';
 import { Plus, X } from 'lucide-react';
 import type {
     Maquina,
@@ -114,6 +114,14 @@ export const MaquinaForm: FC<MaquinaFormProps> = ({
 
     const serieNormalizada = normalizarSerie(valores.serie);
     const modelosVisibles = modelos.filter(m => m.activo || String(m.id_modelo) === valores.modelo_id);
+    const textoGuardar = maquina ? 'Actualizar máquina' : 'Guardar máquina';
+    // Bajo la serie: el error, o cómo se guardará si se normaliza
+    let avisoSerie: ReactNode = null;
+    if (errores.serie) {
+        avisoSerie = <p className="mt-1 text-sm text-red-600">{errores.serie}</p>;
+    } else if (serieNormalizada && serieNormalizada !== valores.serie) {
+        avisoSerie = <p className="mt-1 text-xs text-gray-500">Se guardará como <span className="font-mono font-semibold">{serieNormalizada}</span></p>;
+    }
 
     return (
         <div className="flex flex-col gap-8">
@@ -147,11 +155,7 @@ export const MaquinaForm: FC<MaquinaFormProps> = ({
                         onChange={(e) => cambiar('serie', e.target.value)}
                         maxLength={60}
                     />
-                    {errores.serie ? (
-                        <p className="mt-1 text-sm text-red-600">{errores.serie}</p>
-                    ) : serieNormalizada && serieNormalizada !== valores.serie ? (
-                        <p className="mt-1 text-xs text-gray-500">Se guardará como <span className="font-mono font-semibold">{serieNormalizada}</span></p>
-                    ) : null}
+                    {avisoSerie}
                 </div>
 
                 <div>
@@ -276,7 +280,7 @@ export const MaquinaForm: FC<MaquinaFormProps> = ({
                             Guardando...
                         </>
                     ) : (
-                        maquina ? 'Actualizar máquina' : 'Guardar máquina'
+                        textoGuardar
                     )}
                 </button>
             </div>

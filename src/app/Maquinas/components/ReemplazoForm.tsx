@@ -54,11 +54,21 @@ const filtrar = (lista: Maquina[], termino: string) => {
     });
 };
 
+// Bajo el campo: el error, o si no hay error la ayuda
+const textoBajoCampo = (error: string | undefined, ayuda: ReactNode) => {
+    if (error) return <p className="mt-1 text-sm text-red-600">{error}</p>;
+    if (ayuda) return <p className="mt-1 text-xs text-gray-500">{ayuda}</p>;
+    return null;
+};
+
+// B/N en lugar de BN en las etiquetas
+const etiquetaTipo = (tipo: string) => (tipo === 'BN' ? 'B/N' : tipo);
+
 const Campo: FC<{ id: string; label: string; error?: string; ayuda?: ReactNode; children: ReactNode }> = ({ id, label, error, ayuda, children }) => (
     <div>
         <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
         {children}
-        {error ? <p className="mt-1 text-sm text-red-600">{error}</p> : ayuda ? <p className="mt-1 text-xs text-gray-500">{ayuda}</p> : null}
+        {textoBajoCampo(error, ayuda)}
     </div>
 );
 
@@ -149,7 +159,7 @@ export const ReemplazoForm: FC<ReemplazoFormProps> = ({ maquinas, tipos, isSubmi
             <span className="font-semibold text-gray-900 text-sm font-mono">{m.serie}</span>
             <span className="text-xs text-gray-500">
                 {m.modelo || 'Sin modelo'}
-                {m.tipo_impresion ? ` · ${m.tipo_impresion === 'BN' ? 'B/N' : m.tipo_impresion}` : ''}
+                {m.tipo_impresion ? ` · ${etiquetaTipo(m.tipo_impresion)}` : ''}
                 {m.cliente_nombre ? ` · ${m.cliente_nombre}` : ''}
                 {m.area_nombre ? ` · ${m.area_nombre}` : ''}
                 {m.ip ? ` · ${m.ip}` : ''}

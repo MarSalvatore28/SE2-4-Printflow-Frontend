@@ -555,6 +555,36 @@ const NotificacionesPage = () => {
     },
   ];
 
+  // Contenido: cargando, el error o la pestaña elegida
+  const renderContenido = () => {
+    if (loading) {
+      return (
+        <div className="flex justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
+      );
+    }
+    if (error) {
+      return (
+        <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 flex items-center gap-2">
+          <AlertCircle size={20} />
+          {error}
+        </div>
+      );
+    }
+    return (
+      <DataTable<Notificacion>
+        title={TEXTOS_TABLA[activeTab].titulo}
+        columns={columns}
+        data={filteredNotificaciones}
+        getItemId={(notif) => notif.id_notificacion}
+        emptyMessage={TEXTOS_TABLA[activeTab].vacia}
+        rowsPerPage={10}
+        showActions={false}
+      />
+    );
+  };
+
   return (
     <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
       <div className="flex items-center justify-between mb-6">
@@ -681,26 +711,7 @@ const NotificacionesPage = () => {
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-        </div>
-      ) : error ? (
-        <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 flex items-center gap-2">
-          <AlertCircle size={20} />
-          {error}
-        </div>
-      ) : (
-        <DataTable<Notificacion>
-          title={TEXTOS_TABLA[activeTab].titulo}
-          columns={columns}
-          data={filteredNotificaciones}
-          getItemId={(notif) => notif.id_notificacion}
-          emptyMessage={TEXTOS_TABLA[activeTab].vacia}
-          rowsPerPage={10}
-          showActions={false}
-        />
-      )}
+      {renderContenido()}
       </>
       )}
 

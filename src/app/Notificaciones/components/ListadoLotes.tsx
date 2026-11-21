@@ -48,6 +48,7 @@ export const ListadoLotes = ({ recarga, onVerDetalle }: ListadoLotesProps) => {
 
   const rangoInvalido = Boolean(desde && hasta && desde > hasta);
   const hayFiltros = Boolean(estado || cliente || desde || hasta);
+  const sufijoFiltros = hayFiltros ? ' con los filtros aplicados' : '';
 
   useEffect(() => {
     fetchAllClientes()
@@ -165,6 +166,36 @@ export const ListadoLotes = ({ recarga, onVerDetalle }: ListadoLotesProps) => {
   const etiquetaCampo = 'block text-sm font-medium text-gray-700 mb-2';
   const campo = 'w-full h-[42px] px-3 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary';
 
+  // Lotes: cargando, el error o la tabla
+  const renderLotes = () => {
+    if (cargando) {
+      return (
+        <div className="flex justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
+      );
+    }
+    if (error) {
+      return (
+        <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 flex items-center gap-2">
+          <AlertCircle size={20} />
+          {error}
+        </div>
+      );
+    }
+    return (
+      <DataTable<Lote>
+        title="Lotes recibidos"
+        columns={columnas}
+        data={lotesOrdenados}
+        getItemId={(l) => l.id_lote}
+        emptyMessage={hayFiltros ? 'Ningún lote cumple los filtros.' : 'No hay lotes recibidos.'}
+        rowsPerPage={10}
+        showActions={false}
+      />
+    );
+  };
+
   return (
     <div>
       <div className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200" data-testid="filtros-lotes">
@@ -220,7 +251,7 @@ export const ListadoLotes = ({ recarga, onVerDetalle }: ListadoLotesProps) => {
           <span className={rangoInvalido ? 'text-red-600 font-medium' : 'text-gray-500'}>
             {rangoInvalido
               ? 'La fecha «desde» no puede ser posterior a la fecha «hasta».'
-              : `${lotes.length} lote(s)${hayFiltros ? ' con los filtros aplicados' : ''} · del más reciente al más antiguo`}
+              : `${lotes.length} lote(s)${sufijoFiltros} · del más reciente al más antiguo`}
           </span>
           {hayFiltros && (
             <button onClick={limpiarFiltros} className="text-gray-500 hover:text-red-600 flex items-center gap-1">
@@ -230,26 +261,7 @@ export const ListadoLotes = ({ recarga, onVerDetalle }: ListadoLotesProps) => {
         </div>
       </div>
 
-      {cargando ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-        </div>
-      ) : error ? (
-        <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 flex items-center gap-2">
-          <AlertCircle size={20} />
-          {error}
-        </div>
-      ) : (
-        <DataTable<Lote>
-          title="Lotes recibidos"
-          columns={columnas}
-          data={lotesOrdenados}
-          getItemId={(l) => l.id_lote}
-          emptyMessage={hayFiltros ? 'Ningún lote cumple los filtros.' : 'No hay lotes recibidos.'}
-          rowsPerPage={10}
-          showActions={false}
-        />
-      )}
+      {renderLotes()}
     </div>
   );
 };

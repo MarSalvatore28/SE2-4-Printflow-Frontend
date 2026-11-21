@@ -42,6 +42,8 @@ const inputClass = (conError: boolean) =>
     `w-full rounded-md border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${conError ? 'border-red-500' : 'border-gray-300'}`;
 
 const esBn = (a: InstalacionActivaCliente) => a.tipo_impresion === 'BN';
+// B/N en lugar de BN en las etiquetas
+const etiquetaTipo = (a: InstalacionActivaCliente) => (esBn(a) ? 'B/N' : a.tipo_impresion);
 
 // Cada palabra debe aparecer en la serie, el cliente, el área, la IP o el modelo
 const filtrar = (lista: InstalacionActivaCliente[], termino: string) => {
@@ -53,13 +55,33 @@ const filtrar = (lista: InstalacionActivaCliente[], termino: string) => {
     });
 };
 
+// Bajo el campo: el error, o si no hay error la ayuda
+const textoBajoCampo = (error: string | undefined, ayuda: ReactNode) => {
+    if (error) return <p className="mt-1 text-sm text-red-600">{error}</p>;
+    if (ayuda) return <p className="mt-1 text-xs text-gray-500">{ayuda}</p>;
+    return null;
+};
+
 const CampoForm: FC<{ id: string; label: string; error?: string; ayuda?: ReactNode; children: ReactNode }> = ({ id, label, error, ayuda, children }) => (
     <div>
         <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
         {children}
-        {error ? <p className="mt-1 text-sm text-red-600">{error}</p> : ayuda ? <p className="mt-1 text-xs text-gray-500">{ayuda}</p> : null}
+        {textoBajoCampo(error, ayuda)}
     </div>
 );
+
+// La última lectura aprobada: consultando (undefined), sin lecturas (null) o sus contadores
+const datoUltimaLectura = (ultima: LecturaAprobada | null | undefined) => {
+    if (ultima === undefined) {
+        return <dd className="text-gray-500 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Consultando…</dd>;
+    }
+    if (ultima === null) return <dd className="text-gray-600">Sin lecturas aprobadas.</dd>;
+    return (
+        <dd className="text-gray-900" data-testid="ultima-lectura">
+            {ultima.periodo}: B/N <span className="font-mono">{formatNumber(ultima.bn)}</span> · color <span className="font-mono">{formatNumber(ultima.color)}</span>
+        </dd>
+    );
+};
 
 // Asignación y última lectura aprobada de la máquina elegida
 const ReferenciaLectura: FC<{
@@ -76,7 +98,7 @@ const ReferenciaLectura: FC<{
                 <div>
                     <dt className="text-xs uppercase tracking-wide text-gray-500">Máquina</dt>
                     <dd className="font-mono font-semibold text-gray-900">{asignacion.serie}</dd>
-                    <dd className="text-gray-600">{asignacion.modelo_nombre || 'Sin modelo'}{asignacion.tipo_impresion ? ` · ${esBn(asignacion) ? 'B/N' : asignacion.tipo_impresion}` : ''}</dd>
+                    <dd className="text-gray-600">{asignacion.modelo_nombre || 'Sin modelo'}{asignacion.tipo_impresion ? ` · ${etiquetaTipo(asignacion)}` : ''}</dd>
                 </div>
                 <div>
                     <dt className="text-xs uppercase tracking-wide text-gray-500">Asignación</dt>
@@ -85,15 +107,7 @@ const ReferenciaLectura: FC<{
                 </div>
                 <div>
                     <dt className="text-xs uppercase tracking-wide text-gray-500">Última lectura aprobada{periodo ? ` antes de ${periodo}` : ''}</dt>
-                    {ultima === undefined ? (
-                        <dd className="text-gray-500 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Consultando…</dd>
-                    ) : ultima === null ? (
-                        <dd className="text-gray-600">Sin lecturas aprobadas.</dd>
-                    ) : (
-                        <dd className="text-gray-900" data-testid="ultima-lectura">
-                            {ultima.periodo}: B/N <span className="font-mono">{formatNumber(ultima.bn)}</span> · color <span className="font-mono">{formatNumber(ultima.color)}</span>
-                        </dd>
-                    )}
+                    {datoUltimaLectura(ultima)}
                 </div>
             </dl>
         )}
@@ -227,6 +241,7 @@ const LecturaManualPage = () => {
     // Aviso (no bloquea: la API decide) si un contador es menor que la última lectura aprobada
     const menorQueUltima = (campo: 'contador_bn' | 'contador_color', referencia: number | undefined) =>
         ultima && referencia !== undefined && esEntero(valores[campo]) && Number(valores[campo]) < referencia;
+    const ayudaColor = asignacion && esBn(asignacion) ? 'Impresora B/N: 0' : 'Total color (impresiones + copias)';
 
     return (
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4" data-testid="pantalla-lectura-manual">
@@ -306,7 +321,7 @@ const LecturaManualPage = () => {
                                 value={valores.contador_bn} onChange={(e) => cambiar('contador_bn', e.target.value)} />
                         </CampoForm>
                         <CampoForm id="lectura-color" label="Contador color *" error={errores.contador_color}
-                            ayuda={menorQueUltima('contador_color', ultima?.color) ? <span className="text-yellow-700">Es menor que la última lectura aprobada</span> : asignacion && esBn(asignacion) ? 'Impresora B/N: 0' : 'Total color (impresiones + copias)'}>
+                            ayuda={menorQueUltima('contador_color', ultima?.color) ? <span className="text-yellow-700">Es menor que la última lectura aprobada</span> : ayudaColor}>
                             <input id="lectura-color" inputMode="numeric" autoComplete="off" className={`${inputClass(!!errores.contador_color)} font-mono`}
                                 value={valores.contador_color} onChange={(e) => cambiar('contador_color', e.target.value)} />
                         </CampoForm>

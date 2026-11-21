@@ -275,6 +275,32 @@ const InstalacionesPage = () => {
 
     const displayedInstalaciones = filtrarInstalaciones(instalaciones, filterTerm);
 
+    // Lista: cargando, el error o las instalaciones
+    const renderLista = () => {
+        if (loading) {
+            return (
+                <div className="flex justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                </div>
+            );
+        }
+        if (error) {
+            return (
+                <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 italic">
+                    {error}
+                </div>
+            );
+        }
+        return (
+            <InstalacionesList
+                instalaciones={displayedInstalaciones}
+                onEdit={puedeEditarCatalogos ? handleEditInstalacion : undefined}
+                onRetirar={puedeEditarCatalogos ? handleRetirarInstalacion : undefined}
+                loading={loading}
+            />
+        );
+    };
+
     return (
         <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 mt-4">
             <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Instalaciones</h1>
@@ -367,22 +393,7 @@ const InstalacionesPage = () => {
                         </div>
 
                         {/* Lista */}
-                        {loading ? (
-                            <div className="flex justify-center py-12">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                            </div>
-                        ) : error ? (
-                            <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 italic">
-                                {error}
-                            </div>
-                        ) : (
-                            <InstalacionesList
-                                instalaciones={displayedInstalaciones}
-                                onEdit={puedeEditarCatalogos ? handleEditInstalacion : undefined}
-                                onRetirar={puedeEditarCatalogos ? handleRetirarInstalacion : undefined}
-                                loading={loading}
-                            />
-                        )}
+                        {renderLista()}
                     </div>
                 )}
             </div>

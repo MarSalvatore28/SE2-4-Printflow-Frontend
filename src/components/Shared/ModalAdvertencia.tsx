@@ -1,5 +1,6 @@
 import { AlertTriangle, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
+import { useDialogoAccesible } from '@hooks/useDialogoAccesible';
 
 interface ModalAdvertenciaProps {
     isOpen: boolean;
@@ -17,6 +18,9 @@ export default function ModalAdvertencia({
     buttonText = 'Entendido'
 }: ModalAdvertenciaProps) {
     const [isRendered, setIsRendered] = useState(false);
+    const dialogoRef = useRef<HTMLDivElement>(null);
+    const idTitulo = useId();
+    const idMensaje = useId();
 
     useEffect(() => {
         if (isOpen) {
@@ -26,6 +30,8 @@ export default function ModalAdvertencia({
             return () => clearTimeout(timer);
         }
     }, [isOpen]);
+
+    useDialogoAccesible(isOpen && isRendered, onClose, dialogoRef);
 
     if (!isRendered) return null;
 
@@ -64,12 +70,20 @@ export default function ModalAdvertencia({
             </style>
 
             <div
+                role="presentation"
                 className={`fixed inset-0 z-50 flex items-center justify-center bg-black transition-opacity duration-200 ${isOpen ? 'bg-opacity-50 anim-backdrop' : 'bg-opacity-0'}`}
-                onClick={onClose}
+                onClick={(e) => {
+                    if (e.target === e.currentTarget) onClose();
+                }}
             >
                 <div
-                    className={`bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transition-all duration-200 ${isOpen ? 'anim-modal opacity-100 scale-100' : 'opacity-0 scale-95 translate-y-4'}`}
-                    onClick={(e) => e.stopPropagation()}
+                    ref={dialogoRef}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby={idTitulo}
+                    aria-describedby={idMensaje}
+                    tabIndex={-1}
+                    className={`bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transition-all duration-200 focus:outline-none ${isOpen ? 'anim-modal opacity-100 scale-100' : 'opacity-0 scale-95 translate-y-4'}`}
                 >
                     <div className="flex justify-end p-4 pb-0">
                         <button
@@ -83,16 +97,16 @@ export default function ModalAdvertencia({
 
                     <div className="px-8 pb-8 pt-2">
                         <div className="flex justify-center mb-6">
-                            <div className="anim-icon bg-amber-100 text-amber-600 p-4 rounded-full shadow-inner">
+                            <div aria-hidden="true" className="anim-icon bg-amber-100 text-amber-600 p-4 rounded-full shadow-inner">
                                 <AlertTriangle className="w-12 h-12" />
                             </div>
                         </div>
 
-                        <h2 className="text-2xl font-bold text-gray-900 text-center mb-3">
+                        <h2 id={idTitulo} className="text-2xl font-bold text-gray-900 text-center mb-3">
                             {title}
                         </h2>
 
-                        <div className="text-gray-600 text-center mb-8 leading-relaxed font-medium">
+                        <div id={idMensaje} className="text-gray-600 text-center mb-8 leading-relaxed font-medium">
                             {message}
                         </div>
 

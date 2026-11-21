@@ -231,7 +231,7 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
                     <label htmlFor="informe-area" className="block text-sm font-semibold text-gray-700">Área <span className="font-normal text-gray-500">(opcional)</span></label>
                     <select
                         id="informe-area"
-                        value={selectedArea || ''}
+                        value={selectedArea ?? ''}
                         onChange={(e) => onAreaChange?.(e.target.value === '' ? null : Number(e.target.value))}
                         disabled={!selectedCliente || loadingAreas}
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg disabled:bg-gray-100"

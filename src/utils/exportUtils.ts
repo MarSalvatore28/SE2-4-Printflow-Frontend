@@ -49,6 +49,24 @@ const celdaXlsx = (c: Celda, estilo: EstiloFila): XLSX.CellObject => {
   return { t: "s", v: texto, s: { ...base, ...negrita } } as XLSX.CellObject;
 };
 
+/** Alto de las filas de título, cabecera y nota; las demás usan el alto por defecto. */
+const ALTURAS: Partial<Record<EstiloFila, XLSX.RowInfo>> = {
+  nota: { hpt: 28 },
+  cabecera: { hpt: 30 },
+  titulo: { hpt: 24 },
+};
+
+/**
+ * Celda de una fila, o null si va vacía. En la cabecera del informe la etiqueta va en negrita
+ * y la segunda columna sin estilo de borde.
+ */
+const celdaDeFila = (f: HojaExcel["filas"][number], c: number): XLSX.CellObject | null => {
+  const valor = f.celdas[c] ?? null;
+  if (f.estilo !== "etiqueta") return celdaXlsx(valor, f.estilo);
+  if (valor === null) return null;
+  return celdaXlsx(valor, c === 0 ? "etiqueta" : "vacia");
+};
+
 const hojaXlsx = (hoja: HojaExcel): XLSX.WorkSheet => {
   const ws: XLSX.WorkSheet = {};
   const merges: XLSX.Range[] = [];
@@ -59,18 +77,12 @@ const hojaXlsx = (hoja: HojaExcel): XLSX.WorkSheet => {
     const ancha = FILAS_ANCHAS.includes(f.estilo);
     const columnas = ancha ? hoja.columnas : f.celdas.length;
     for (let c = 0; c < columnas; c++) {
-      const valor = f.celdas[c] ?? null;
-      // En la cabecera del informe la etiqueta va en negrita y la segunda columna sin estilo de borde
-      if (valor === null && f.estilo === "etiqueta") continue;
-      if (c === 0 && f.estilo === "etiqueta") {
-        ws[XLSX.utils.encode_cell({ r, c })] = celdaXlsx(valor, "etiqueta");
-        continue;
-      }
-      ws[XLSX.utils.encode_cell({ r, c })] = celdaXlsx(valor, f.estilo === "etiqueta" ? "vacia" : f.estilo);
+      const celda = celdaDeFila(f, c);
+      if (celda) ws[XLSX.utils.encode_cell({ r, c })] = celda;
     }
     ultimaColumna = Math.max(ultimaColumna, columnas - 1);
     if (ancha && hoja.columnas > 1) merges.push({ s: { r, c: 0 }, e: { r, c: hoja.columnas - 1 } });
-    alturas[r] = f.estilo === "nota" ? { hpt: 28 } : f.estilo === "cabecera" ? { hpt: 30 } : f.estilo === "titulo" ? { hpt: 24 } : {};
+    alturas[r] = ALTURAS[f.estilo] ?? {};
   });
 
   ws["!ref"] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: Math.max(hoja.filas.length - 1, 0), c: Math.max(ultimaColumna, 0) } });

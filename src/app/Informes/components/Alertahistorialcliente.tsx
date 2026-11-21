@@ -141,7 +141,7 @@ export const AlertaHistorialCliente: React.FC<AlertaHistorialClienteProps> = ({
                                     <span className="text-gray-600 line-through">
                                         {cambio.anterior}
                                     </span>
-                                    <svg className="h-3 w-3 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg aria-hidden="true" className="h-3 w-3 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                     </svg>
                                     <span className="text-amber-900 font-medium">

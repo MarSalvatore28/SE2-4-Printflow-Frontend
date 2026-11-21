@@ -4,6 +4,7 @@ import { TablaDetalleConsolidado } from '@app/Clientes/components/TablaDetalleCo
 import { TablaDetalleUsuario } from '@app/Informes/components/TablaDetalleUsuario';
 import { AlertaHistorialCliente } from '@app/Informes/components/Alertahistorialcliente';
 import { ResumenConsolidadoCard } from '@app/Informes/components/ResumenConsolidadoCard';
+import { FacturacionPeriodoCard } from '@app/Informes/components/FacturacionPeriodoCard';
 import { exportToExcel, exportToPDF } from '@utils/exportUtils';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
@@ -37,23 +38,7 @@ const InformesPage = () => {
 
     const clienteActual = clientes.find(c => c.id_cliente === selectedCliente);
 
-    // Contrato - límites incluidos mensuales
-    const contratoCopiaBN = clienteActual?.impresiones_bn_incluidas || 0;
-    const contratoImpresionBN = 0;
-    const contratoCopiaColor = clienteActual?.impresiones_color_incluidas || 0;
-    const contratoImpresionColor = 0;
-
-    // Costo normal (precio por página dentro del límite incluido)
-    const costoNormalBN = parseFloat(String(clienteActual?.costo_impresion_bn || 0));
-    const costoNormalColor = parseFloat(String(clienteActual?.costo_impresion_color || 0));
-
-    // Costo excedente (precio por página que supera el límite)
-    const costoExcedenteCopiaBN = parseFloat(String(clienteActual?.costo_x_excedente_impresion_bn || 0));
-    const costoExcedenteImpresionBN = 0;
-    const costoExcedenteCopiaColor = parseFloat(String(clienteActual?.costo_x_excedente_impresion_color || 0));
-    const costoExcedenteImpresionColor = 0;
-
-    // Configuración de facturación del contrato
+    // Configuración de facturación del contrato (la usa el Excel)
     const printerBill = clienteActual?.printer_bill || 'Diferenciar B/N de Color';
 
     // --- Cálculo de fechas del periodo ---
@@ -208,25 +193,15 @@ const InformesPage = () => {
                         />
                     )}
 
+                    <FacturacionPeriodoCard
+                        facturacion={resumen.facturacion}
+                        montoTotalGeneral={resumen.monto_total_general}
+                    />
+
                     <div className='mb-4 text-lg font-semibold text-gray-900'>
                         <span className="block h-6">Resumen del consolidado:</span>
                     </div>
-                    <TablaDetalleConsolidado
-                        data={reportes}
-                        contratoCopiaBN={contratoCopiaBN}
-                        contratoImpresionBN={contratoImpresionBN}
-                        contratoCopiaColor={contratoCopiaColor}
-                        contratoImpresionColor={contratoImpresionColor}
-                        costoNormalBN={costoNormalBN}
-                        costoNormalColor={costoNormalColor}
-                        costoExcedenteCopiaBN={costoExcedenteCopiaBN}
-                        costoExcedenteImpresionBN={costoExcedenteImpresionBN}
-                        costoExcedenteCopiaColor={costoExcedenteCopiaColor}
-                        costoExcedenteImpresionColor={costoExcedenteImpresionColor}
-                        printerBill={printerBill}
-                        rentaEquipos={resumen?.renta_equipos || []}
-                        totalRenta={resumen?.total_renta || 0}
-                    />
+                    <TablaDetalleConsolidado data={reportes} />
                     <div className='mt-8 mb-4 text-lg font-semibold text-gray-900'>
                         <span className="block h-6">Detalles por dispositivo y usuario:</span>
                     </div>

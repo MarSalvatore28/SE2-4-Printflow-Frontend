@@ -38,9 +38,6 @@ const InformesPage = () => {
 
     const clienteActual = clientes.find(c => c.id_cliente === selectedCliente);
 
-    // Configuración de facturación del contrato (la usa el Excel)
-    const printerBill = clienteActual?.printer_bill || 'Diferenciar B/N de Color';
-
     // --- Cálculo de fechas del periodo ---
     // Fecha de inicio del periodo: la fecha más grande entre los contadores del periodo ANTERIOR
     // (fecha_corte_anterior en la data del consolidado)
@@ -71,15 +68,12 @@ const InformesPage = () => {
     };
 
     const exportParams = {
-        printerBill,
-        rentaEquipos: resumen?.renta_equipos || [],
-        totalRenta: resumen?.total_renta || 0,
         fechaInicio: formatFechaCabecera(fechaInicioRaw),
         fechaFin: formatFechaCabecera(fechaFinRaw)
     };
 
     return (
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
             <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de informes</h1>
 
             <FiltrosBusqueda
@@ -166,7 +160,7 @@ const InformesPage = () => {
                             {/* Botones de exportar en cabecera */}
                             <div className="flex items-center gap-2 shrink-0">
                                 <button
-                                    onClick={() => exportToExcel(reportes, clienteActual, `${selectedAño}-${selectedMes}`, transacciones, exportParams)}
+                                    onClick={() => exportToExcel(reportes, clienteActual, `${selectedAño}-${selectedMes}`, { resumen, transacciones, fechaInicio: exportParams.fechaInicio, fechaFin: exportParams.fechaFin, generadoEn })}
                                     className="px-4 py-2 bg-green-500 hover:bg-green-400 text-white font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-2 text-sm"
                                     title="Exportar en Excel"
                                 >

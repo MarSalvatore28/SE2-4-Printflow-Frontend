@@ -140,6 +140,8 @@ export interface FacturacionContrato {
   color: FacturacionTramo;
   renta: string;
   total: string;
+  /** true cuando el consolidado se pidió filtrado por área o máquina: se factura el contrato completo. */
+  filtrado?: boolean;
 }
 
 export interface ResumenConsolidado {

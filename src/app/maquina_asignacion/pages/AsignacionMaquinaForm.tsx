@@ -335,7 +335,7 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
         (multipleSelection ? maquinasConIP.length > 0 : formData.area_id > 0 && formData.maquina_id > 0 && formData.ip_address.trim() !== '') && !submitting;
 
     return (
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 relative">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 relative">
             <ModalConfirmacion
                 isOpen={modalConfig.isOpen}
                 onClose={handleCloseModal}

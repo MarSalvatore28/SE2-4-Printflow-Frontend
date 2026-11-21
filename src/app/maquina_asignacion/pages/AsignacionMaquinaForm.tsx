@@ -321,7 +321,7 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
             const cuantas = instaladas.length === 1 ? 'Se instaló 1 máquina' : `Se instalaron ${instaladas.length} máquinas`;
             mostrarModal('Instalación parcial', `${cuantas}. Las que fallaron siguen en la lista para corregirlas:`, 'warning', details);
         } else {
-            mostrarModal('Error de Instalación', 'No se pudo completar la instalación. Revise los errores:', 'warning', details);
+            mostrarModal('Error de instalación', 'No se pudo completar la instalación. Revise los errores:', 'warning', details);
         }
     };
 

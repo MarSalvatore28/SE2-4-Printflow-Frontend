@@ -35,7 +35,7 @@ const clasePestana = (activa: boolean) =>
   }`;
 
 const TEXTOS_TABLA = {
-  "no-leidas": { titulo: "Notificaciones No Leídas", vacia: "¡Genial! No tienes notificaciones sin leer." },
+  "no-leidas": { titulo: "Notificaciones no leídas", vacia: "¡Genial! No tienes notificaciones sin leer." },
   todas: { titulo: "Todas las Notificaciones", vacia: "No hay notificaciones en el sistema." },
   lotes: { titulo: "Todas las Notificaciones", vacia: "No hay notificaciones en el sistema." },
 };
@@ -193,7 +193,7 @@ const NotificacionesPage = () => {
     }
 
     setModalConfig({
-      title: 'Aprobar Lote',
+      title: 'Aprobar lote',
       message: (
         <div>
           <p>¿Estás seguro de <strong>APROBAR</strong> este lote?</p>
@@ -212,7 +212,7 @@ const NotificacionesPage = () => {
           void refrescarCampana();
 
           setModalConfig({
-            title: 'Lote Aprobado',
+            title: 'Lote aprobado',
             message: 'El lote ha sido aprobado exitosamente.',
             type: 'activate',
             confirmText: 'Aceptar',
@@ -227,7 +227,7 @@ const NotificacionesPage = () => {
             const listaErrores = err.errores;
 
             setModalConfig({
-              title: 'Validación Fallida',
+              title: 'Validación fallida',
               type: 'warning',
               confirmText: 'Entendido',
               showCancel: false,
@@ -270,7 +270,7 @@ const NotificacionesPage = () => {
     }
 
     setModalConfig({
-      title: "Rechazar Lote",
+      title: "Rechazar lote",
       message: (
         <div>
           <p>
@@ -295,7 +295,7 @@ const NotificacionesPage = () => {
           void refrescarCampana();
 
           setModalConfig({
-            title: "Lote Rechazado",
+            title: "Lote rechazado",
             message:
               "El lote ha sido rechazado correctamente. Los registros de carga se han eliminado.",
             type: "activate",
@@ -315,7 +315,7 @@ const NotificacionesPage = () => {
 
   const handleEliminarNotificacion = (notificacion: Notificacion) => {
     setModalConfig({
-      title: "Eliminar Notificación",
+      title: "Eliminar notificación",
       message:
         "¿Estás seguro de que deseas eliminar esta notificación? Esta acción no se puede deshacer.",
       type: "delete",
@@ -484,10 +484,10 @@ const NotificacionesPage = () => {
                 setSelectedLote(notif.lote_id!);
               }}
               className="inline-flex items-center px-2 py-1.5 rounded-md border-2 border-secondary/50 shadow-sm text-xs font-medium text-gray-700 bg-background/20 hover:bg-accent/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
-              title="Ver Detalle del Lote"
+              title="Ver detalle del lote"
             >
               <VisibilityIcon className="w-1 h-1 mr-1.5 text-primary text-xs" />
-              Ver Detalle
+              Ver detalle
             </button>
           )}
         </div>
@@ -507,7 +507,7 @@ const NotificacionesPage = () => {
                   handleAprobarLote(notif);
                 }}
                 className="inline-flex items-center p-1.5 border border-green-300 shadow-sm rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
-                title="Aprobar Lote"
+                title="Aprobar lote"
               >
                 <CheckCircleIcon />
               </button>
@@ -517,7 +517,7 @@ const NotificacionesPage = () => {
                   handleRechazarLote(notif);
                 }}
                 className="inline-flex items-center p-1.5 border border-red-300 shadow-sm rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
-                title="Rechazar Lote"
+                title="Rechazar lote"
               >
                 <ClearIcon />
               </button>

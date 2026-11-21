@@ -294,7 +294,7 @@ const CamposMaquinaUnica = ({
         )}
 
         <div className="input-container">
-            <label htmlFor="instalacion-contabilidad" className="input-label">Contabilidad por Usuario</label>
+            <label htmlFor="instalacion-contabilidad" className="input-label">Contabilidad por usuario</label>
             <div className="input-wrapper">
                 <select
                     id="instalacion-contabilidad"
@@ -659,7 +659,7 @@ export const InstalacionFormFields: React.FC<InstalacionFormFieldsProps> = ({
                                                     </div>
 
                                                     <div className={colSpanRow2}>
-                                                        <label htmlFor={`instalacion-${item.maquina.id_maquina}-contabilidad`} className="block text-xs font-medium text-gray-700 mb-1">Contabilidad por Usuario</label>
+                                                        <label htmlFor={`instalacion-${item.maquina.id_maquina}-contabilidad`} className="block text-xs font-medium text-gray-700 mb-1">Contabilidad por usuario</label>
                                                         <select
                                                             id={`instalacion-${item.maquina.id_maquina}-contabilidad`}
                                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"

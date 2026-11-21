@@ -56,7 +56,7 @@ const LoginPage = () => {
                     Iniciar sesión
                 </h2>
                 <p className="mt-2 text-center text-sm text-gray-600">
-                    Sistema de Gestión de Contadores
+                    Sistema de gestión de contadores
                 </p>
             </div>
 

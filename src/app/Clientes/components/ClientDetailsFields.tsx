@@ -85,13 +85,14 @@ export const ClientDetailsFields: React.FC<ClientDetailsFieldsProps> = ({ formDa
         // Quitamos los paddings extra y el título. Dejamos solo el Grid principal.
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="input-container">
-                <label className="input-label block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="cliente-nombre" className="input-label block text-sm font-medium text-gray-700 mb-1">
                     Nombre comercial *<span className="text-xs text-gray-400 ml-2 font-normal">
                         ({(formData.nombre || '').length}/80)
                     </span>
                 </label>
                 <div className="input-wrapper">
                     <input
+                        id="cliente-nombre"
                         type="text"
                         name="nombre"
                         className="input-field w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all"
@@ -113,9 +114,10 @@ export const ClientDetailsFields: React.FC<ClientDetailsFieldsProps> = ({ formDa
             </div>
 
             <div className="input-container">
-                <label className="input-label block text-sm font-medium text-gray-700 mb-1">RUC *</label>
+                <label htmlFor="cliente-ruc" className="input-label block text-sm font-medium text-gray-700 mb-1">RUC *</label>
                 <div className="input-wrapper">
                     <input
+                        id="cliente-ruc"
                         type="text"
                         name="ruc"
                         className={`input-field font-mono w-full rounded-md border px-4 py-2 focus:outline-none focus:ring-2 transition-all ${claseBordeRuc}`}
@@ -145,13 +147,14 @@ export const ClientDetailsFields: React.FC<ClientDetailsFieldsProps> = ({ formDa
             </div>
 
             <div className="input-container md:col-span-2">
-                <label className="input-label block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="cliente-razon-social" className="input-label block text-sm font-medium text-gray-700 mb-1">
                     Razón social<span className="text-xs text-gray-400 ml-2 font-normal">
                         ({(formData.razon_social || '').length}/80)
                     </span>
                 </label>
                 <div className="input-wrapper">
                     <input
+                        id="cliente-razon-social"
                         type="text"
                         name="razon_social"
                         className="input-field w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all"

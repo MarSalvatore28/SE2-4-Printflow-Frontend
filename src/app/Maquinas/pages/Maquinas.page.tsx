@@ -277,10 +277,11 @@ const MaquinasPage = () => {
             <div className="flex flex-col gap-6">
                 <div className="flex flex-col md:flex-row gap-4 items-end bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <div className="flex-1 w-full">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label htmlFor="buscar-maquina" className="block text-sm font-medium text-gray-700 mb-2">
                             Buscar máquina (serie, modelo o IP)
                         </label>
                         <BuscadorInteligente<Maquina>
+                            inputId="buscar-maquina"
                             key={buscadorKey}
                             placeholder="Ej: SIMA0001, Ricoh, 10.20.1.11..."
                             buscarFn={searchMaquinas}

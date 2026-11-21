@@ -19,6 +19,8 @@ interface BuscadorInteligenteProps<T> {
     onSearchClick?: (termino: string) => void;
     initialValue?: string;
     isInModal?: boolean;
+    // id del campo de texto, para asociarle un <label htmlFor>
+    inputId?: string;
 }
 
 export function BuscadorInteligente<T>({
@@ -38,7 +40,8 @@ export function BuscadorInteligente<T>({
     onInputChange,
     onSearchClick,
     initialValue = "",
-    isInModal = false
+    isInModal = false,
+    inputId
 }: Readonly<BuscadorInteligenteProps<T>>) {
 
     const [termino, setTermino] = useState(initialValue);
@@ -315,6 +318,7 @@ export function BuscadorInteligente<T>({
 
                     <input
                         ref={inputRef}
+                        id={inputId}
                         type="text"
                         role="combobox"
                         aria-label={placeholder}

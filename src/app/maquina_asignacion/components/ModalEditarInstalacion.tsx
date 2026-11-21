@@ -67,10 +67,11 @@ export const ModalEditarInstalacion = ({
                     </div>
 
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-1">
+                        <label htmlFor="editar-instalacion-ip" className="block text-sm font-semibold text-gray-700 mb-1">
                             Dirección IP *
                         </label>
                         <input
+                            id="editar-instalacion-ip"
                             type="text"
                             value={datos.ip_address}
                             onChange={(e) => cambiar({ ip_address: e.target.value })}
@@ -81,10 +82,11 @@ export const ModalEditarInstalacion = ({
                     </div>
 
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-1">
+                        <label htmlFor="editar-instalacion-fecha" className="block text-sm font-semibold text-gray-700 mb-1">
                             Fecha de Instalación
                         </label>
                         <input
+                            id="editar-instalacion-fecha"
                             type="date"
                             value={datos.fecha_instalacion}
                             onChange={(e) => cambiar({ fecha_instalacion: e.target.value })}
@@ -94,10 +96,11 @@ export const ModalEditarInstalacion = ({
 
                     {instalacion.renta_equipo ? (
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">
+                            <label htmlFor="editar-instalacion-renta" className="block text-sm font-semibold text-gray-700 mb-1">
                                 Costo de renta mensual ($)
                             </label>
                             <input
+                                id="editar-instalacion-renta"
                                 type="number"
                                 min="0"
                                 step="0.01"
@@ -108,9 +111,9 @@ export const ModalEditarInstalacion = ({
                         </div>
                     ) : (
                         <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                           <label className="block text-sm font-semibold text-gray-700 mb-1">
+                           <p className="block text-sm font-semibold text-gray-700 mb-1">
                                 Costo de renta mensual
-                            </label>
+                            </p>
                             <p className="text-sm font-medium text-gray-500">
                                 El contrato asociado no incluye cobro por renta de equipo.
                             </p>

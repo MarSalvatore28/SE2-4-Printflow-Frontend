@@ -380,10 +380,11 @@ const AreaPage = () => {
                         {/* Filtros */}
                         <div className="flex flex-col md:flex-row gap-4 items-end bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <div className="flex-1 w-full">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label htmlFor="buscar-area" className="block text-sm font-medium text-gray-700 mb-2">
                                     Buscar área
                                 </label>
                                 <BusquedaInteligenteAreas
+                                    inputId="buscar-area"
                                     onSeleccionar={(a) => {
                                         setFilterAreaId(a.id_area);
                                         setFilterClientId(null);

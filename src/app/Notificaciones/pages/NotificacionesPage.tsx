@@ -652,10 +652,11 @@ const NotificacionesPage = () => {
       <div className="mb-6">
         <div className="flex flex-col md:flex-row gap-4 items-end bg-gray-50 p-4 rounded-lg border border-gray-200">
           <div className="flex-1 w-full">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="buscar-notificacion" className="block text-sm font-medium text-gray-700 mb-2">
               Buscar Notificación
             </label>
             <BuscadorInteligente<Notificacion>
+              inputId="buscar-notificacion"
               placeholder="Buscar por título, mensaje, lote..."
               buscarFn={async (termino: string) => filtrarNotificaciones(allNotificaciones, termino)}
               onSeleccionar={(notif: Notificacion) => {

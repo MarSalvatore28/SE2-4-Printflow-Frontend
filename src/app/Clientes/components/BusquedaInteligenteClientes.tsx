@@ -12,6 +12,7 @@ interface BusquedaInteligenteClientesProps {
     onSearchClick?: (termino: string) => void;
     defaultValue?: string;
     disabled?: boolean;
+    inputId?: string;
 }
 
 export const BusquedaInteligenteClientes: React.FC<BusquedaInteligenteClientesProps> = ({
@@ -24,7 +25,8 @@ export const BusquedaInteligenteClientes: React.FC<BusquedaInteligenteClientesPr
     onInputChange,
     onSearchClick,
     defaultValue,
-    disabled = false
+    disabled = false,
+    inputId
 }) => {
     const itemsUnicos = useMemo(() => {
         const mapa = new Map();
@@ -58,6 +60,7 @@ export const BusquedaInteligenteClientes: React.FC<BusquedaInteligenteClientesPr
             onInputChange={onInputChange}
             onSearchClick={onSearchClick}
             initialValue={defaultValue}
+            inputId={inputId}
 
             getItemKey={(c) => c.id_cliente}
             getItemLabel={(c) => c.nombre}

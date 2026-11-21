@@ -166,8 +166,9 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700">Cliente <span className="text-red-600">*</span></label>
+                    <label htmlFor="informe-cliente" className="block text-sm font-semibold text-gray-700">Cliente <span className="text-red-600">*</span></label>
                     <BuscadorInteligente<Cliente>
+                        inputId="informe-cliente"
                         placeholder="Buscar cliente..."
                         buscarFn={async (term) => {
                             if (!term) return clientesUnicos;
@@ -247,8 +248,9 @@ export const FiltrosBusqueda: React.FC<FiltrosBusquedaProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700">Máquina <span className="font-normal text-gray-500">(opcional)</span></label>
+                    <label htmlFor="informe-maquina" className="block text-sm font-semibold text-gray-700">Máquina <span className="font-normal text-gray-500">(opcional)</span></label>
                     <BuscadorInteligente<Maquina>
+                        inputId="informe-maquina"
                         disabled={!selectedCliente}
                         placeholder={selectedCliente ? "Todas las máquinas (buscar por serie, modelo o IP)" : "Seleccione primero un cliente"}
                         buscarFn={async (term) => {

@@ -44,7 +44,7 @@ const fechaCorteDe = (reportes: ReporteStaging[], lote: Lote): string | null => 
   const fechas = reportes
     .map((r) => r.consolidado_fecha_corte)
     .filter((f): f is string => Boolean(f))
-    .sort();
+    .sort((a, b) => a.localeCompare(b));
   return fechas.length ? fechas[fechas.length - 1] : lote.fecha_corte;
 };
 

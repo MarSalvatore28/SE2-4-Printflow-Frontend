@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useId } from 'react';
 import { Search, X, Loader2, ChevronDown } from 'lucide-react';
 
 interface BuscadorInteligenteProps<T> {
@@ -39,7 +39,7 @@ export function BuscadorInteligente<T>({
     onSearchClick,
     initialValue = "",
     isInModal = false
-}: BuscadorInteligenteProps<T>) {
+}: Readonly<BuscadorInteligenteProps<T>>) {
 
     const [termino, setTermino] = useState(initialValue);
     const [resultados, setResultados] = useState<T[]>([]);
@@ -54,6 +54,14 @@ export function BuscadorInteligente<T>({
     const initialValueRef = useRef(initialValue);
     const itemSeleccionadoRef = useRef(false);
     const lastSearchedTermRef = useRef<string | null>(null);
+    const idLista = useId();
+    const idOpcion = (index: number) => `${idLista}-opcion-${index}`;
+
+    // La opción marcada con las flechas siempre queda a la vista dentro de la lista
+    useEffect(() => {
+        if (!mostrarResultados || indiceSeleccionado < 0) return;
+        document.getElementById(`${idLista}-opcion-${indiceSeleccionado}`)?.scrollIntoView?.({ block: 'nearest' });
+    }, [idLista, indiceSeleccionado, mostrarResultados]);
 
     useEffect(() => {
         if (isInModal && !itemSeleccionadoRef.current) {
@@ -203,6 +211,8 @@ export function BuscadorInteligente<T>({
                 }
                 break;
             case 'Escape':
+                // Cierra solo la lista, no el modal en el que esté el buscador
+                e.stopPropagation();
                 setMostrarResultados(false);
                 setIndiceSeleccionado(-1);
                 break;
@@ -227,17 +237,91 @@ export function BuscadorInteligente<T>({
         }
     };
 
+    const listaVisible = mostrarResultados && !error && resultados.length > 0;
+    const opcionActiva = listaVisible && indiceSeleccionado >= 0 && indiceSeleccionado < resultados.length
+        ? idOpcion(indiceSeleccionado)
+        : undefined;
+
+    const alTeclearOpcion = (e: React.KeyboardEvent, item: T) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleSeleccionar(item);
+        }
+    };
+
+    let botonLimpiar: React.ReactNode = null;
+    if (loading) {
+        botonLimpiar = <Loader2 aria-hidden="true" className="w-5 h-5 text-primary animate-spin" />;
+    } else if (termino.length > 0) {
+        botonLimpiar = (
+            <button
+                onClick={handleLimpiar}
+                className="text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
+                type="button"
+                aria-label="Limpiar búsqueda"
+            >
+                <X aria-hidden="true" className="w-5 h-5" />
+            </button>
+        );
+    }
+
+    const renderResultados = () => {
+        if (error) {
+            return (
+                <div className="p-4 text-center text-red-600" role="alert">
+                    <p>{error}</p>
+                </div>
+            );
+        }
+        if (resultados.length === 0) {
+            return (
+                <div className="p-4 text-center text-gray-500" role="status">
+                    <p>No se encontraron resultados</p>
+                </div>
+            );
+        }
+        const esResultadoBusqueda = termino.length >= minCaracteres;
+        return (
+            <ul id={idLista} role="listbox" aria-label={placeholder} className="py-1">
+                {resultados.map((item, index) => (
+                    <li
+                        key={generarKeyUnica(item, index, esResultadoBusqueda)}
+                        id={idOpcion(index)}
+                        role="option"
+                        aria-selected={index === indiceSeleccionado}
+                        tabIndex={-1}
+                        onClick={() => handleSeleccionar(item)}
+                        onKeyDown={(e) => alTeclearOpcion(e, item)}
+                        className={`px-4 py-2 cursor-pointer transition-colors ${index === indiceSeleccionado
+                                ? 'bg-secondary/10 border-l-4 border-primary'
+                                : 'hover:bg-gray-50'
+                            }`}
+                        onMouseEnter={() => setIndiceSeleccionado(index)}
+                    >
+                        {renderItem(item)}
+                    </li>
+                ))}
+            </ul>
+        );
+    };
+
     return (
         <div ref={wrapperRef} className={`relative ${className}`}>
             <div className="flex gap-2">
                 <div className="relative flex-1">
                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <Search className="w-5 h-5 text-gray-400" />
+                        <Search aria-hidden="true" className="w-5 h-5 text-gray-400" />
                     </div>
 
                     <input
                         ref={inputRef}
                         type="text"
+                        role="combobox"
+                        aria-label={placeholder}
+                        aria-autocomplete="list"
+                        aria-expanded={listaVisible}
+                        aria-controls={listaVisible ? idLista : undefined}
+                        aria-activedescendant={opcionActiva}
                         value={termino}
                         onChange={(e) => {
                             itemSeleccionadoRef.current = false; 
@@ -259,17 +343,7 @@ export function BuscadorInteligente<T>({
                     />
 
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 gap-1">
-                        {loading ? (
-                            <Loader2 className="w-5 h-5 text-primary animate-spin" />
-                        ) : termino.length > 0 ? (
-                            <button
-                                onClick={handleLimpiar}
-                                className="text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
-                                type="button"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
-                        ) : null}
+                        {botonLimpiar}
 
                         <button
                             onClick={() => {
@@ -282,8 +356,9 @@ export function BuscadorInteligente<T>({
                             }}
                             className="text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
                             type="button"
+                            aria-label={mostrarResultados ? 'Ocultar opciones' : 'Mostrar opciones'}
                         >
-                            <ChevronDown className={`w-5 h-5 transition-transform ${mostrarResultados ? 'rotate-180' : ''}`} />
+                            <ChevronDown aria-hidden="true" className={`w-5 h-5 transition-transform ${mostrarResultados ? 'rotate-180' : ''}`} />
                         </button>
                     </div>
                 </div>
@@ -313,36 +388,7 @@ export function BuscadorInteligente<T>({
 
             {mostrarResultados && (
                 <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                    {error ? (
-                        <div className="p-4 text-center text-red-600">
-                            <p>{error}</p>
-                        </div>
-                    ) : resultados.length === 0 ? (
-                        <div className="p-4 text-center text-gray-500">
-                            <p>No se encontraron resultados</p>
-                        </div>
-                    ) : (
-                        <ul className="py-1">
-                            {resultados.map((item, index) => {
-                                const esResultadoBusqueda = termino.length >= minCaracteres;
-                                const keyUnica = generarKeyUnica(item, index, esResultadoBusqueda);
-
-                                return (
-                                    <li
-                                        key={keyUnica}
-                                        onClick={() => handleSeleccionar(item)}
-                                        className={`px-4 py-2 cursor-pointer transition-colors ${index === indiceSeleccionado
-                                                ? 'bg-secondary/10 border-l-4 border-primary'
-                                                : 'hover:bg-gray-50'
-                                            }`}
-                                        onMouseEnter={() => setIndiceSeleccionado(index)}
-                                    >
-                                        {renderItem(item)}
-                                    </li>
-                                );
-                            })}
-                        </ul>
-                    )}
+                    {renderResultados()}
                 </div>
             )}
         </div>

@@ -33,6 +33,8 @@ export default function ModalConfirmacion({
 
   const [isRendered, setIsRendered] = useState(false);
   const dialogoRef = useRef<HTMLDivElement>(null);
+  // Con campo de texto, el foco empieza en él (en vez de autoFocus)
+  const campoRef = useRef<HTMLTextAreaElement>(null);
   const idTitulo = useId();
   const idMensaje = useId();
 
@@ -45,7 +47,7 @@ export default function ModalConfirmacion({
     }
   }, [isOpen]);
 
-  useDialogoAccesible(isOpen && isRendered, onClose, dialogoRef);
+  useDialogoAccesible(isOpen && isRendered, onClose, dialogoRef, campoRef);
 
   if (!isRendered) return null;
 
@@ -171,7 +173,8 @@ export default function ModalConfirmacion({
             {showInput && (
               <div className="mb-6">
                 <textarea
-                  autoFocus
+                  ref={campoRef}
+                  aria-label={inputPlaceholder || title}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   placeholder={inputPlaceholder}

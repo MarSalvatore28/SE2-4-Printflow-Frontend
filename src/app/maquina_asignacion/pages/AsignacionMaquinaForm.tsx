@@ -14,6 +14,7 @@ import {
     puedeEnviarInstalacion,
     validarFormularioInstalacion,
 } from '@app/maquina_asignacion/utils/formularioInstalacion';
+import { etiquetaMaquina, fechaCorta, hoyIso } from '@app/maquina_asignacion/utils/instalaciones';
 
 type DetalleModal = Array<{ label: string, text: string }>;
 
@@ -47,7 +48,7 @@ const ResumenInstalacion = ({
     multipleSelection: boolean;
     maquinasConIP: MaquinaConIP[];
     formData: InstalacionFormData;
-    selectedNames: { cliente: string; area: string; contrato: string };
+    selectedNames: { cliente: string; area: string; contrato: string; maquina: string };
 }) => (
     <div className="mb-6 p-4 bg-gradient-to-r from-edit/10 to-edit-hover/5 border border-edit-hover rounded-lg">
         <p className="text-sm font-semibold text-text mb-3 flex items-center gap-2">
@@ -61,12 +62,13 @@ const ResumenInstalacion = ({
                 </div>
             ) : (
                 <>
-                    <div className="rounded px-3 py-2"><span className="text-gray-600 block text-xs mb-1">Máquina ID:</span><span className="font-semibold text-gray-900">{formData.maquina_id}</span></div>
-                    <div className="rounded px-3 py-2"><span className="text-gray-600 block text-xs mb-1">Área global:</span><span className="font-semibold uppercase text-gray-900">{selectedNames.area || formData.area_id}</span></div>
+                    <div className="rounded px-3 py-2"><span className="text-gray-600 block text-xs mb-1">Máquina:</span><span className="font-semibold text-gray-900">{selectedNames.maquina}</span></div>
+                    <div className="rounded px-3 py-2"><span className="text-gray-600 block text-xs mb-1">Área global:</span><span className="font-semibold uppercase text-gray-900">{selectedNames.area}</span></div>
                 </>
             )}
             <div className="rounded px-3 py-2 md:col-span-2"><span className="text-gray-600 block text-xs mb-1">Cliente:</span><span className="font-semibold uppercase text-gray-900">{selectedNames.cliente}</span></div>
-            <div className="rounded px-3 py-2 md:col-span-2"><span className="text-gray-600 block text-xs mb-1">Contrato:</span><span className="font-semibold uppercase text-gray-900">{selectedNames.contrato || formData.contrato_id}</span></div>
+            <div className="rounded px-3 py-2 md:col-span-2"><span className="text-gray-600 block text-xs mb-1">Contrato:</span><span className="font-semibold text-gray-900">{selectedNames.contrato}</span></div>
+            <div className="rounded px-3 py-2 md:col-span-2"><span className="text-gray-600 block text-xs mb-1">Fecha de instalación:</span><span className="font-semibold text-gray-900">{fechaCorta(formData.fecha_instalacion)}</span></div>
         </div>
     </div>
 );
@@ -98,7 +100,7 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
         contador_acumulativo: true,
         contabilidad_por_usuario: false,
         costo_renta_mensual: 0,
-        fecha_instalacion: new Date().toISOString().split('T')[0]
+        fecha_instalacion: hoyIso()
     });
 
     const [selectedClienteId, setSelectedClienteId] = useState<number | undefined>(undefined);
@@ -123,7 +125,8 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
     const [selectedNames, setSelectedNames] = useState({
         cliente: '',
         area: '',
-        contrato: ''
+        contrato: '',
+        maquina: ''
     });
 
     const resetForm = () => {
@@ -136,11 +139,11 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
             contador_acumulativo: true,
             contabilidad_por_usuario: false,
             costo_renta_mensual: 0,
-            fecha_instalacion: new Date().toISOString().split('T')[0]
+            fecha_instalacion: hoyIso()
         });
         setSelectedClienteId(undefined);
         setMaquinasConIP([]);
-        setSelectedNames({ cliente: '', area: '', contrato: '' });
+        setSelectedNames({ cliente: '', area: '', contrato: '', maquina: '' });
         setValidationErrors({});
     };
 
@@ -156,10 +159,10 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
                 contador_acumulativo: true,
                 contabilidad_por_usuario: false,
                 costo_renta_mensual: 0,
-                fecha_instalacion: new Date().toISOString().split('T')[0]
+                fecha_instalacion: hoyIso()
             }));
             setMaquinasConIP([]);
-            setSelectedNames(prev => ({ ...prev, area: '', contrato: '' }));
+            setSelectedNames(prev => ({ ...prev, area: '', contrato: '', maquina: '' }));
         }
     }, [selectedClienteId]);
 
@@ -213,8 +216,9 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
         setValidationErrors({});
     };
 
-    const handleSelectMaquina = (maquina: { id_maquina: number }) => {
+    const handleSelectMaquina = (maquina: MaquinaSinInstalacion) => {
         setFormData(prev => ({ ...prev, maquina_id: maquina.id_maquina }));
+        setSelectedNames(prev => ({ ...prev, maquina: etiquetaMaquina(maquina) }));
         setValidationErrors({});
     };
 
@@ -223,7 +227,7 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
             maquina,
             ip_address: '',
             observaciones: '',
-            fecha_instalacion: new Date().toISOString().split('T')[0],
+            fecha_instalacion: hoyIso(),
             costo_renta_mensual: 0,
             contador_acumulativo: true,
             contabilidad_por_usuario: false,
@@ -282,6 +286,7 @@ export const InstalacionForm: React.FC<InstalacionFormProps> = ({
             datos: formData,
             multiple: multipleSelection,
             maquinas: maquinasConIP,
+            hoy: hoyIso(),
         });
 
         setValidationErrors(errors);

@@ -226,7 +226,7 @@ const UsuariosPage = () => {
                     Listar
                 </button>
                 <button onClick={abrirNuevo} className={clasePestana(activeTab === 'formulario')}>
-                    {activeTab === 'formulario' && editando ? 'Editar Usuario' : 'Agregar'}
+                    {activeTab === 'formulario' && editando ? 'Editar usuario' : 'Agregar'}
                 </button>
             </div>
 
